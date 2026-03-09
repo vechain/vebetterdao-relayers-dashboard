@@ -1,14 +1,28 @@
-/* 
- * Fix for vechain-kit modal jumping when iOS keyboard opens
- * 
+/*
+ * Fixes for vechain-kit modals (Chakra v2 inside Chakra v3 host app)
+ *
  * IMPORTANT: These styles ONLY target vechain-kit modals (Chakra v2)
  * - vechain-kit uses Chakra v2: .chakra-modal__* classes
  * - Host app uses Chakra v3: Dialog.* components (different classes)
- * 
- * iOS Safari scrolls window when input is focused, breaking fixed modals
  */
 
-/* iOS-specific fix - only applies to Chakra v2 modals (vechain-kit) */
+/*
+ * Fix: Stale overlay blocking all clicks after modal closes.
+ * When vechain-kit modal content is gone but the overlay persists,
+ * disable pointer-events so the page remains interactive.
+ */
+.chakra-modal__overlay {
+  /* Overlay should never block clicks by itself when there is no visible modal */
+  pointer-events: auto;
+}
+
+/* If the overlay exists but there is no modal content, make it non-blocking */
+.chakra-modal__overlay:only-child {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* iOS-specific fix - prevents jumping when keyboard opens */
 @supports (-webkit-touch-callout: none) {
   /* Lock body scroll when vechain-kit modal is open */
   body:has(.chakra-modal__overlay) {
@@ -16,7 +30,7 @@
     width: 100% !important;
     overflow: hidden !important;
   }
-  
+
   /* Ensure modal container uses absolute positioning relative to body */
   .chakra-modal__content-container {
     position: absolute !important;
@@ -26,7 +40,7 @@
     bottom: 0 !important;
     overflow-y: auto !important;
   }
-  
+
   .chakra-modal__content {
     position: relative !important;
     max-height: 85vh !important;

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 
 import { queryClient } from "@/api/QueryProvider"
 import { Provider } from "@/components/ui/provider"
+import { VeChainModalCleanup } from "@/components/VeChainModalCleanup"
 import { KapaWidgetProvider } from "@/providers/KapaWidgetProvider"
 
 import "./theme/vechain-kit-fixes.css"
@@ -19,7 +20,10 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
     <Provider>
       <KapaWidgetProvider />
       <QueryClientProvider client={queryClient}>
-        <VechainKitProviderWrapper>{children}</VechainKitProviderWrapper>
+        <VechainKitProviderWrapper>
+          <VeChainModalCleanup />
+          {children}
+        </VechainKitProviderWrapper>
       </QueryClientProvider>
     </Provider>
   )
