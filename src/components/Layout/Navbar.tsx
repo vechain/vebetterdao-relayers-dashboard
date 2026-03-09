@@ -46,7 +46,7 @@ export function Navbar() {
   const { data: isRegistered } = useRelayerRegistration(account?.address)
 
   const routes: NavRoute[] = isRegistered
-    ? [BASE_ROUTES[0], BASE_ROUTES[1], MY_RELAYER_ROUTE, ...BASE_ROUTES.slice(2)]
+    ? [BASE_ROUTES[0]!, BASE_ROUTES[1]!, MY_RELAYER_ROUTE, ...BASE_ROUTES.slice(2)]
     : BASE_ROUTES
   const logoFilter = useColorModeValue("none", "brightness(0) invert(1)")
   const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
