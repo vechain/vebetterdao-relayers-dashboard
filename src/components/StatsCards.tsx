@@ -10,14 +10,14 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import type { IconType } from "react-icons";
-import { LuChartLine, LuCoins, LuRadar, LuUsers } from "react-icons/lu";
+import { LuChartLine, LuCircleCheck, LuCoins, LuRadar } from "react-icons/lu";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
 import { useReportData } from "@/hooks/useReportData";
-import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers";
 import { formatNumber, formatToken } from "@/lib/format";
 import { computeAverageROI } from "@/lib/roi";
+import { computeRoundCompletion, getRoundPhaseLabel } from "@/lib/round-utils";
 
 interface StatItemProps {
   label: string;
@@ -73,8 +73,6 @@ function computeTotalRewardsRaw(
 
 export function StatsCards() {
   const { data: report, isLoading, error } = useReportData();
-  const { totalUsers: onChainUsers, isLoading: usersLoading } =
-    useTotalAutoVotingUsers();
   const { count: relayerCount, isLoading: relayersLoading } =
     useRegisteredRelayers();
   const b3trToVtho = useB3trToVthoRate();
@@ -99,15 +97,35 @@ export function StatsCards() {
       ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
       : "1 B3TR = \u2026 VTHO";
 
+  const currentRoundData = rounds.find(
+    (r) => r.roundId === report?.currentRound,
+  );
+  const roundCompletion =
+    currentRoundData != null ? computeRoundCompletion(currentRoundData) : null;
+  const roundPhase =
+    currentRoundData != null ? getRoundPhaseLabel(currentRoundData) : "";
+
   return (
     <SimpleGrid w="full" columns={{ base: 2, md: 2, lg: 2 }} gap="4">
-      {/* <StatItem
-        label="Auto-voting users"
-        value={usersLoading ? "..." : onChainUsers != null ? formatNumber(onChainUsers) : "\u2014"}
-        sublabel="current total"
-        icon={LuUsers}
-        isLoading={usersLoading}
-      /> */}
+      <StatItem
+        label="Current round"
+        value={
+          isLoading
+            ? "..."
+            : roundCompletion != null
+              ? `${roundCompletion}%`
+              : "\u2014"
+        }
+        sublabel={
+          isLoading
+            ? ""
+            : currentRoundData
+              ? `#${currentRoundData.roundId} · ${roundPhase}`
+              : "no data"
+        }
+        icon={LuCircleCheck}
+        isLoading={isLoading}
+      />
       <StatItem
         label="Total relayers"
         value={relayersLoading ? "..." : String(relayerCount)}

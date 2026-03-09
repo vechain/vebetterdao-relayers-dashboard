@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge, Heading, HStack, IconButton, Link, VStack } from "@chakra-ui/react"
+import { Badge, Button, Heading, HStack, IconButton, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LuArrowLeft, LuArrowRight } from "react-icons/lu"
@@ -30,9 +30,12 @@ export function RoundDetailHeader({ round, firstRound, currentRound }: RoundDeta
 
   return (
     <VStack align="stretch" gap="2">
-      <Link asChild color="text.subtle" textStyle="sm" _hover={{ color: "text.default" }}>
-        <NextLink href="/">{"← Back to home"}</NextLink>
-      </Link>
+      <NextLink href="/">
+        <Button variant="ghost" size="sm">
+          <LuArrowLeft />
+          {"Back to home"}
+        </Button>
+      </NextLink>
 
       <HStack justify="space-between" w="full">
         <HStack gap="3" align="center">

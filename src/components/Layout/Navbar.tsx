@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Box,
@@ -14,50 +14,78 @@ import {
   useDisclosure,
   useMediaQuery,
   VStack,
-} from "@chakra-ui/react"
-import { useAccountModal, useConnectModal, useWallet, WalletButton } from "@vechain/vechain-kit"
-import Image from "next/image"
-import NextLink from "next/link"
-import { usePathname } from "next/navigation"
-import { LuHouse, LuInfo, LuLogIn, LuMenu, LuPlay, LuRadar, LuUsers } from "react-icons/lu"
+} from "@chakra-ui/react";
+import {
+  useAccountModal,
+  useConnectModal,
+  useWallet,
+  WalletButton,
+} from "@vechain/vechain-kit";
+import Image from "next/image";
+import NextLink from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LuHouse,
+  LuInfo,
+  LuLogIn,
+  LuMenu,
+  LuPlay,
+  LuRadar,
+  LuUsers,
+} from "react-icons/lu";
 
-import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
-import { basePath } from "@/config/basePath"
-import { useRelayerRegistration } from "@/hooks/useRelayerRegistration"
+import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode";
+import { basePath } from "@/config/basePath";
+import { useRelayerRegistration } from "@/hooks/useRelayerRegistration";
 
-type NavPage = "home" | "relayers" | "relayer" | "run" | "learn"
+type NavPage = "home" | "relayers" | "relayer" | "run" | "learn";
 
-type NavRoute = { value: NavPage; label: string; href: string; icon: typeof LuHouse }
+type NavRoute = {
+  value: NavPage;
+  label: string;
+  href: string;
+  icon: typeof LuHouse;
+};
 
 const BASE_ROUTES: NavRoute[] = [
   { value: "home", label: "Home", href: "/", icon: LuHouse },
   { value: "relayers", label: "Relayers", href: "/relayers", icon: LuUsers },
   { value: "run", label: "Run", href: "/run", icon: LuPlay },
   { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
-]
+];
 
-const MY_RELAYER_ROUTE: NavRoute = { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar }
+const MY_RELAYER_ROUTE: NavRoute = {
+  value: "relayer",
+  label: "My Relayer",
+  href: "/relayer",
+  icon: LuRadar,
+};
 
 export function Navbar() {
-  const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
-  const { open, onClose, onOpen } = useDisclosure()
-  const pathname = usePathname()
-  const { account, connection } = useWallet()
-  const { open: openConnectModal } = useConnectModal()
-  const { open: openAccountModal } = useAccountModal()
-  const { data: isRegistered } = useRelayerRegistration(account?.address)
+  const [isDesktop] = useMediaQuery(["(min-width: 1200px)"]);
+  const { open, onClose, onOpen } = useDisclosure();
+  const pathname = usePathname();
+  const { account, connection } = useWallet();
+  const { open: openConnectModal } = useConnectModal();
+  const { open: openAccountModal } = useAccountModal();
+  const { data: isRegistered } = useRelayerRegistration(account?.address);
 
   const routes: NavRoute[] = isRegistered
-    ? [BASE_ROUTES[0]!, BASE_ROUTES[1]!, MY_RELAYER_ROUTE, ...BASE_ROUTES.slice(2)]
-    : BASE_ROUTES
-  const logoFilter = useColorModeValue("none", "brightness(0) invert(1)")
-  const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
-  const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
+    ? [
+        BASE_ROUTES[0]!,
+        BASE_ROUTES[1]!,
+        MY_RELAYER_ROUTE,
+        ...BASE_ROUTES.slice(2),
+      ]
+    : BASE_ROUTES;
+  const logoFilter = useColorModeValue("none", "brightness(0) invert(1)");
+  const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4");
+  const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F");
 
   const isActive = (route: NavRoute) =>
     pathname === route.href ||
     (route.value === "home" && (pathname === "" || pathname === "/")) ||
-    (route.value === "relayers" && pathname.startsWith("/relayers"))
+    (route.value === "relayers" && pathname.startsWith("/relayers"));
 
   return (
     <Box bg="bg.secondary" px={0} position="sticky" top={0} zIndex={3} w="full">
@@ -66,7 +94,13 @@ export function Navbar() {
           <Link asChild>
             <NextLink href={"/"}>
               <HStack gap={2} align="flex-start" w="full">
-                <Image src={`${basePath}/assets/vb.svg`} alt="VeBetterDAO" width={28} height={28} style={{ filter: logoFilter }} />
+                <Image
+                  src={`${basePath}/assets/vb.svg`}
+                  alt="VeBetterDAO"
+                  width={28}
+                  height={28}
+                  style={{ filter: logoFilter }}
+                />
                 <Heading size="lg" fontWeight="bold">
                   {"Relayers"}
                 </Heading>
@@ -76,7 +110,12 @@ export function Navbar() {
         </HStack>
 
         {isDesktop && (
-          <Box position="absolute" left="50%" transform="translateX(-50%)" zIndex={1}>
+          <Box
+            position="absolute"
+            left="50%"
+            transform="translateX(-50%)"
+            zIndex={1}
+          >
             <HStack
               gap={2}
               justifyContent="center"
@@ -84,8 +123,9 @@ export function Navbar() {
               border="sm"
               borderColor="border.secondary"
               bg="bg.primary"
-              p={2}>
-              {routes.map(route => (
+              p={2}
+            >
+              {routes.map((route) => (
                 <NextLink key={route.value} href={route.href}>
                   <Button
                     border="none"
@@ -95,7 +135,8 @@ export function Navbar() {
                     fontWeight={isActive(route) ? "bold" : "normal"}
                     textStyle="sm"
                     px="4"
-                    py="2">
+                    py="2"
+                  >
                     {route.label}
                   </Button>
                 </NextLink>
@@ -106,7 +147,11 @@ export function Navbar() {
 
         <HStack flex="1" gap={2} justifyContent="end" alignItems="center">
           <NextLink href="/run">
-            <Button variant="primary" size={isDesktop ? "md" : "sm"} rounded="full">
+            <Button
+              variant="primary"
+              size={isDesktop ? "md" : "sm"}
+              rounded="full"
+            >
               <LuPlay />
               {"Run"}
             </Button>
@@ -128,7 +173,13 @@ export function Navbar() {
           )}
 
           {!isDesktop && (
-            <IconButton onClick={onOpen} variant="ghost" rounded="6px" size="lg" aria-label="Open menu">
+            <IconButton
+              onClick={onOpen}
+              variant="ghost"
+              rounded="6px"
+              size="lg"
+              aria-label="Open menu"
+            >
               <LuMenu size={28} />
             </IconButton>
           )}
@@ -136,13 +187,27 @@ export function Navbar() {
       </HStack>
 
       {!isDesktop && (
-        <Drawer.Root size="sm" placement="end" open={open} onOpenChange={e => !e.open && onClose()}>
+        <Drawer.Root
+          size="sm"
+          placement="end"
+          open={open}
+          onOpenChange={(e) => !e.open && onClose()}
+        >
           <Portal>
             <Drawer.Backdrop />
             <Drawer.Positioner>
-              <Drawer.Content maxWidth="95%" borderTopLeftRadius={16} borderBottomLeftRadius={16}>
+              <Drawer.Content
+                maxWidth="95%"
+                borderTopLeftRadius={16}
+                borderBottomLeftRadius={16}
+              >
                 <Drawer.CloseTrigger asChild>
-                  <CloseButton position="absolute" top={4} right={4} size="sm" />
+                  <CloseButton
+                    position="absolute"
+                    top={4}
+                    right={4}
+                    size="sm"
+                  />
                 </Drawer.CloseTrigger>
 
                 <Drawer.Header>
@@ -151,7 +216,12 @@ export function Navbar() {
                   </Heading>
                 </Drawer.Header>
 
-                <Drawer.Body px={5} display="flex" flexDirection="column" justifyContent="space-between">
+                <Drawer.Body
+                  px={5}
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="space-between"
+                >
                   <VStack gap={0} w="full" align="stretch">
                     <Box py={3}>
                       <Button
@@ -163,15 +233,17 @@ export function Navbar() {
                         _hover={{ bg: walletHoverBg }}
                         loading={connection.isLoading}
                         onClick={() => {
-                          onClose()
+                          onClose();
                           if (connection.isConnected && account) {
-                            openAccountModal()
+                            openAccountModal();
                           } else {
-                            openConnectModal()
+                            openConnectModal();
                           }
-                        }}>
+                        }}
+                      >
                         {connection.isConnected && account ? (
-                          account.domain || `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
+                          account.domain ||
+                          `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
                         ) : (
                           <>
                             <LuLogIn />
@@ -181,8 +253,12 @@ export function Navbar() {
                       </Button>
                     </Box>
                     <Separator my={2} />
-                    {routes.map(route => (
-                      <NextLink key={route.value} href={route.href} onClick={onClose}>
+                    {routes.map((route) => (
+                      <NextLink
+                        key={route.value}
+                        href={route.href}
+                        onClick={onClose}
+                      >
                         <Button
                           variant="ghost"
                           w="full"
@@ -191,7 +267,8 @@ export function Navbar() {
                           alignItems="center"
                           gap={4}
                           size="lg"
-                          fontWeight={isActive(route) ? "bold" : "normal"}>
+                          fontWeight={isActive(route) ? "bold" : "normal"}
+                        >
                           <route.icon size={20} />
                           {route.label}
                         </Button>
@@ -200,7 +277,14 @@ export function Navbar() {
                   </VStack>
                   <Box pb={6}>
                     <Separator mb={4} />
-                    <ColorModeButton withText w="full" display="flex" justifyContent="flex-start" size="lg" gap={4} />
+                    <ColorModeButton
+                      withText
+                      w="full"
+                      display="flex"
+                      justifyContent="flex-start"
+                      size="lg"
+                      gap={4}
+                    />
                   </Box>
                 </Drawer.Body>
               </Drawer.Content>
@@ -209,5 +293,5 @@ export function Navbar() {
         </Drawer.Root>
       )}
     </Box>
-  )
+  );
 }

@@ -11,7 +11,7 @@ export default function DashboardContent() {
   return (
     <VStack w="full" gap={{ base: 10, md: 14 }} align="stretch">
       <SimpleGrid columns={{ base: 1, md: 1 }} gap="4">
-        <BecomeRelayerCard />
+        <BecomeRelayerCard forceBanner={true} />
       </SimpleGrid>
 
       <VStack w="full" gap={4} align="stretch">
