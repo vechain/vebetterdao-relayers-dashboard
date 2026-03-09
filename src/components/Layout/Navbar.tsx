@@ -151,7 +151,7 @@ export function Navbar() {
 
                 <Drawer.Body px={5} display="flex" flexDirection="column" justifyContent="space-between">
                   <VStack gap={0} w="full" align="stretch">
-                    <Box py={3}>
+                    <Box py={3} onClick={onClose}>
                       <WalletButton
                         buttonStyle={{
                           variant: "outline",
