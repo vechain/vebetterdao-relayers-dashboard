@@ -1,24 +1,18 @@
 "use client"
 
-import { Flex, Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
-const ConnectedWallet = dynamic(
-  () => import("@/components/ConnectedWallet").then(m => ({ default: m.ConnectedWallet })),
-  {
-    ssr: false,
-    loading: () => (
-      <Flex minH="40vh" align="center" justify="center">
-        <Spinner size="lg" color="blue.solid" />
-      </Flex>
-    ),
-  },
-)
+import { RelayerDetailSkeleton } from "@/components/RelayerDetail"
+
+const RelayerDetailPage = dynamic(() => import("@/app/relayer/RelayerDetailPage"), {
+  ssr: false,
+})
 
 export default function RelayerPage() {
   return (
-    <VStack w="full" gap={{ base: 4, md: 14 }} align="stretch">
-      <ConnectedWallet />
-    </VStack>
+    <Suspense fallback={<RelayerDetailSkeleton />}>
+      <RelayerDetailPage />
+    </Suspense>
   )
 }

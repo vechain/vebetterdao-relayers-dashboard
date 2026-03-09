@@ -19,15 +19,16 @@ import { WalletButton } from "@vechain/vechain-kit"
 import Image from "next/image"
 import NextLink from "next/link"
 import { usePathname } from "next/navigation"
-import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar } from "react-icons/lu"
+import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar, LuUsers } from "react-icons/lu"
 
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 import { basePath } from "@/config/basePath"
 
-type NavPage = "home" | "relayer" | "run" | "learn"
+type NavPage = "home" | "relayers" | "relayer" | "run" | "learn"
 
 const ROUTES: { value: NavPage; label: string; href: string; icon: typeof LuHouse }[] = [
   { value: "home", label: "Home", href: "/", icon: LuHouse },
+  { value: "relayers", label: "Relayers", href: "/relayers", icon: LuUsers },
   { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar },
   { value: "run", label: "Run", href: "/run", icon: LuPlay },
   { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
@@ -42,7 +43,9 @@ export function Navbar() {
   const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
 
   const isActive = (route: (typeof ROUTES)[number]) =>
-    pathname === route.href || (route.value === "home" && (pathname === "" || pathname === "/"))
+    pathname === route.href ||
+    (route.value === "home" && (pathname === "" || pathname === "/")) ||
+    (route.value === "relayers" && pathname.startsWith("/relayers"))
 
   return (
     <Box bg="bg.secondary" px={0} position="sticky" top={0} zIndex={3} w="full">

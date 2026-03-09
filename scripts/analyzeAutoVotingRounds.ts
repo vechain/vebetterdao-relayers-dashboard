@@ -78,12 +78,29 @@ interface RoundAnalytics {
   isRoundEnded: boolean // True if the round has ended
 }
 
+interface RelayerRoundBreakdown {
+  roundId: number
+  votedForCount: number
+  rewardsClaimedCount: number
+  weightedActions: number
+  actions: number
+  claimableRewardsRaw: string
+  vthoSpentOnVotingRaw: string
+  vthoSpentOnClaimingRaw: string
+}
+
+interface RelayerAnalytics {
+  address: string
+  rounds: RelayerRoundBreakdown[]
+}
+
 interface AnalyticsReport {
   generatedAt: string
   network: string
   firstRound: number
   currentRound: number
   rounds: RoundAnalytics[]
+  relayers: RelayerAnalytics[]
 }
 
 // ============ Contract Helper Functions ============
@@ -699,6 +716,255 @@ async function calculateVthoSpent(thor: ThorClient, txIds: Set<string>): Promise
   return totalVtho
 }
 
+/**
+ * Get all registered relayer addresses from RelayerRewardsPool
+ */
+async function getRegisteredRelayers(thor: ThorClient, contractAddress: string): Promise<string[]> {
+  const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
+  const result = await thor.contracts.executeCall(
+    contractAddress,
+    relayerPoolContract.getFunction("getRegisteredRelayers"),
+    [],
+  )
+  if (!result.success || !result.result?.array?.[0]) return []
+  const relayers = result.result.array[0] as string[]
+  return relayers.map(r => r.toLowerCase())
+}
+
+/**
+ * Get per-relayer action breakdown for a round from RelayerActionRegistered events.
+ * Returns a map: relayerAddress -> { votedForCount, rewardsClaimedCount, weightedActions, actions }
+ */
+async function getRelayerActionsForRound(
+  thor: ThorClient,
+  contractAddress: string,
+  roundId: number,
+  fromBlock: number,
+  toBlock?: number,
+): Promise<
+  Map<string, { votedForCount: number; rewardsClaimedCount: number; weightedActions: number; actions: number }>
+> {
+  const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
+  const actionEvent = relayerPoolContract.getEvent("RelayerActionRegistered") as any
+  const roundIdHex = "0x" + roundId.toString(16).padStart(64, "0")
+
+  const relayerMap = new Map<
+    string,
+    { votedForCount: number; rewardsClaimedCount: number; weightedActions: number; actions: number }
+  >()
+  let offset = 0
+  const MAX_EVENTS_PER_REQUEST = 1000
+
+  while (true) {
+    const logs = await thor.logs.filterEventLogs({
+      range: {
+        unit: "block" as const,
+        from: fromBlock,
+        to: toBlock,
+      },
+      options: {
+        offset,
+        limit: MAX_EVENTS_PER_REQUEST,
+      },
+      order: "asc",
+      criteriaSet: [
+        {
+          criteria: {
+            address: contractAddress,
+            topic0: actionEvent.encodeFilterTopicsNoNull({})[0],
+            topic3: roundIdHex,
+          },
+          eventAbi: actionEvent,
+        },
+      ],
+    })
+
+    for (const log of logs) {
+      const decodedData = actionEvent.decodeEventLog({
+        topics: log.topics.map((topic: string) => Hex.of(topic)),
+        data: Hex.of(log.data),
+      })
+      const relayer = (decodedData.args.relayer as string).toLowerCase()
+      const actionCount = Number(decodedData.args.actionCount ?? 0)
+      const weight = Number(decodedData.args.weight ?? 0)
+
+      const existing = relayerMap.get(relayer) ?? {
+        votedForCount: 0,
+        rewardsClaimedCount: 0,
+        weightedActions: 0,
+        actions: 0,
+      }
+
+      existing.actions += actionCount
+      existing.weightedActions += weight
+
+      // Vote actions have weight 3, claim actions have weight 1
+      if (weight === 3) {
+        existing.votedForCount += 1
+      } else if (weight === 1) {
+        existing.rewardsClaimedCount += 1
+      }
+
+      relayerMap.set(relayer, existing)
+    }
+
+    if (logs.length < MAX_EVENTS_PER_REQUEST) {
+      break
+    }
+    offset += MAX_EVENTS_PER_REQUEST
+  }
+
+  return relayerMap
+}
+
+/**
+ * Get per-relayer VTHO spent on voting for a round.
+ * Groups voting transaction receipts by tx.origin (relayer).
+ */
+async function getPerRelayerVthoSpentOnVoting(
+  thor: ThorClient,
+  contractAddress: string,
+  roundId: number,
+  fromBlock: number,
+  toBlock: number,
+): Promise<Map<string, bigint>> {
+  const xAllocationVotingContract = ABIContract.ofAbi(XAllocationVoting__factory.abi)
+  const autoVoteCastEvent = xAllocationVotingContract.getEvent("AllocationAutoVoteCast") as any
+  const roundIdHex = "0x" + roundId.toString(16).padStart(64, "0")
+
+  // Collect tx IDs with their origin
+  const txSet = new Set<string>()
+  let offset = 0
+  const MAX_EVENTS_PER_REQUEST = 1000
+
+  while (true) {
+    const logs = await thor.logs.filterEventLogs({
+      range: { unit: "block" as const, from: fromBlock, to: toBlock },
+      options: { offset, limit: MAX_EVENTS_PER_REQUEST },
+      order: "asc",
+      criteriaSet: [
+        {
+          criteria: {
+            address: contractAddress,
+            topic0: autoVoteCastEvent.encodeFilterTopicsNoNull({})[0],
+            topic2: roundIdHex,
+          },
+          eventAbi: autoVoteCastEvent,
+        },
+      ],
+    })
+
+    for (const log of logs) {
+      if (log.meta?.txID) txSet.add(log.meta.txID)
+    }
+    if (logs.length < MAX_EVENTS_PER_REQUEST) break
+    offset += MAX_EVENTS_PER_REQUEST
+  }
+
+  const relayerVtho = new Map<string, bigint>()
+  for (const txId of txSet) {
+    try {
+      const receipt = await thor.transactions.getTransactionReceipt(txId)
+      if (receipt) {
+        const origin = (receipt.meta?.txOrigin ?? "").toLowerCase()
+        const paid = BigInt(receipt.paid ?? 0)
+        relayerVtho.set(origin, (relayerVtho.get(origin) ?? BigInt(0)) + paid)
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  return relayerVtho
+}
+
+/**
+ * Get per-relayer VTHO spent on claiming for a round (claims for prevRound during this round).
+ */
+async function getPerRelayerVthoSpentOnClaiming(
+  thor: ThorClient,
+  voterRewardsAddress: string,
+  prevRoundId: number,
+  fromBlock: number,
+  toBlock: number,
+): Promise<Map<string, bigint>> {
+  const voterRewardsContract = ABIContract.ofAbi(VoterRewards__factory.abi)
+  const relayerFeeTakenEvent = voterRewardsContract.getEvent("RelayerFeeTaken") as any
+  const cycleHex = "0x" + prevRoundId.toString(16).padStart(64, "0")
+
+  const txSet = new Set<string>()
+  let offset = 0
+  const MAX_EVENTS_PER_REQUEST = 1000
+
+  while (true) {
+    const logs = await thor.logs.filterEventLogs({
+      range: { unit: "block" as const, from: fromBlock, to: toBlock },
+      options: { offset, limit: MAX_EVENTS_PER_REQUEST },
+      order: "asc",
+      criteriaSet: [
+        {
+          criteria: {
+            address: voterRewardsAddress,
+            topic0: relayerFeeTakenEvent.encodeFilterTopicsNoNull({})[0],
+            topic2: cycleHex,
+          },
+          eventAbi: relayerFeeTakenEvent,
+        },
+      ],
+    })
+
+    for (const log of logs) {
+      if (log.meta?.txID) txSet.add(log.meta.txID)
+    }
+    if (logs.length < MAX_EVENTS_PER_REQUEST) break
+    offset += MAX_EVENTS_PER_REQUEST
+  }
+
+  const relayerVtho = new Map<string, bigint>()
+  for (const txId of txSet) {
+    try {
+      const receipt = await thor.transactions.getTransactionReceipt(txId)
+      if (receipt) {
+        const origin = (receipt.meta?.txOrigin ?? "").toLowerCase()
+        const paid = BigInt(receipt.paid ?? 0)
+        relayerVtho.set(origin, (relayerVtho.get(origin) ?? BigInt(0)) + paid)
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  return relayerVtho
+}
+
+/**
+ * Get per-relayer claimable rewards for a round.
+ */
+async function getPerRelayerClaimableRewards(
+  thor: ThorClient,
+  contractAddress: string,
+  relayerAddresses: string[],
+  roundId: number,
+): Promise<Map<string, bigint>> {
+  const relayerPoolContract = ABIContract.ofAbi(RelayerRewardsPool__factory.abi)
+  const rewardsMap = new Map<string, bigint>()
+
+  for (const addr of relayerAddresses) {
+    const result = await withRetry(() =>
+      thor.contracts.executeCall(contractAddress, relayerPoolContract.getFunction("claimableRewards"), [
+        addr,
+        roundId,
+      ]),
+    )
+    const val = result.success && result.result?.array?.[0] ? BigInt(String(result.result.array[0])) : BigInt(0)
+    if (val > BigInt(0)) {
+      rewardsMap.set(addr.toLowerCase(), val)
+    }
+  }
+
+  return rewardsMap
+}
+
 // ============ Formatting Helpers ============
 
 /**
@@ -1079,6 +1345,7 @@ async function main(): Promise<void> {
       firstRound: checkpoint.firstRound,
       currentRound: currentRoundId,
       rounds: checkpoint.rounds.sort((a, b) => a.roundId - b.roundId),
+      relayers: checkpoint.relayers ?? [],
     }
     const filepath = saveReport(report, outputPath)
     console.log(`Report saved to: ${filepath}`)
@@ -1106,12 +1373,117 @@ async function main(): Promise<void> {
 
   printTable(rounds)
 
+  // ============ Per-Relayer Analytics ============
+  console.log("\n  Collecting per-relayer analytics...")
+
+  const registeredRelayers = await getRegisteredRelayers(thor, CONFIG.relayerRewardsPoolContractAddress)
+  console.log(`    - Registered relayers: ${registeredRelayers.length}`)
+
+  // Start from checkpoint relayer data for completed rounds
+  const checkpointRelayerMap = new Map<string, Map<number, RelayerRoundBreakdown>>()
+  if (checkpoint?.relayers) {
+    for (const rel of checkpoint.relayers) {
+      const roundMap = new Map<number, RelayerRoundBreakdown>()
+      for (const rd of rel.rounds) {
+        // Keep checkpoint data for completed rounds we're not re-analyzing
+        if (rd.roundId < startRoundId) {
+          roundMap.set(rd.roundId, rd)
+        }
+      }
+      checkpointRelayerMap.set(rel.address.toLowerCase(), roundMap)
+    }
+  }
+
+  // Collect per-relayer data for newly analyzed rounds
+  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
+    console.log(`    - Analyzing relayer data for round ${roundId}...`)
+
+    const roundSnapshot = await getRoundSnapshot(thor, CONFIG.xAllocationVotingContractAddress, roundId)
+    const roundDeadline = await getRoundDeadline(thor, CONFIG.xAllocationVotingContractAddress, roundId)
+
+    // Get action breakdown from RelayerActionRegistered events
+    const relayerActions = await getRelayerActionsForRound(
+      thor,
+      CONFIG.relayerRewardsPoolContractAddress,
+      roundId,
+      roundSnapshot,
+      undefined,
+    )
+
+    // Get per-relayer VTHO spent on voting
+    const votingVtho = await getPerRelayerVthoSpentOnVoting(
+      thor,
+      CONFIG.xAllocationVotingContractAddress,
+      roundId,
+      roundSnapshot,
+      roundDeadline,
+    )
+
+    // Get per-relayer VTHO spent on claiming (for previous round)
+    let claimingVtho = new Map<string, bigint>()
+    const prevRoundId = roundId - 1
+    if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
+      const prevDeadline = await getRoundDeadline(thor, CONFIG.xAllocationVotingContractAddress, prevRoundId)
+      claimingVtho = await getPerRelayerVthoSpentOnClaiming(
+        thor,
+        CONFIG.voterRewardsContractAddress,
+        prevRoundId,
+        prevDeadline,
+        roundDeadline,
+      )
+    }
+
+    // Get per-relayer claimable rewards
+    const allRelayersForRound = new Set([
+      ...registeredRelayers,
+      ...relayerActions.keys(),
+    ])
+    const claimableRewards = await getPerRelayerClaimableRewards(
+      thor,
+      CONFIG.relayerRewardsPoolContractAddress,
+      Array.from(allRelayersForRound),
+      roundId,
+    )
+
+    // Merge into relayer map
+    for (const addr of allRelayersForRound) {
+      if (!checkpointRelayerMap.has(addr)) {
+        checkpointRelayerMap.set(addr, new Map())
+      }
+      const roundMap = checkpointRelayerMap.get(addr)!
+      const actions = relayerActions.get(addr)
+
+      roundMap.set(roundId, {
+        roundId,
+        votedForCount: actions?.votedForCount ?? 0,
+        rewardsClaimedCount: actions?.rewardsClaimedCount ?? 0,
+        weightedActions: actions?.weightedActions ?? 0,
+        actions: actions?.actions ?? 0,
+        claimableRewardsRaw: (claimableRewards.get(addr) ?? BigInt(0)).toString(),
+        vthoSpentOnVotingRaw: (votingVtho.get(addr) ?? BigInt(0)).toString(),
+        vthoSpentOnClaimingRaw: (claimingVtho.get(addr) ?? BigInt(0)).toString(),
+      })
+    }
+  }
+
+  // Build final relayers array (include all known relayers, even if no round data)
+  const allKnownRelayers = new Set([...registeredRelayers, ...checkpointRelayerMap.keys()])
+  const relayers: RelayerAnalytics[] = Array.from(allKnownRelayers).map(addr => ({
+    address: addr,
+    rounds: Array.from(checkpointRelayerMap.get(addr)?.values() ?? [])
+      .filter(rd => rd.actions > 0 || rd.weightedActions > 0 || BigInt(rd.claimableRewardsRaw) > BigInt(0))
+      .sort((a, b) => a.roundId - b.roundId),
+  }))
+
+  console.log(`    - Relayer analytics collected for ${relayers.length} relayers`)
+
   const report: AnalyticsReport = {
     generatedAt: new Date().toISOString(),
     network: "mainnet",
     firstRound: FIRST_AUTO_VOTING_ROUND,
     currentRound: currentRoundId,
     rounds,
+    relayers,
   }
 
   const filepath = saveReport(report, outputPath)

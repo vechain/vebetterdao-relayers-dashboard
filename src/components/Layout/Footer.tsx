@@ -22,6 +22,7 @@ const GITHUB_REPOS = [
 
 const NAVIGATION = [
   { label: "Home", href: "/" },
+  { label: "Relayers", href: "/relayers" },
   { label: "My Relayer", href: "/relayer" },
   { label: "Become a Relayer", href: "/new-relayer" },
   { label: "Learn", href: "/learn" },
