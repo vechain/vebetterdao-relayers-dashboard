@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: yarn build:mainnet
         env:
-          NEXT_PUBLIC_BASE_PATH: "/vebetterdao-relayers-dashboard"
+          NEXT_PUBLIC_BASE_PATH: ""
           NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Upload Pages artifact
