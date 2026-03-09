@@ -43,8 +43,7 @@ export function RelayerDetailHeader({
   const { open: openConnect } = useConnectModal();
   const [showModal, setShowModal] = useState(false);
 
-  const displayName =
-    domain?.domain ?? `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const displayName = domain?.domain ?? "Unknown";
   const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
   const explorerUrl = `https://explore.vechain.org/address/${address}`;
   const description = textRecords?.description;
@@ -123,7 +122,7 @@ export function RelayerDetailHeader({
 
                   <HStack gap="2" color="text.subtle">
                     <Text textStyle="xs" lineClamp={1}>
-                      {domain?.domain ? shortAddress : address}
+                      {shortAddress}
                     </Text>
                     <Clipboard.Root value={address}>
                       <Clipboard.Trigger asChild>

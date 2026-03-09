@@ -74,9 +74,7 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
 
   const { data: avatarSrc } = useGetAvatarOfAddress(summary.address);
 
-  const displayName =
-    domain?.domain ||
-    `${summary.address.slice(0, 6)}...${summary.address.slice(-4)}`;
+  const displayName = domain?.domain || "Unknown";
   const shortAddress = `${summary.address.slice(0, 6)}...${summary.address.slice(-4)}`;
   const href = `/relayer?address=${domain?.domain || summary.address}`;
 
@@ -110,9 +108,7 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
         </Badge>
       </HStack>
       <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
-        {domain?.domain
-          ? shortAddress
-          : `${summary.address.slice(0, 10)}...${summary.address.slice(-6)}`}
+        {shortAddress}
       </Text>
     </VStack>
   );
