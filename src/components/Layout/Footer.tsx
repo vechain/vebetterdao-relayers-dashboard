@@ -6,7 +6,7 @@ import { useThor } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { LuRadar } from "react-icons/lu"
 
-import { ColorModeToggle } from "./ui/color-mode"
+import { ColorModeToggle } from "../ui/color-mode"
 
 const RESOURCES = [
   { label: "Network Status", href: "https://vechainstats.com" },

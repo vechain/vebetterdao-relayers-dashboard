@@ -4,7 +4,7 @@ import { Box, Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { LuCoins, LuScale, LuServer, LuZap } from "react-icons/lu"
 
-import { BaseModal } from "./BaseModal"
+import { BaseModal } from "../Base/BaseModal"
 
 interface RelayerInfoModalProps {
   isOpen: boolean

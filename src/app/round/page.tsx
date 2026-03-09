@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
 
-import { RoundDetailSkeleton } from "@/components/RoundDetailSkeleton"
+import { RoundDetailSkeleton } from "@/components/RoundDetail"
 
 const RoundDetailPage = dynamic(() => import("@/app/round/RoundDetailPage"), {
   ssr: false,

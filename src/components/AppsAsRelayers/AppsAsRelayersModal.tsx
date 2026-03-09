@@ -4,7 +4,7 @@ import { Box, Button, Card, Heading, HStack, Separator, SimpleGrid, Text, VStack
 import NextLink from "next/link"
 import { LuExternalLink, LuLayoutGrid, LuShieldCheck, LuUsers } from "react-icons/lu"
 
-import { BaseModal } from "./BaseModal"
+import { BaseModal } from "../Base/BaseModal"
 
 interface AppsAsRelayersModalProps {
   isOpen: boolean

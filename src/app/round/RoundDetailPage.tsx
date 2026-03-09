@@ -3,9 +3,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import { useSearchParams } from "next/navigation"
 
-import { RoundDetailContent } from "@/components/RoundDetailContent"
-import { RoundDetailHeader } from "@/components/RoundDetailHeader"
-import { RoundDetailSkeleton } from "@/components/RoundDetailSkeleton"
+import { RoundDetailContent, RoundDetailHeader, RoundDetailSkeleton } from "@/components/RoundDetail"
 import { useReportData } from "@/hooks/useReportData"
 import type { RoundAnalytics } from "@/lib/types"
 

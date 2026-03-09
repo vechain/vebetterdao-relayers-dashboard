@@ -8,7 +8,7 @@ import { useDismissedBanner } from "@/hooks/useDismissedBanners"
 
 import { RelayerInfoModal } from "./RelayerInfoModal"
 
-export function BecomeRelayer() {
+export function BecomeRelayerCard() {
   const { open, onOpen, onClose } = useDisclosure()
   const { isDismissed, dismiss } = useDismissedBanner("become-relayer")
 

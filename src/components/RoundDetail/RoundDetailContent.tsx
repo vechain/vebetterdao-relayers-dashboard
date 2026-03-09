@@ -11,8 +11,8 @@ import { formatNumber, formatToken } from "@/lib/format"
 import { computeROI } from "@/lib/roi"
 import type { RoundAnalytics } from "@/lib/types"
 
-import { AppsAsRelayers } from "./AppsAsRelayers"
-import { BecomeRelayer } from "./BecomeRelayer"
+import { AppsAsRelayersCard } from "../AppsAsRelayers"
+import { BecomeRelayerCard } from "../RelayerInfo"
 
 function pct(numerator: number, denominator: number): string {
   if (denominator === 0) return "\u2014"
@@ -314,8 +314,8 @@ export function RoundDetailContent({ round, generatedAt }: RoundDetailContentPro
       </Grid>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-        <BecomeRelayer />
-        <AppsAsRelayers />
+        <BecomeRelayerCard />
+        <AppsAsRelayersCard />
       </SimpleGrid>
     </VStack>
   )

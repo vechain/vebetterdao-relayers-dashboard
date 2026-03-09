@@ -5,11 +5,11 @@ import dynamic from "next/dynamic"
 
 import { Providers } from "./providers"
 
-const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), {
+const Navbar = dynamic(() => import("@/components/Layout").then(mod => mod.Navbar), {
   ssr: false,
 })
 
-const Footer = dynamic(() => import("@/components/Footer").then(mod => mod.Footer), {
+const Footer = dynamic(() => import("@/components/Layout").then(mod => mod.Footer), {
   ssr: false,
 })
 

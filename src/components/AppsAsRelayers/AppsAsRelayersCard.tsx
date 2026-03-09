@@ -7,7 +7,7 @@ import { useDismissedBanner } from "@/hooks/useDismissedBanners"
 
 import { AppsAsRelayersModal } from "./AppsAsRelayersModal"
 
-export function AppsAsRelayers() {
+export function AppsAsRelayersCard() {
   const { isDismissed, dismiss } = useDismissedBanner("apps-as-relayers")
   const { open, onOpen, onClose } = useDisclosure()
 
