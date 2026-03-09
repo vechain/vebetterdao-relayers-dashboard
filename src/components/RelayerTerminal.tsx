@@ -86,9 +86,18 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
     if (fullscreen) fitAddonRef.current?.fit()
   }, [fullscreen])
 
+  // Lock/unlock body scroll when entering/exiting fullscreen on mobile
+  useEffect(() => {
+    if (!fullscreen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [fullscreen])
+
   return (
     <Box
-      ref={containerRef}
       w="full"
       h={fullscreen ? "100%" : { base: "400px", md: "500px" }}
       minH={fullscreen ? "100%" : { base: "400px", md: "500px" }}
@@ -100,15 +109,20 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
       bg="#1a1a2e"
       p={2}
       css={{
-        "& .xterm-viewport": {
-          overflow: "auto !important",
-          WebkitOverflowScrolling: "touch",
-          touchAction: "pan-y",
-        },
-        "& .xterm-screen": {
-          touchAction: "pan-y",
-        },
-      }}
-    />
+        overscrollBehavior: "contain",
+      }}>
+      <Box
+        ref={containerRef}
+        w="full"
+        h="full"
+        css={{
+          "& .xterm-viewport": {
+            overflow: "auto !important",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
+          },
+        }}
+      />
+    </Box>
   )
 }
