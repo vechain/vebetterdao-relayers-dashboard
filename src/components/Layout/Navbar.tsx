@@ -159,7 +159,7 @@ export function Navbar() {
                         size="md"
                         borderRadius="full"
                         width="100%"
-                        textColor={walletTextColor}
+                        color={walletTextColor}
                         _hover={{ bg: walletHoverBg }}
                         loading={connection.isLoading}
                         onClick={() => {
