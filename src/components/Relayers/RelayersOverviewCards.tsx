@@ -2,12 +2,14 @@
 
 import { Box, Card, HStack, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import type { IconType } from "react-icons"
-import { LuActivity, LuCoins, LuFlame, LuRadar } from "react-icons/lu"
+import { LuActivity, LuChartLine, LuCoins, LuFlame, LuRadar } from "react-icons/lu"
 
+import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
 import { useReportData } from "@/hooks/useReportData"
 import { formatNumber, formatToken } from "@/lib/format"
 import { computeRelayersOverview } from "@/lib/relayer-utils"
+import { computeAverageROI } from "@/lib/roi"
 
 function StatItem({
   label,
@@ -49,11 +51,16 @@ function StatItem({
 export function RelayersOverviewCards() {
   const { data: report, isLoading: reportLoading } = useReportData()
   const { count: relayerCount, isLoading: relayersLoading } = useRegisteredRelayers()
+  const b3trToVtho = useB3trToVthoRate()
 
   const overview = report ? computeRelayersOverview(report) : null
+  const concludedRounds = (report?.rounds ?? []).filter(
+    (r) => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0",
+  )
+  const avgRoi = computeAverageROI(concludedRounds, b3trToVtho)
 
   return (
-    <SimpleGrid w="full" columns={{ base: 2, md: 4 }} gap="4">
+    <SimpleGrid w="full" columns={{ base: 2, md: 5 }} gap="4">
       <StatItem
         label="Total relayers"
         value={relayersLoading ? "..." : formatNumber(relayerCount)}
@@ -80,6 +87,23 @@ export function RelayersOverviewCards() {
         value={reportLoading ? "..." : overview ? `${formatToken(overview.totalVthoSpentRaw)} VTHO` : "\u2014"}
         sublabel="total gas costs"
         icon={LuFlame}
+        isLoading={reportLoading}
+      />
+      <StatItem
+        label="Average ROI"
+        value={
+          reportLoading
+            ? "..."
+            : avgRoi != null
+              ? `${formatNumber(Math.round(avgRoi))}%`
+              : "\u2014"
+        }
+        sublabel={
+          b3trToVtho != null
+            ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
+            : "1 B3TR = \u2026 VTHO"
+        }
+        icon={LuChartLine}
         isLoading={reportLoading}
       />
     </SimpleGrid>

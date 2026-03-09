@@ -16,7 +16,7 @@ import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
 import { useReportData } from "@/hooks/useReportData";
 import { formatNumber, formatToken } from "@/lib/format";
-import { computeAverageROI } from "@/lib/roi";
+import { computeROI } from "@/lib/roi";
 import { computeRoundCompletion, getRoundPhaseLabel } from "@/lib/round-utils";
 
 interface StatItemProps {
@@ -61,16 +61,6 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
   );
 }
 
-function computeTotalRewardsRaw(
-  rounds: { totalRelayerRewardsRaw: string }[],
-): string {
-  let total = BigInt(0);
-  for (const r of rounds) {
-    total += BigInt(r.totalRelayerRewardsRaw);
-  }
-  return total.toString();
-}
-
 export function StatsCards() {
   const { data: report, isLoading, error } = useReportData();
   const { count: relayerCount, isLoading: relayersLoading } =
@@ -86,20 +76,19 @@ export function StatsCards() {
   }
 
   const rounds = report?.rounds ?? [];
-  const concludedRounds = rounds.filter(
-    (r) => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0",
-  );
-  const roi = computeAverageROI(concludedRounds, b3trToVtho);
-  const totalRewards = computeTotalRewardsRaw(rounds);
-
-  const roiSublabel =
-    b3trToVtho != null
-      ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
-      : "1 B3TR = \u2026 VTHO";
 
   const currentRoundData = rounds.find(
     (r) => r.roundId === report?.currentRound,
   );
+
+  const rewardsRaw = currentRoundData
+    ? currentRoundData.isRoundEnded
+      ? currentRoundData.totalRelayerRewardsRaw
+      : currentRoundData.estimatedRelayerRewardsRaw
+    : "0";
+  const expectedRoi = currentRoundData
+    ? computeROI(rewardsRaw, currentRoundData.vthoSpentTotalRaw, b3trToVtho)
+    : null;
   const roundCompletion =
     currentRoundData != null ? computeRoundCompletion(currentRoundData) : null;
   const roundPhase =
@@ -134,22 +123,44 @@ export function StatsCards() {
         isLoading={relayersLoading}
       />
       <StatItem
-        label="Total rewards"
-        value={isLoading ? "..." : `${formatToken(totalRewards)} B3TR`}
-        sublabel="all time"
+        label={
+          currentRoundData && !currentRoundData.isRoundEnded
+            ? "Projected rewards"
+            : "Round rewards"
+        }
+        value={
+          isLoading
+            ? "..."
+            : currentRoundData
+              ? `${formatToken(
+                  currentRoundData.isRoundEnded
+                    ? currentRoundData.totalRelayerRewardsRaw
+                    : currentRoundData.estimatedRelayerRewardsRaw,
+                )} B3TR`
+              : "\u2014"
+        }
+        sublabel={
+          currentRoundData ? `for round #${currentRoundData.roundId}` : ""
+        }
         icon={LuCoins}
         isLoading={isLoading}
       />
       <StatItem
-        label="Average ROI"
+        label={
+          currentRoundData && !currentRoundData.isRoundEnded
+            ? "Expected ROI"
+            : "ROI"
+        }
         value={
           isLoading
             ? "..."
-            : roi != null
-              ? `${formatNumber(Math.round(roi))}%`
+            : expectedRoi != null
+              ? `${formatNumber(Math.round(expectedRoi))}%`
               : "\u2014"
         }
-        sublabel={roiSublabel}
+        sublabel={
+          currentRoundData ? `for round #${currentRoundData.roundId}` : ""
+        }
         icon={LuChartLine}
         isLoading={isLoading}
       />
