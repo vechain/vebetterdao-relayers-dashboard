@@ -15,7 +15,7 @@ import {
   useMediaQuery,
   VStack,
 } from "@chakra-ui/react"
-import { WalletButton } from "@vechain/vechain-kit"
+import { useWallet, WalletButton } from "@vechain/vechain-kit"
 import Image from "next/image"
 import NextLink from "next/link"
 import { usePathname } from "next/navigation"
@@ -23,26 +23,36 @@ import { LuHouse, LuInfo, LuMenu, LuPlay, LuRadar, LuUsers } from "react-icons/l
 
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode"
 import { basePath } from "@/config/basePath"
+import { useRelayerRegistration } from "@/hooks/useRelayerRegistration"
 
 type NavPage = "home" | "relayers" | "relayer" | "run" | "learn"
 
-const ROUTES: { value: NavPage; label: string; href: string; icon: typeof LuHouse }[] = [
+type NavRoute = { value: NavPage; label: string; href: string; icon: typeof LuHouse }
+
+const BASE_ROUTES: NavRoute[] = [
   { value: "home", label: "Home", href: "/", icon: LuHouse },
   { value: "relayers", label: "Relayers", href: "/relayers", icon: LuUsers },
-  { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar },
   { value: "run", label: "Run", href: "/run", icon: LuPlay },
   { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
 ]
+
+const MY_RELAYER_ROUTE: NavRoute = { value: "relayer", label: "My Relayer", href: "/relayer", icon: LuRadar }
 
 export function Navbar() {
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"])
   const { open, onClose, onOpen } = useDisclosure()
   const pathname = usePathname()
+  const { account } = useWallet()
+  const { data: isRegistered } = useRelayerRegistration(account?.address)
+
+  const routes: NavRoute[] = isRegistered
+    ? [BASE_ROUTES[0], BASE_ROUTES[1], MY_RELAYER_ROUTE, ...BASE_ROUTES.slice(2)]
+    : BASE_ROUTES
   const logoFilter = useColorModeValue("none", "brightness(0) invert(1)")
   const walletTextColor = useColorModeValue("#1A1A1A", "#E4E4E4")
   const walletHoverBg = useColorModeValue("#f8f8f8", "#2D2D2F")
 
-  const isActive = (route: (typeof ROUTES)[number]) =>
+  const isActive = (route: NavRoute) =>
     pathname === route.href ||
     (route.value === "home" && (pathname === "" || pathname === "/")) ||
     (route.value === "relayers" && pathname.startsWith("/relayers"))
@@ -73,7 +83,7 @@ export function Navbar() {
               borderColor="border.secondary"
               bg="bg.primary"
               p={2}>
-              {ROUTES.map(route => (
+              {routes.map(route => (
                 <NextLink key={route.value} href={route.href}>
                   <Button
                     border="none"
@@ -155,7 +165,7 @@ export function Navbar() {
                       />
                     </Box>
                     <Separator my={2} />
-                    {ROUTES.map(route => (
+                    {routes.map(route => (
                       <NextLink key={route.value} href={route.href} onClick={onClose}>
                         <Button
                           variant="ghost"

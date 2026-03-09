@@ -1,8 +1,9 @@
 "use client";
 
-import { Text, VStack } from "@chakra-ui/react";
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit";
+import { Button, Text, VStack } from "@chakra-ui/react";
+import { useConnectModal, useVechainDomain, useWallet } from "@vechain/vechain-kit";
 import { useSearchParams } from "next/navigation";
+import { LuWallet } from "react-icons/lu";
 
 import {
   RelayerDetailContent,
@@ -24,7 +25,9 @@ function isAddress(value: string): boolean {
 export default function RelayerDetailPage() {
   const searchParams = useSearchParams();
   const { account } = useWallet();
-  const addressOrDomain = searchParams.get("address") ?? "";
+  const addressParam = searchParams.get("address") ?? "";
+  // If no address param, show the connected wallet's relayer page
+  const addressOrDomain = addressParam || account?.address || "";
 
   const isDomain = addressOrDomain.length > 0 && !isAddress(addressOrDomain);
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(
@@ -35,14 +38,19 @@ export default function RelayerDetailPage() {
     ? domainData?.address?.toLowerCase()
     : addressOrDomain.toLowerCase();
 
+  const { open: openConnect } = useConnectModal();
   const { data: report, isLoading: reportLoading } = useReportData();
 
   if (!addressOrDomain) {
     return (
-      <VStack w="full" align="stretch" gap="4">
-        <Text color="status.negative.primary" textStyle="sm">
-          {"No relayer address provided."}
+      <VStack w="full" align="center" gap="4" py="16">
+        <Text color="text.subtle" textStyle="sm">
+          {"Connect your wallet to view your relayer dashboard."}
         </Text>
+        <Button variant="outline" size="md" rounded="full" onClick={() => openConnect()}>
+          <LuWallet />
+          {"Connect Wallet"}
+        </Button>
       </VStack>
     );
   }
