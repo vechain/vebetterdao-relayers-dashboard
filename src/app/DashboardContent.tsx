@@ -1,19 +1,17 @@
-"use client"
+"use client";
 
-import { Box, Heading, SimpleGrid, VStack } from "@chakra-ui/react"
+import { Box, Heading, SimpleGrid, VStack } from "@chakra-ui/react";
 
-import { AppsAsRelayersCard } from "@/components/AppsAsRelayers"
-import { AiSkillBanner, FeelLostBanner } from "@/components/Banners"
-import { BecomeRelayerCard } from "@/components/RelayerInfo"
-import { RoundsChart, RoundsList } from "@/components/Rounds"
-import { StatsCards } from "@/components/StatsCards"
+import { AiSkillBanner, FeelLostBanner } from "@/components/Banners";
+import { BecomeRelayerCard } from "@/components/RelayerInfo";
+import { RoundsChart, RoundsList } from "@/components/Rounds";
+import { StatsCards } from "@/components/StatsCards";
 
 export default function DashboardContent() {
   return (
     <VStack w="full" gap={{ base: 10, md: 14 }} align="stretch">
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+      <SimpleGrid columns={{ base: 1, md: 1 }} gap="4">
         <BecomeRelayerCard />
-        <AppsAsRelayersCard />
       </SimpleGrid>
 
       <VStack w="full" gap={4} align="stretch">
@@ -34,5 +32,5 @@ export default function DashboardContent() {
         </Box>
       </SimpleGrid>
     </VStack>
-  )
+  );
 }

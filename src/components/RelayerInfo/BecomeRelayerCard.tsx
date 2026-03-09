@@ -1,23 +1,35 @@
-"use client"
+"use client";
 
-import { Box, Button, Card, CloseButton, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import NextLink from "next/link"
-import { LuArrowUpRight, LuRadar, LuRocket } from "react-icons/lu"
+import {
+  Box,
+  Button,
+  Card,
+  CloseButton,
+  HStack,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react";
+import NextLink from "next/link";
+import { LuArrowUpRight, LuRadar, LuRocket } from "react-icons/lu";
 
-import { useDismissedBanner } from "@/hooks/useDismissedBanners"
+import { useDismissedBanner } from "@/hooks/useDismissedBanners";
 
-import { RelayerInfoModal } from "./RelayerInfoModal"
+import { AppsAsRelayersModal } from "@/components/AppsAsRelayers/AppsAsRelayersModal";
 
 interface BecomeRelayerCardProps {
-  forceBanner?: boolean
-  mt?: Card.RootProps["mt"]
+  forceBanner?: boolean;
+  mt?: Card.RootProps["mt"];
 }
 
-export function BecomeRelayerCard({ forceBanner = false, mt }: BecomeRelayerCardProps) {
-  const { open, onOpen, onClose } = useDisclosure()
-  const { isDismissed, dismiss } = useDismissedBanner("become-relayer")
+export function BecomeRelayerCard({
+  forceBanner = false,
+  mt,
+}: BecomeRelayerCardProps) {
+  const { open, onOpen, onClose } = useDisclosure();
+  const { isDismissed, dismiss } = useDismissedBanner("become-relayer");
 
-  if (!forceBanner && isDismissed) return null
+  if (!forceBanner && isDismissed) return null;
 
   return (
     <>
@@ -28,7 +40,8 @@ export function BecomeRelayerCard({ forceBanner = false, mt }: BecomeRelayerCard
         overflow="hidden"
         position="relative"
         w="full"
-        mt={mt}>
+        mt={mt}
+      >
         {!forceBanner && (
           <CloseButton
             position="absolute"
@@ -42,7 +55,11 @@ export function BecomeRelayerCard({ forceBanner = false, mt }: BecomeRelayerCard
           />
         )}
         <VStack align="start" gap="3" position="relative" zIndex={1}>
-          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" color="white">
+          <Text
+            textStyle={{ base: "lg", md: "xl" }}
+            fontWeight="bold"
+            color="white"
+          >
             {"Become a relayer"}
           </Text>
           <Text textStyle="md" color="whiteAlpha.800">
@@ -56,12 +73,19 @@ export function BecomeRelayerCard({ forceBanner = false, mt }: BecomeRelayerCard
                 rounded="full"
                 color="white"
                 borderColor="whiteAlpha.500"
-                _hover={{ bg: "whiteAlpha.200" }}>
+                _hover={{ bg: "whiteAlpha.200" }}
+              >
                 {"Become a Relayer"}
                 <LuRocket />
               </Button>
             </NextLink>
-            <Button variant="link" size="sm" rounded="full" color="white" onClick={onOpen}>
+            <Button
+              variant="link"
+              size="sm"
+              rounded="full"
+              color="white"
+              onClick={onOpen}
+            >
               {"Learn"}
               <LuArrowUpRight />
             </Button>
@@ -73,12 +97,13 @@ export function BecomeRelayerCard({ forceBanner = false, mt }: BecomeRelayerCard
           bottom="-2"
           opacity={0.15}
           color="white"
-          fontSize={{ base: "96px", md: "128px" }}>
+          fontSize={{ base: "96px", md: "128px" }}
+        >
           <LuRadar />
         </Box>
       </Card.Root>
 
-      <RelayerInfoModal isOpen={open} onClose={onClose} />
+      <AppsAsRelayersModal isOpen={open} onClose={onClose} />
     </>
-  )
+  );
 }
