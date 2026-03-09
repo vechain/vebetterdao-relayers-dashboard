@@ -1,22 +1,30 @@
-"use client"
+"use client";
 
-import { Box, Card, HStack, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
-import type { IconType } from "react-icons"
-import { LuChartLine, LuCoins, LuRadar, LuUsers } from "react-icons/lu"
+import {
+  Box,
+  Card,
+  HStack,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import type { IconType } from "react-icons";
+import { LuChartLine, LuCoins, LuRadar, LuUsers } from "react-icons/lu";
 
-import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate"
-import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers"
-import { useReportData } from "@/hooks/useReportData"
-import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers"
-import { formatNumber, formatToken } from "@/lib/format"
-import { computeAverageROI } from "@/lib/roi"
+import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
+import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
+import { useReportData } from "@/hooks/useReportData";
+import { useTotalAutoVotingUsers } from "@/hooks/useTotalAutoVotingUsers";
+import { formatNumber, formatToken } from "@/lib/format";
+import { computeAverageROI } from "@/lib/roi";
 
 interface StatItemProps {
-  label: string
-  value: string
-  sublabel: string
-  icon: IconType
-  isLoading?: boolean
+  label: string;
+  value: string;
+  sublabel: string;
+  icon: IconType;
+  isLoading?: boolean;
 }
 
 function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
@@ -24,10 +32,19 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
     <Card.Root p={{ base: "4", md: "6" }} variant="action">
       <VStack flex={1} alignItems="start" gap="1">
         <HStack w="full" justifyContent="space-between" alignItems="center">
-          <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" lineClamp={1}>
+          <Text
+            textStyle={{ base: "xs", md: "sm" }}
+            color="text.subtle"
+            lineClamp={1}
+          >
             {label}
           </Text>
-          <Box as="span" color="text.subtle" fontSize={{ base: "16px", md: "20px" }} lineHeight="1">
+          <Box
+            as="span"
+            color="text.subtle"
+            fontSize={{ base: "16px", md: "20px" }}
+            lineHeight="1"
+          >
             {icon({})}
           </Box>
         </HStack>
@@ -41,69 +58,83 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
         </Text>
       </VStack>
     </Card.Root>
-  )
+  );
 }
 
-function computeTotalRewardsRaw(rounds: { totalRelayerRewardsRaw: string }[]): string {
-  let total = BigInt(0)
+function computeTotalRewardsRaw(
+  rounds: { totalRelayerRewardsRaw: string }[],
+): string {
+  let total = BigInt(0);
   for (const r of rounds) {
-    total += BigInt(r.totalRelayerRewardsRaw)
+    total += BigInt(r.totalRelayerRewardsRaw);
   }
-  return total.toString()
+  return total.toString();
 }
 
 export function StatsCards() {
-  const { data: report, isLoading, error } = useReportData()
-  const { totalUsers: onChainUsers, isLoading: usersLoading } = useTotalAutoVotingUsers()
-  const { count: relayerCount, isLoading: relayersLoading } = useRegisteredRelayers()
-  const b3trToVtho = useB3trToVthoRate()
+  const { data: report, isLoading, error } = useReportData();
+  const { totalUsers: onChainUsers, isLoading: usersLoading } =
+    useTotalAutoVotingUsers();
+  const { count: relayerCount, isLoading: relayersLoading } =
+    useRegisteredRelayers();
+  const b3trToVtho = useB3trToVthoRate();
 
   if (error) {
     return (
       <Text color="status.negative.primary" textStyle="sm">
         {"Failed to load report data."}
       </Text>
-    )
+    );
   }
 
-  const rounds = report?.rounds ?? []
-  const concludedRounds = rounds.filter(r => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0")
-  const roi = computeAverageROI(concludedRounds, b3trToVtho)
-  const totalRewards = computeTotalRewardsRaw(rounds)
+  const rounds = report?.rounds ?? [];
+  const concludedRounds = rounds.filter(
+    (r) => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0",
+  );
+  const roi = computeAverageROI(concludedRounds, b3trToVtho);
+  const totalRewards = computeTotalRewardsRaw(rounds);
 
   const roiSublabel =
-    b3trToVtho != null ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO` : "1 B3TR = \u2026 VTHO"
+    b3trToVtho != null
+      ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
+      : "1 B3TR = \u2026 VTHO";
 
   return (
     <SimpleGrid w="full" columns={{ base: 2, md: 2, lg: 2 }} gap="4">
-      <StatItem
+      {/* <StatItem
         label="Auto-voting users"
         value={usersLoading ? "..." : onChainUsers != null ? formatNumber(onChainUsers) : "\u2014"}
         sublabel="current total"
         icon={LuUsers}
         isLoading={usersLoading}
-      />
+      /> */}
       <StatItem
-        label="Registered relayers"
+        label="Total relayers"
         value={relayersLoading ? "..." : String(relayerCount)}
-        sublabel="on-chain"
+        sublabel="registered"
         icon={LuRadar}
         isLoading={relayersLoading}
       />
       <StatItem
         label="Total rewards"
         value={isLoading ? "..." : `${formatToken(totalRewards)} B3TR`}
-        sublabel="all rounds"
+        sublabel="all time"
         icon={LuCoins}
         isLoading={isLoading}
       />
       <StatItem
         label="Average ROI"
-        value={isLoading ? "..." : roi != null ? `${formatNumber(Math.round(roi))}%` : "\u2014"}
+        value={
+          isLoading
+            ? "..."
+            : roi != null
+              ? `${formatNumber(Math.round(roi))}%`
+              : "\u2014"
+        }
         sublabel={roiSublabel}
         icon={LuChartLine}
         isLoading={isLoading}
       />
     </SimpleGrid>
-  )
+  );
 }
