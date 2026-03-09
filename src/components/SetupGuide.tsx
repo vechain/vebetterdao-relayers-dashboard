@@ -1,10 +1,36 @@
-"use client"
+"use client";
 
-import { Box, Button, Card, Code, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
-import NextLink from "next/link"
-import { LuArrowLeft, LuCoins, LuExternalLink, LuScale, LuServer, LuZap } from "react-icons/lu"
+import {
+  Grid,
+  Button,
+  Card,
+  Code,
+  Heading,
+  HStack,
+  Link,
+  Text,
+  VStack,
+  Box,
+} from "@chakra-ui/react";
+import NextLink from "next/link";
+import {
+  LuArrowLeft,
+  LuCoins,
+  LuExternalLink,
+  LuScale,
+  LuServer,
+  LuZap,
+} from "react-icons/lu";
 
-function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
+function Step({
+  number,
+  title,
+  children,
+}: {
+  number: number;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <Card.Root variant="primary" p={{ base: "4", md: "6" }}>
       <VStack align="start" gap="3">
@@ -19,7 +45,8 @@ function Step({ number, title, children }: { number: number; title: string; chil
             h="7"
             display="flex"
             alignItems="center"
-            justifyContent="center">
+            justifyContent="center"
+          >
             {number}
           </Text>
           <Text textStyle={{ base: "md", md: "lg" }} fontWeight="semibold">
@@ -31,15 +58,24 @@ function Step({ number, title, children }: { number: number; title: string; chil
         </VStack>
       </VStack>
     </Card.Root>
-  )
+  );
 }
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <Code display="block" whiteSpace="pre" p="3" rounded="lg" w="full" textStyle="sm" overflowX="auto" bg="bg.tertiary">
+    <Code
+      display="block"
+      whiteSpace="pre"
+      p="3"
+      rounded="lg"
+      w="full"
+      textStyle="sm"
+      overflowX="auto"
+      bg="bg.tertiary"
+    >
       {children}
     </Code>
-  )
+  );
 }
 
 export function SetupGuide() {
@@ -59,80 +95,95 @@ export function SetupGuide() {
           {"Relayer Setup Guide"}
         </Heading>
         <Text textStyle="md" color="text.subtle">
-          {"Set up and run your own relayer node to earn B3TR rewards."}
+          {"Setup a node and become a relayer to earn B3TR rewards."}
         </Text>
       </VStack>
 
-      <Card.Root variant="primary" p={{ base: "5", md: "8" }} w="full">
-        <VStack gap={6} align="stretch">
-          <VStack gap={2} align="start">
-            <Heading size="lg" fontWeight="bold">
-              {"What Are Relayers?"}
-            </Heading>
-            <Text color="text.subtle">
-              {
-                "Relayers are services that cast votes and claim rewards for users who enabled auto-voting. Anyone can run one — apps, community members, developers. You earn a share of rewards for the work you do."
-              }
-            </Text>
-          </VStack>
+      <Grid templateColumns={{ base: "1fr", md: "2fr 1fr" }} gap="4" w="full">
+        <Step number={1} title="Prerequisites">
+          <Text textStyle="sm" color="text.subtle">
+            {
+              "You need a VeChain wallet with some VTHO for gas fees. The relayer node requires Node.js 18+ and a registered relayer address."
+            }
+          </Text>
+          <Text textStyle="sm" color="text.subtle">
+            {
+              "Anyone can register as a relayer by calling registerRelayer() on RelayerRewardsPool."
+            }
+          </Text>
+        </Step>
 
-          <HStack gap={4} align="start">
-            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-              <LuZap />
-            </Box>
-            <VStack gap={1} align="start">
-              <Text fontWeight="semibold">{"What You Do"}</Text>
-              <Text textStyle="sm" color="text.subtle">
-                {
-                  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches. It loops every few minutes until everyone is served."
-                }
-              </Text>
-            </VStack>
-          </HStack>
+        <Card.Root variant="primary" p={{ base: "5", md: "8" }} w="full">
+            <VStack gap={6} align="stretch">
+              <VStack gap={2} align="start">
+                <Heading size="lg" fontWeight="bold">
+                  {"What Are Relayers?"}
+                </Heading>
+                <Text color="text.subtle">
+                  {
+                    "Relayers are services that cast votes and claim rewards for users who enabled auto-voting. Anyone can run one — apps, community members, developers. You earn a share of rewards for the work you do."
+                  }
+                </Text>
+              </VStack>
 
-          <HStack gap={4} align="start">
-            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-              <LuCoins />
-            </Box>
-            <VStack gap={1} align="start">
-              <Text fontWeight="semibold">{"How You Earn"}</Text>
-              <Text textStyle="sm" color="text.subtle">
-                {
-                  "Each user you serve pays 10% of their weekly rewards (max 100 B3TR) into a shared pool. At the end of the week, the pool is split among relayers based on work done. Voting earns 3 points, claiming earns 1 point — more points, bigger share."
-                }
-              </Text>
-            </VStack>
-          </HStack>
+              <HStack gap={4} align="start">
+                <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
+                  <LuZap />
+                </Box>
+                <VStack gap={1} align="start">
+                  <Text fontWeight="semibold">{"What You Do"}</Text>
+                  <Text textStyle="sm" color="text.subtle">
+                    {
+                      "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches. It loops every few minutes until everyone is served."
+                    }
+                  </Text>
+                </VStack>
+              </HStack>
 
-          <HStack gap={4} align="start">
-            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-              <LuServer />
-            </Box>
-            <VStack gap={1} align="start">
-              <Text fontWeight="semibold">{"What You Need"}</Text>
-              <Text textStyle="sm" color="text.subtle">
-                {
-                  "A wallet with some VTHO for gas, the relayer node software, and a connection to a VeChain Thor node. You can run it locally, on a server, or in Docker."
-                }
-              </Text>
-            </VStack>
-          </HStack>
+              <HStack gap={4} align="start">
+                <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
+                  <LuCoins />
+                </Box>
+                <VStack gap={1} align="start">
+                  <Text fontWeight="semibold">{"How You Earn"}</Text>
+                  <Text textStyle="sm" color="text.subtle">
+                    {
+                      "Each user you serve pays 10% of their weekly rewards (max 100 B3TR) into a shared pool. At the end of the week, the pool is split among relayers based on work done. Voting earns 3 points, claiming earns 1 point — more points, bigger share."
+                    }
+                  </Text>
+                </VStack>
+              </HStack>
 
-          <HStack gap={4} align="start">
-            <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-              <LuScale />
-            </Box>
-            <VStack gap={1} align="start">
-              <Text fontWeight="semibold">{"The Rules"}</Text>
-              <Text textStyle="sm" color="text.subtle">
-                {
-                  "Every user must be served. If even one gets missed, nobody gets paid — the whole pool stays locked. It's first-come-first-served: if another relayer handles a user before you, you get nothing for that user. After the round is fully complete, you claim your share."
-                }
-              </Text>
+              <HStack gap={4} align="start">
+                <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
+                  <LuServer />
+                </Box>
+                <VStack gap={1} align="start">
+                  <Text fontWeight="semibold">{"What You Need"}</Text>
+                  <Text textStyle="sm" color="text.subtle">
+                    {
+                      "A wallet with some VTHO for gas, the relayer node software, and a connection to a VeChain Thor node. You can run it locally, on a server, or in Docker."
+                    }
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <HStack gap={4} align="start">
+                <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
+                  <LuScale />
+                </Box>
+                <VStack gap={1} align="start">
+                  <Text fontWeight="semibold">{"The Rules"}</Text>
+                  <Text textStyle="sm" color="text.subtle">
+                    {
+                      "Every user must be served. If even one gets missed, nobody gets paid — the whole pool stays locked. It's first-come-first-served: if another relayer handles a user before you, you get nothing for that user. After the round is fully complete, you claim your share."
+                    }
+                  </Text>
+                </VStack>
+              </HStack>
             </VStack>
-          </HStack>
-        </VStack>
-      </Card.Root>
+        </Card.Root>
+      </Grid>
 
       <VStack align="start" gap="4" w="full">
         <Step number={1} title="Prerequisites">
@@ -142,22 +193,30 @@ export function SetupGuide() {
             }
           </Text>
           <Text textStyle="sm" color="text.subtle">
-            {"Anyone can register as a relayer by calling registerRelayer() on RelayerRewardsPool."}
+            {
+              "Anyone can register as a relayer by calling registerRelayer() on RelayerRewardsPool."
+            }
           </Text>
         </Step>
 
         <Step number={2} title="Clone the relayer node">
           <Text textStyle="sm" color="text.subtle">
-            {"The relayer node is a standalone CLI tool with no monorepo dependency."}
+            {
+              "The relayer node is a standalone CLI tool with no monorepo dependency."
+            }
           </Text>
           <CodeBlock>
-            {"git clone https://github.com/vechain/vebetterdao-contracts\ncd relayer-node\nyarn install"}
+            {
+              "git clone https://github.com/vechain/vebetterdao-contracts\ncd relayer-node\nyarn install"
+            }
           </CodeBlock>
         </Step>
 
         <Step number={3} title="Configure environment">
           <Text textStyle="sm" color="text.subtle">
-            {"Create a .env file with your relayer wallet credentials and network configuration."}
+            {
+              "Create a .env file with your relayer wallet credentials and network configuration."
+            }
           </Text>
           <CodeBlock>
             {
@@ -201,10 +260,16 @@ export function SetupGuide() {
               {"Need more details?"}
             </Text>
             <Text textStyle="sm" color="text.subtle">
-              {"Check the full documentation for advanced configuration and troubleshooting."}
+              {
+                "Check the full documentation for advanced configuration and troubleshooting."
+              }
             </Text>
           </VStack>
-          <Link href="https://docs.vebetterdao.org/vebetter/automation" target="_blank" rel="noopener noreferrer">
+          <Link
+            href="https://docs.vebetterdao.org/vebetter/automation"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button variant="outline" size="sm" rounded="full">
               {"Full Documentation"}
               <LuExternalLink />
@@ -213,5 +278,5 @@ export function SetupGuide() {
         </HStack>
       </Card.Root>
     </VStack>
-  )
+  );
 }
