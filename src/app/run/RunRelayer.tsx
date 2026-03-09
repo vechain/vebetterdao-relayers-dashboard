@@ -449,7 +449,7 @@ export function RunRelayer() {
             borderRadius={isFullscreen ? 0 : "12px"}
             display={isFullscreen ? "flex" : undefined}
             flexDirection={isFullscreen ? "column" : undefined}
-            css={isFullscreen ? { overscrollBehavior: "none", touchAction: "none" } : undefined}>
+            css={isFullscreen ? { overscrollBehavior: "none" } : undefined}>
             {isFullscreen && (
               <Button
                 position="absolute"

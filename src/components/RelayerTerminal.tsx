@@ -120,6 +120,10 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
             overflow: "auto !important",
             WebkitOverflowScrolling: "touch",
             overscrollBehavior: "contain",
+            touchAction: "pan-y",
+          },
+          "& .xterm-screen": {
+            touchAction: "pan-y",
           },
         }}
       />
