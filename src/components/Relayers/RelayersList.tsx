@@ -27,6 +27,7 @@ import {
 } from "react-icons/lu";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
+import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
 import { useReportData } from "@/hooks/useReportData";
 import type { RelayerSummary } from "@/lib/relayer-utils";
 import {
@@ -116,6 +117,7 @@ function useSearchAddress(query: string) {
 export function RelayersList() {
   const { t } = useTranslation();
   const { data: report, isLoading, error } = useReportData();
+  const { relayers: registeredRelayers } = useRegisteredRelayers();
   const b3trToVtho = useB3trToVthoRate();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [search, setSearch] = useState("");
@@ -138,10 +140,38 @@ export function RelayersList() {
   );
 
   const summaries = useMemo<RelayerSummary[]>(() => {
-    if (!report?.relayers) return [];
-    const roundCtx = buildRoundRewardsContext(report);
-    return report.relayers.map((r) => computeRelayerSummary(r, roundCtx));
-  }, [report]);
+    const reportSummaries: RelayerSummary[] = [];
+    const reportAddresses = new Set<string>();
+
+    if (report?.relayers) {
+      const roundCtx = buildRoundRewardsContext(report);
+      for (const r of report.relayers) {
+        reportSummaries.push(computeRelayerSummary(r, roundCtx));
+        reportAddresses.add(r.address.toLowerCase());
+      }
+    }
+
+    // Include on-chain registered relayers not yet in the report
+    if (registeredRelayers) {
+      for (const addr of registeredRelayers) {
+        if (!reportAddresses.has(addr.toLowerCase())) {
+          reportSummaries.push({
+            address: addr.toLowerCase(),
+            totalActions: 0,
+            totalVotedFor: 0,
+            totalRewardsClaimed: 0,
+            totalWeightedActions: 0,
+            totalB3trEarnedRaw: "0",
+            totalVthoSpentRaw: "0",
+            lastActiveRound: null,
+            activeRoundsCount: 0,
+          });
+        }
+      }
+    }
+
+    return reportSummaries;
+  }, [report, registeredRelayers]);
 
   const filtered = useMemo(() => {
     const currentRound = report?.currentRound ?? 0;
