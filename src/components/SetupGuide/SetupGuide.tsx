@@ -26,10 +26,11 @@ import {
   LuCheck,
   LuWallet,
   LuUserPlus,
+  LuPencil,
   LuPlay,
   LuShare2,
 } from "react-icons/lu";
-import { useWallet, useConnectModal, useVechainDomain } from "@vechain/vechain-kit";
+import { useWallet, useConnectModal, useVechainDomain, useAccountCustomizationModal } from "@vechain/vechain-kit";
 
 import { RegisterRelayerModal } from "./RegisterRelayerModal";
 import { ShareRelayerModal } from "./ShareRelayerModal";
@@ -102,6 +103,7 @@ function Step({
 export function SetupGuide() {
   const { account } = useWallet();
   const { open: openConnectModal } = useConnectModal();
+  const { open: openCustomization } = useAccountCustomizationModal();
   const { data: domain } = useVechainDomain(account?.address);
   const router = useRouter();
 
@@ -115,6 +117,7 @@ export function SetupGuide() {
     if (step === 2) return isStepCompleted(1);
     if (step === 3) return isStepCompleted(2);
     if (step === 4) return isStepCompleted(2);
+    if (step === 5) return isStepCompleted(2);
     return false;
   };
 
@@ -127,7 +130,7 @@ export function SetupGuide() {
   }, [completeStep]);
 
   const handleRunInBrowser = useCallback(() => {
-    completeStep(3);
+    completeStep(4);
     router.push("/run");
   }, [completeStep, router]);
 
@@ -216,36 +219,63 @@ export function SetupGuide() {
             )}
           </Step>
 
-          {/* Step 3: Run the node */}
+          {/* Step 3: Customize your profile */}
           <Step
             number={3}
-            title={t("Run the Node")}
+            title={t("Customize Your Profile")}
             disabled={!isStepEnabled(3)}
             completed={isStepCompleted(3)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Choose how to run your relayer node. You can run it directly in your browser, with Docker, or via npm.")}
+              {t("Switch to and connect with your relayer wallet, then customize your profile with an avatar, name, and description so users can recognize you.")}
             </Text>
             {!isStepCompleted(3) && isStepEnabled(3) && (
-              <RunOptions onRunInBrowser={handleRunInBrowser} />
+              <Button
+                onClick={() => {
+                  openCustomization();
+                  completeStep(3);
+                }}
+                variant="solid"
+                rounded="full"
+                size="sm"
+                gap={2}
+              >
+                <LuPencil size={14} />
+                {t("Customize")}
+              </Button>
             )}
           </Step>
 
-          {/* Step 4: Share your profile */}
+          {/* Step 4: Run the node */}
           <Step
             number={4}
-            title={t("Share Your Profile")}
+            title={t("Run the Node")}
             disabled={!isStepEnabled(4)}
             completed={isStepCompleted(4)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Let people know you're a relayer so they can choose you. The more users you serve, the more you earn.")}
+              {t("Choose how to run your relayer node. You can run it directly in your browser, with Docker, or via npm.")}
             </Text>
             {!isStepCompleted(4) && isStepEnabled(4) && (
+              <RunOptions onRunInBrowser={handleRunInBrowser} />
+            )}
+          </Step>
+
+          {/* Step 5: Share your profile */}
+          <Step
+            number={5}
+            title={t("Share Your Profile")}
+            disabled={!isStepEnabled(5)}
+            completed={isStepCompleted(5)}
+          >
+            <Text textStyle="sm" color="text.subtle">
+              {t("Let people know you're a relayer so they can choose you. The more users you serve, the more you earn.")}
+            </Text>
+            {!isStepCompleted(5) && isStepEnabled(5) && (
               <Button
                 onClick={() => {
                   setShareModalOpen(true);
-                  completeStep(4);
+                  completeStep(5);
                 }}
                 variant="solid"
                 rounded="full"
