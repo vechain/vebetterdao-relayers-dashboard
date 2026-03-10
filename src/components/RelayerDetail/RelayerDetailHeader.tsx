@@ -11,7 +11,9 @@ import {
   Image,
   MenuContent,
   MenuItem,
+  MenuPositioner,
   MenuRoot,
+  MenuSeparator,
   MenuTrigger,
   Portal,
   Text,
@@ -167,17 +169,6 @@ export function RelayerDetailHeader({
                         <LuExternalLink size={12} />
                       </Box>
                     </a>
-                    {isOwnRelayer && (
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        rounded="full"
-                        onClick={() => openCustomization()}
-                      >
-                        <LuPencil />
-                        {t("Customize")}
-                      </Button>
-                    )}
                   </HStack>
 
                   {description && (
@@ -222,7 +213,7 @@ export function RelayerDetailHeader({
                   )
                 )}
 
-                {isOwnRelayer && isRegistered && (
+                {isOwnRelayer && (
                   <MenuRoot>
                     <MenuTrigger asChild>
                       <IconButton
@@ -235,17 +226,32 @@ export function RelayerDetailHeader({
                       </IconButton>
                     </MenuTrigger>
                     <Portal>
-                      <MenuContent>
-                        <MenuItem
-                          value="unregister"
-                          color="fg.error"
-                          cursor="pointer"
-                          onClick={() => setShowUnregisterModal(true)}
-                        >
-                          <LuTriangleAlert />
-                          {t("Unregister relayer")}
-                        </MenuItem>
-                      </MenuContent>
+                      <MenuPositioner>
+                        <MenuContent>
+                          <MenuItem
+                            value="customize"
+                            cursor="pointer"
+                            onClick={() => openCustomization()}
+                          >
+                            <LuPencil />
+                            {t("Customize profile")}
+                          </MenuItem>
+                          {isRegistered && (
+                            <>
+                              <MenuSeparator />
+                              <MenuItem
+                                value="unregister"
+                                color="fg.error"
+                                cursor="pointer"
+                                onClick={() => setShowUnregisterModal(true)}
+                              >
+                                <LuTriangleAlert />
+                                {t("Unregister relayer")}
+                              </MenuItem>
+                            </>
+                          )}
+                        </MenuContent>
+                      </MenuPositioner>
                     </Portal>
                   </MenuRoot>
                 )}
