@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import {
   LuArrowDown,
   LuArrowUp,
+  LuArrowUpDown,
   LuChevronsDown,
   LuPlus,
   LuSearch,
@@ -251,6 +252,31 @@ export function RelayersList() {
             </Button>
           ))}
         </HStack>
+      </HStack>
+
+      {/* Mobile sort controls */}
+      <HStack gap="1" hideFrom="md" flexWrap="wrap">
+        <HStack gap="1" color="text.subtle">
+          <LuArrowUpDown size={14} />
+          <Text textStyle="xs">{t("Sort by")}:</Text>
+        </HStack>
+        {SORT_COLUMNS.map((col) => (
+          <Button
+            key={col.field}
+            size="xs"
+            variant={sortField === col.field ? "subtle" : "ghost"}
+            fontWeight={sortField === col.field ? "bold" : "normal"}
+            onClick={() => handleSort(col.field)}
+          >
+            {t(col.labelKey)}
+            {sortField === col.field &&
+              (sortDir === "asc" ? (
+                <LuArrowUp size={12} />
+              ) : (
+                <LuArrowDown size={12} />
+              ))}
+          </Button>
+        ))}
       </HStack>
 
       {/* Desktop column headers — aligned with RelayerCard's 7-column grid */}
