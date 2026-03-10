@@ -194,7 +194,8 @@ export function RoundActiveRelayers({ roundId }: RoundActiveRelayersProps) {
   const { data: report } = useReportData();
 
   const { activeRelayers, totalWeighted } = useMemo(() => {
-    if (!report?.relayers) return { activeRelayers: [] as ActiveRelayer[], totalWeighted: 0 };
+    if (!report?.relayers)
+      return { activeRelayers: [] as ActiveRelayer[], totalWeighted: 0 };
     const result: ActiveRelayer[] = [];
     let weighted = 0;
     for (const relayer of report.relayers) {
@@ -233,32 +234,6 @@ export function RoundActiveRelayers({ roundId }: RoundActiveRelayersProps) {
           {activeRelayers.length}
         </Badge>
       </HStack>
-
-      {/* Desktop column headers */}
-      <Box hideBelow="md" px="5">
-        <HStack w="full" gap="2">
-          <SimpleGrid columns={6} gap="4" w="full" alignItems="center">
-            <Box gridColumn="span 2">
-              <Text textStyle="xxs" color="text.subtle" fontWeight="medium">
-                {"Relayer"}
-              </Text>
-            </Box>
-            <Text textStyle="xxs" color="text.subtle" fontWeight="medium">
-              {"Voted for"}
-            </Text>
-            <Text textStyle="xxs" color="text.subtle" fontWeight="medium">
-              {"Claimed for"}
-            </Text>
-            <Text textStyle="xxs" color="text.subtle" fontWeight="medium">
-              {"VTHO spent"}
-            </Text>
-            <Text textStyle="xxs" color="text.subtle" fontWeight="medium">
-              {"Weight"}
-            </Text>
-          </SimpleGrid>
-          <Box w="8" flexShrink={0} />
-        </HStack>
-      </Box>
 
       <VStack gap="3" align="stretch">
         {activeRelayers.map((relayer) => (
