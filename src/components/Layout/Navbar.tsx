@@ -205,35 +205,17 @@ export function Navbar() {
                   justifyContent="space-between"
                 >
                   <VStack gap={0} w="full" align="stretch">
-                    <Box py={3}>
-                      <Button
-                        variant="outline"
-                        size="md"
-                        borderRadius="full"
-                        width="100%"
-                        color={walletTextColor}
-                        _hover={{ bg: walletHoverBg }}
-                        loading={connection.isLoading}
-                        onClick={() => {
-                          onClose();
-                          if (connection.isConnected && account) {
-                            openAccountModal();
-                          } else {
-                            openConnectModal();
-                          }
-                        }}
-                      >
-                        {connection.isConnected && account ? (
-                          account.domain ||
-                          `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
-                        ) : (
-                          <>
-                            <LuLogIn />
-                            {"Login"}
-                          </>
-                        )}
-                      </Button>
-                    </Box>
+                    <WalletButton
+                      buttonStyle={{
+                        variant: "outline",
+                        width: "full",
+                        size: "md",
+                        borderRadius: "full",
+                        textColor: walletTextColor,
+                        _hover: { bg: walletHoverBg },
+                      }}
+                      connectionVariant="popover"
+                    />
                     <Separator my={2} />
                     {routes.map((route) => (
                       <NextLink

@@ -135,8 +135,8 @@ export function RelayersOverviewCards() {
         }
         sublabel={
           b3trToVtho != null
-            ? `1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
-            : "1 B3TR = \u2026 VTHO"
+            ? `rate: 1 B3TR = ${formatNumber(Math.round(b3trToVtho))} VTHO`
+            : "rate: 1 B3TR = \u2026 VTHO"
         }
         icon={LuChartLine}
         isLoading={reportLoading}

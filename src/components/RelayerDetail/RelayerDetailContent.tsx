@@ -258,12 +258,19 @@ function RoundStat({
 function RoundRow({
   rd,
   b3trRaw,
+  b3trToVtho,
   isActive,
 }: {
   rd: RelayerAnalytics["rounds"][number];
   b3trRaw: string;
+  b3trToVtho: number | undefined;
   isActive?: boolean;
 }) {
+  const vthoSpentRaw = (
+    BigInt(rd.vthoSpentOnVotingRaw) + BigInt(rd.vthoSpentOnClaimingRaw)
+  ).toString();
+  const roi = computeRelayerROI(b3trRaw, vthoSpentRaw, b3trToVtho);
+
   return (
     <VStack
       gap="2"
@@ -284,9 +291,13 @@ function RoundRow({
           </Badge>
         )}
       </HStack>
-      <SimpleGrid columns={{ base: 2, sm: 4 }} gap="3">
-        <RoundStat label="Voted for" value={rd.votedForCount} />
-        <RoundStat label="Claimed" value={rd.rewardsClaimedCount} />
+      <SimpleGrid columns={{ base: 2, sm: 5 }} gap="3">
+        <RoundStat label="Voted for" value={rd.votedForCount} unit="users" />
+        <RoundStat
+          label="Claimed for"
+          value={rd.rewardsClaimedCount}
+          unit="users"
+        />
         <RoundStat
           label="B3TR earned"
           value={formatToken(b3trRaw)}
@@ -294,13 +305,12 @@ function RoundRow({
         />
         <RoundStat
           label="VTHO spent"
-          value={formatToken(
-            (
-              BigInt(rd.vthoSpentOnVotingRaw) +
-              BigInt(rd.vthoSpentOnClaimingRaw)
-            ).toString(),
-          )}
+          value={formatToken(vthoSpentRaw)}
           unit="VTHO"
+        />
+        <RoundStat
+          label="ROI"
+          value={roi != null ? `${formatNumber(Math.round(roi))}%` : "\u2014"}
         />
       </SimpleGrid>
     </VStack>
@@ -409,93 +419,50 @@ export function RelayerDetailContent({
         </Card.Root>
       </Grid>
 
-      <Grid
-        templateColumns={{ base: "1fr", md: "2fr 1fr" }}
-        gap="4"
-        alignItems="start"
-      >
-        <Card.Root variant="primary">
-          <Card.Body>
-            <VStack gap="3" align="stretch">
-              <SectionHeader title="Round History" icon={<LuFlame />} />
-              {roundsDesc.length === 0 ? (
-                <Text textStyle="sm" color="text.subtle">
-                  {"No round data available."}
-                </Text>
-              ) : (
-                <VStack gap="1" align="stretch">
-                  {visibleRounds.map((rd) => (
-                    <RoundRow
-                      key={rd.roundId}
-                      rd={rd}
-                      isActive={rd.roundId === currentRound}
-                      b3trRaw={
-                        roundCtx
-                          ? computeRelayerRoundB3tr(
-                              rd.weightedActions,
-                              roundCtx.get(rd.roundId),
-                            ).toString()
-                          : rd.claimableRewardsRaw
-                      }
-                    />
-                  ))}
-                  {hasMore && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      w="full"
-                      onClick={() =>
-                        setVisibleCount((prev) => prev + ROUNDS_PAGE_SIZE)
-                      }
-                    >
-                      <LuChevronDown />
-                      {"Load more"}
-                    </Button>
-                  )}
-                </VStack>
-              )}
-            </VStack>
-          </Card.Body>
-        </Card.Root>
-
-        <Card.Root variant="primary">
-          <Card.Body>
-            <VStack gap="3" align="stretch">
-              <SectionHeader title="Latest Activity" icon={<LuZap />} />
-              {activityItems.length === 0 ? (
-                <Text textStyle="sm" color="text.subtle">
-                  {"No activity yet."}
-                </Text>
-              ) : (
-                <VStack gap="1" align="stretch">
-                  {visibleActivity.map((item, i) => (
-                    <ActivityRow
-                      key={`${item.roundId}-${item.type}-${i}`}
-                      item={item}
-                      isCurrentRound={item.roundId === currentRound}
-                    />
-                  ))}
-                  {hasMoreActivity && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      w="full"
-                      onClick={() =>
-                        setVisibleActivityCount(
-                          (prev) => prev + ACTIVITY_PAGE_SIZE,
-                        )
-                      }
-                    >
-                      <LuChevronDown />
-                      {"Load more"}
-                    </Button>
-                  )}
-                </VStack>
-              )}
-            </VStack>
-          </Card.Body>
-        </Card.Root>
-      </Grid>
+      <Card.Root variant="primary">
+        <Card.Body>
+          <VStack gap="3" align="stretch">
+            <SectionHeader title="Round History" icon={<LuFlame />} />
+            {roundsDesc.length === 0 ? (
+              <Text textStyle="sm" color="text.subtle">
+                {"No round data available."}
+              </Text>
+            ) : (
+              <VStack gap="1" align="stretch">
+                {visibleRounds.map((rd) => (
+                  <RoundRow
+                    key={rd.roundId}
+                    rd={rd}
+                    isActive={rd.roundId === currentRound}
+                    b3trToVtho={b3trToVtho}
+                    b3trRaw={
+                      roundCtx
+                        ? computeRelayerRoundB3tr(
+                            rd.weightedActions,
+                            roundCtx.get(rd.roundId),
+                          ).toString()
+                        : rd.claimableRewardsRaw
+                    }
+                  />
+                ))}
+                {hasMore && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    w="full"
+                    onClick={() =>
+                      setVisibleCount((prev) => prev + ROUNDS_PAGE_SIZE)
+                    }
+                  >
+                    <LuChevronDown />
+                    {"Load more"}
+                  </Button>
+                )}
+              </VStack>
+            )}
+          </VStack>
+        </Card.Body>
+      </Card.Root>
     </VStack>
   );
 }

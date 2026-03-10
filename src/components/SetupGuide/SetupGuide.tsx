@@ -28,7 +28,7 @@ import {
   LuPlay,
   LuShare2,
 } from "react-icons/lu";
-import { useWallet, useConnectModal } from "@vechain/vechain-kit";
+import { useWallet, useConnectModal, useVechainDomain } from "@vechain/vechain-kit";
 
 import { RegisterRelayerModal } from "./RegisterRelayerModal";
 import { ShareRelayerModal } from "./ShareRelayerModal";
@@ -101,6 +101,7 @@ function Step({
 export function SetupGuide() {
   const { account } = useWallet();
   const { open: openConnectModal } = useConnectModal();
+  const { data: domain } = useVechainDomain(account?.address);
   const router = useRouter();
 
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -375,7 +376,7 @@ export function SetupGuide() {
       <ShareRelayerModal
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
-        relayerAddress={account?.address}
+        relayerAddress={domain?.domain ?? account?.address}
       />
     </VStack>
   );

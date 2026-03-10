@@ -21,14 +21,14 @@ import {
 import NextLink from "next/link";
 import { useState } from "react";
 import {
-    LuArrowLeft,
-    LuCheck,
-    LuClipboard,
-    LuExternalLink,
-    LuHeart,
-    LuPlay,
-    LuShare2,
-  } from "react-icons/lu";
+  LuArrowLeft,
+  LuCheck,
+  LuClipboard,
+  LuExternalLink,
+  LuHeart,
+  LuPlay,
+  LuShare2,
+} from "react-icons/lu";
 
 import { useRelayerRegistration } from "@/hooks/useRelayerRegistration";
 
@@ -72,13 +72,6 @@ export function RelayerDetailHeader({
   return (
     <>
       <VStack align="start" gap="4">
-        <NextLink href="/relayers">
-          <Button variant="ghost" size="sm">
-            <LuArrowLeft />
-            {"Back to relayers"}
-          </Button>
-        </NextLink>
-
         <Card.Root variant="primary" w="full">
           <Card.Body>
             <HStack
@@ -217,7 +210,7 @@ export function RelayerDetailHeader({
       <ShareRelayerModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        relayerAddress={address}
+        relayerAddress={domain?.domain ?? address}
       />
     </>
   );

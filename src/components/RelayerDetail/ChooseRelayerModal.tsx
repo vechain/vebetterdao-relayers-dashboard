@@ -4,11 +4,10 @@ import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { LuExternalLink, LuHeart, LuInfo } from "react-icons/lu"
 
+import { getConfig } from "@/config"
 import { useIsAutoVotingEnabled } from "@/hooks/useIsAutoVotingEnabled"
 
 import { BaseModal } from "../Base/BaseModal"
-
-const GOVERNANCE_AUTO_VOTING_URL = "https://governance.vebetterdao.org"
 
 interface ChooseRelayerModalProps {
   isOpen: boolean
@@ -17,11 +16,12 @@ interface ChooseRelayerModalProps {
   relayerName: string
 }
 
-export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerName }: ChooseRelayerModalProps) {
+export function ChooseRelayerModal({ isOpen, onClose, relayerName }: ChooseRelayerModalProps) {
   const { account } = useWallet()
   const { data: isAutoVotingEnabled, isLoading } = useIsAutoVotingEnabled(account?.address)
+  const { governanceUrl } = getConfig()
+  const allocationsUrl = `${governanceUrl}/allocations`
 
-  // Auto-voting not enabled — show enablement prompt
   if (!isLoading && !isAutoVotingEnabled) {
     return (
       <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton isCloseable>
@@ -42,9 +42,9 @@ export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerNam
           </Text>
 
           <HStack gap="3" pt="2">
-            <a href={GOVERNANCE_AUTO_VOTING_URL} target="_blank" rel="noopener noreferrer">
+            <a href={allocationsUrl} target="_blank" rel="noopener noreferrer">
               <Button variant="primary" size="md" rounded="full">
-                {"Go to Governance App"}
+                {"Go to Allocations"}
                 <LuExternalLink />
               </Button>
             </a>
@@ -57,7 +57,6 @@ export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerNam
     )
   }
 
-  // Auto-voting is enabled — show confirmation (transaction to be wired when contract supports it)
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton isCloseable>
       <VStack gap={5} align="stretch">

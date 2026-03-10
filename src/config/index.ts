@@ -19,6 +19,7 @@ export type AppConfig = {
   emissionsContractAddress: string
   nodeUrl: string
   network: NetworkConfig
+  governanceUrl: string
 }
 
 const mainnetConfig: AppConfig = {
@@ -28,6 +29,7 @@ const mainnetConfig: AppConfig = {
   voterRewardsContractAddress: "0x838A33AF756a6366f93e201423E1425f67eC0Fa7",
   emissionsContractAddress: "0xDf94739bd169C84fe6478D8420Bb807F1f47b135",
   nodeUrl: "https://mainnet.vechain.org",
+  governanceUrl: "https://governance.vebetterdao.org",
   network: {
     id: "main",
     name: "main",
@@ -69,6 +71,7 @@ const testnetStagingConfig: AppConfig = {
   voterRewardsContractAddress: "0x851ef91801899a4e7e4a3174a9300b3e20c957e8",
   emissionsContractAddress: "0x66898f98409db20ed6a1bf0021334b7897eb0688",
   nodeUrl: "https://testnet.vechain.org",
+  governanceUrl: "https://staging.testnet.governance.vebetterdao.org",
   network: {
     id: "testnet",
     name: "testnet",

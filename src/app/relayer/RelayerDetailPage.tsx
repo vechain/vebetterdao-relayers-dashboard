@@ -1,22 +1,29 @@
 "use client";
 
-import { Button, Text, VStack } from "@chakra-ui/react";
-import { useConnectModal, useVechainDomain, useWallet } from "@vechain/vechain-kit";
+import { Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  useConnectModal,
+  useVechainDomain,
+  useWallet,
+} from "@vechain/vechain-kit";
 import { useSearchParams } from "next/navigation";
-import { LuWallet } from "react-icons/lu";
+import { LuArrowLeft, LuWallet } from "react-icons/lu";
 
 import {
   RelayerDetailContent,
   RelayerDetailHeader,
   RelayerDetailSkeleton,
+  UnclaimedRewardsBanner,
 } from "@/components/RelayerDetail";
 import { useReportData } from "@/hooks/useReportData";
+import { useUnclaimedRelayerRewards } from "@/hooks/useUnclaimedRelayerRewards";
 import {
   buildRoundRewardsContext,
   computeRelayerSummary,
   isRelayerActive,
 } from "@/lib/relayer-utils";
 import { BecomeRelayerCard } from "@/components/RelayerInfo";
+import NextLink from "next/link";
 
 function isAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
@@ -41,13 +48,33 @@ export default function RelayerDetailPage() {
   const { open: openConnect } = useConnectModal();
   const { data: report, isLoading: reportLoading } = useReportData();
 
+  const relayer = report?.relayers?.find(
+    (r) => r.address.toLowerCase() === (resolvedAddress ?? ""),
+  );
+  const relayerData = relayer ?? {
+    address: resolvedAddress ?? "",
+    rounds: [],
+  };
+  const roundCtx = report ? buildRoundRewardsContext(report) : undefined;
+
+  const unclaimed = useUnclaimedRelayerRewards(
+    relayerData,
+    report?.rounds ?? [],
+    roundCtx,
+  );
+
   if (!addressOrDomain) {
     return (
       <VStack w="full" align="center" gap="4" py="16">
         <Text color="text.subtle" textStyle="sm">
           {"Connect your wallet to view your relayer dashboard."}
         </Text>
-        <Button variant="outline" size="md" rounded="full" onClick={() => openConnect()}>
+        <Button
+          variant="outline"
+          size="md"
+          rounded="full"
+          onClick={() => openConnect()}
+        >
           <LuWallet />
           {"Connect Wallet"}
         </Button>
@@ -80,21 +107,34 @@ export default function RelayerDetailPage() {
     );
   }
 
-  const relayer = report?.relayers?.find(
-    (r) => r.address.toLowerCase() === resolvedAddress,
-  );
   const currentRound = report?.currentRound ?? 0;
-
-  // Build a minimal relayer object if not found in report (newly registered, no activity yet)
-  const relayerData = relayer ?? { address: resolvedAddress, rounds: [] };
-  const roundCtx = report ? buildRoundRewardsContext(report) : undefined;
   const summary = computeRelayerSummary(relayerData, roundCtx);
   const active = isRelayerActive(summary, currentRound);
   const isOwnRelayer = account?.address?.toLowerCase() === resolvedAddress;
 
   return (
     <VStack w="full" align="stretch" gap="6">
-      <RelayerDetailHeader address={resolvedAddress} isActive={active} isOwnRelayer={isOwnRelayer} />
+      <HStack>
+        <NextLink href="/relayers">
+          <Button variant="ghost" size="sm">
+            <LuArrowLeft />
+            {"Back to relayers"}
+          </Button>
+        </NextLink>
+      </HStack>
+      {isOwnRelayer && unclaimed.hasUnclaimed && (
+        <UnclaimedRewardsBanner
+          rounds={unclaimed.rounds}
+          totalAmountRaw={unclaimed.totalAmountRaw}
+          relayerAddress={resolvedAddress}
+        />
+      )}
+      <RelayerDetailHeader
+        address={resolvedAddress}
+        isActive={active}
+        isOwnRelayer={isOwnRelayer}
+      />
+
       <RelayerDetailContent
         relayer={relayerData}
         currentRound={currentRound}

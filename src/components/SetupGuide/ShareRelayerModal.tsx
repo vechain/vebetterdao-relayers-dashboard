@@ -111,7 +111,7 @@ function ConfettiCanvas({ active }: { active: boolean }) {
 
 export function ShareRelayerModal({ isOpen, onClose, relayerAddress }: Props) {
   const dashboardUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/relayer/${relayerAddress ?? ""}`
+    ? `${window.location.origin}/relayer?address=${relayerAddress ?? ""}`
     : ""
 
   const shareText = "I just became a relayer on @VeBetterDAO! Choose me as your relayer and let's earn together."
