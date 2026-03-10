@@ -180,7 +180,12 @@ export function RelayerDetailHeader({
               </HStack>
 
               {/* Right: action buttons */}
-              <HStack flexShrink={0} gap={2}>
+              <HStack
+                flexShrink={0}
+                gap={2}
+                flexDir={{ base: "column", sm: "row" }}
+                w={{ base: "full", sm: "auto" }}
+              >
                 <Button
                   variant="outline"
                   size="sm"
