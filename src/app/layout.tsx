@@ -65,14 +65,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body style={{ margin: "0", padding: "0" }}>
         <ClientApp>{children}</ClientApp>
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
-      {process.env.NEXT_PUBLIC_GA_ID && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-      )}
     </html>
   );
 }
