@@ -32,24 +32,26 @@ import {
 import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode";
 import { basePath } from "@/config/basePath";
 import { useRelayerRegistration } from "@/hooks/useRelayerRegistration";
+import { useTranslation } from "react-i18next";
 
 type NavPage = "home" | "relayers" | "rounds" | "manage" | "learn";
 
 type NavRoute = {
   value: NavPage;
-  label: string;
+  labelKey: string;
   href: string;
   icon: typeof LuHouse;
 };
 
 const BASE_ROUTES: NavRoute[] = [
-  { value: "home", label: "Home", href: "/", icon: LuHouse },
-  { value: "relayers", label: "Relayers", href: "/relayers", icon: LuUsers },
-  { value: "rounds", label: "Rounds", href: "/round", icon: LuTimer },
-  { value: "learn", label: "Learn", href: "/learn", icon: LuInfo },
+  { value: "home", labelKey: "Home", href: "/", icon: LuHouse },
+  { value: "relayers", labelKey: "Relayers", href: "/relayers", icon: LuUsers },
+  { value: "rounds", labelKey: "Rounds", href: "/round", icon: LuTimer },
+  { value: "learn", labelKey: "Learn", href: "/learn", icon: LuInfo },
 ];
 
 export function Navbar() {
+  const { t } = useTranslation();
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"]);
   const { open, onClose, onOpen } = useDisclosure();
   const pathname = usePathname();
@@ -61,7 +63,7 @@ export function Navbar() {
         ...BASE_ROUTES,
         {
           value: "manage",
-          label: "Manage Relayer",
+          labelKey: "Manage Relayer",
           href: "/relayer",
           icon: LuRadar,
         },
@@ -90,7 +92,7 @@ export function Navbar() {
                   style={{ filter: logoFilter }}
                 />
                 <Heading size="lg" fontWeight="bold">
-                  {"Relayers"}
+                  {t("Relayers")}
                 </Heading>
               </HStack>
             </NextLink>
@@ -125,7 +127,7 @@ export function Navbar() {
                     px="4"
                     py="2"
                   >
-                    {route.label}
+                    {t(route.labelKey)}
                   </Button>
                 </NextLink>
               ))}
@@ -152,7 +154,7 @@ export function Navbar() {
               variant="ghost"
               rounded="6px"
               size="lg"
-              aria-label="Open menu"
+              aria-label={t("Open menu")}
             >
               <LuMenu size={28} />
             </IconButton>
@@ -186,7 +188,7 @@ export function Navbar() {
 
                 <Drawer.Header>
                   <Heading size="lg" fontWeight="bold">
-                    {"VeBetter Relayers"}
+                    {t("VeBetter Relayers")}
                   </Heading>
                 </Drawer.Header>
 
@@ -214,7 +216,7 @@ export function Navbar() {
                           fontWeight={isActive(route) ? "bold" : "normal"}
                         >
                           <route.icon size={20} />
-                          {route.label}
+                          {t(route.labelKey)}
                         </Button>
                       </NextLink>
                     ))}

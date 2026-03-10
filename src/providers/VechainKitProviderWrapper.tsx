@@ -1,6 +1,9 @@
 "use client";
 
 import { useToken } from "@chakra-ui/react";
+import { useCurrentLanguage } from "@vechain/vechain-kit";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { getConfig } from "@/config";
 import type { EnvConfig } from "@/config";
 import dynamic from "next/dynamic";
@@ -14,13 +17,30 @@ const VeChainKitProvider = dynamic(
   },
 );
 
+/** Syncs host app i18n language changes into VeChain Kit (e.g. footer LanguageSelector). */
+function LanguageSync({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation();
+  const { setLanguage: setKitLanguage } = useCurrentLanguage();
+
+  useEffect(() => {
+    const handle = (lng: string) =>
+      setKitLanguage(lng.split("-")[0] || "en");
+    i18n.on("languageChanged", handle);
+    return () => i18n.off("languageChanged", handle);
+  }, [i18n, setKitLanguage]);
+
+  return <>{children}</>;
+}
+
 interface Props {
   readonly children: React.ReactNode;
 }
 
 export function VechainKitProviderWrapper({ children }: Props) {
   const { colorMode } = useColorMode();
+  const { i18n } = useTranslation();
   const isDarkMode = colorMode === "dark";
+  const lang = i18n.language?.split("-")[0] ?? "en";
 
   const [
     bgPrimary,
@@ -86,10 +106,13 @@ export function VechainKitProviderWrapper({ children }: Props) {
         { method: "dappkit", gridColumn: 4 },
       ]}
       darkMode={isDarkMode}
-      language="en"
+      language={lang}
+      onLanguageChange={(language) => {
+        if (i18n.language !== language) i18n.changeLanguage(language);
+      }}
       network={{ type: networkType }}
     >
-      {children}
+      <LanguageSync>{children}</LanguageSync>
     </VeChainKitProvider>
   );
 }

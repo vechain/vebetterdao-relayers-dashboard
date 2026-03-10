@@ -16,37 +16,40 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useThor } from "@vechain/vechain-kit";
 import NextLink from "next/link";
+import { useTranslation } from "react-i18next";
 
 import { basePath } from "@/config/basePath";
 import { ColorModeToggle, useColorModeValue } from "../ui/color-mode";
+import { LanguageSelector } from "./components/LanguageSelector";
 
 const RESOURCES = [
-  { label: "Network Status", href: "https://vechainstats.com" },
-  { label: "API Documentation", href: "https://docs.vechain.org" },
-  { label: "Governance App", href: "https://governance.vebetterdao.org" },
+  { labelKey: "Network Status", href: "https://vechainstats.com" },
+  { labelKey: "API Documentation", href: "https://docs.vechain.org" },
+  { labelKey: "Governance App", href: "https://governance.vebetterdao.org" },
 ];
 
 const GITHUB_REPOS = [
-  { label: "Skills", href: "https://github.com/vechain/vebetterdao-skills" },
+  { labelKey: "Skills", href: "https://github.com/vechain/vebetterdao-skills" },
   {
-    label: "Relayer Node",
+    labelKey: "Relayer Node",
     href: "https://github.com/vechain/vebetterdao-relayer-node",
   },
   {
-    label: "Contracts",
+    labelKey: "Contracts",
     href: "https://github.com/vechain/vebetterdao-contracts",
   },
 ];
 
 const NAVIGATION = [
-  { label: "Home", href: "/" },
-  { label: "Relayers", href: "/relayers" },
-  { label: "My Relayer", href: "/relayer" },
-  { label: "Become a Relayer", href: "/new-relayer" },
-  { label: "Learn", href: "/learn" },
+  { labelKey: "Home", href: "/" },
+  { labelKey: "Relayers", href: "/relayers" },
+  { labelKey: "My Relayer", href: "/relayer" },
+  { labelKey: "Become a Relayer", href: "/new-relayer" },
+  { labelKey: "Learn", href: "/learn" },
 ];
 
 function SyncingBlock() {
+  const { t } = useTranslation();
   const thor = useThor();
 
   const { data: blockNumber } = useQuery({
@@ -74,7 +77,7 @@ function SyncingBlock() {
           fontWeight="semibold"
           textTransform="uppercase"
         >
-          {"Syncing Block"}
+          {t("Syncing Block")}
         </Text>
         <Text textStyle="sm" fontWeight="semibold">
           {blockNumber != null ? `#${blockNumber.toLocaleString()}` : "–"}
@@ -86,20 +89,21 @@ function SyncingBlock() {
 }
 
 function NavigationLinks() {
+  const { t } = useTranslation();
   return (
     <VStack align="start" gap={2}>
       <Text fontWeight="bold" textStyle="sm">
-        {"NAVIGATION"}
+        {t("NAVIGATION")}
       </Text>
       {NAVIGATION.map((item) => (
         <Link
-          key={item.label}
+          key={item.labelKey}
           asChild
           textStyle="xs"
           color="text.subtle"
           _hover={{ color: "text.default" }}
         >
-          <NextLink href={item.href}>{item.label}</NextLink>
+          <NextLink href={item.href}>{t(item.labelKey)}</NextLink>
         </Link>
       ))}
     </VStack>
@@ -107,8 +111,18 @@ function NavigationLinks() {
 }
 
 export function Footer() {
+  const { t } = useTranslation();
   const [isDesktop] = useMediaQuery(["(min-width: 1200px)"]);
   const logoFilter = useColorModeValue("none", "brightness(0) invert(1)");
+
+  const languageColumn = (
+    <VStack align="start" gap={2}>
+      <Text fontWeight="bold" textStyle="sm">
+        {t("Language")}
+      </Text>
+      <LanguageSelector />
+    </VStack>
+  );
 
   return (
     <Box
@@ -135,23 +149,24 @@ export function Footer() {
                 style={{ filter: logoFilter }}
               />
               <Heading size="lg" fontWeight="bold">
-                {"VeBetter Relayers"}
+                {t("VeBetter Relayers")}
               </Heading>
             </HStack>
             <Text textStyle="xs" color="text.subtle">
-              {"The central hub for managing and monitoring relayers."}
+              {t("The central hub for managing and monitoring relayers.")}
             </Text>
             {isDesktop && <ColorModeToggle mt="2" />}
           </VStack>
 
-          <SimpleGrid columns={{ base: 2, md: 3 }} gap={{ base: 8, md: 8 }}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 8, md: 8 }}>
+            {languageColumn}
             <VStack align="start" gap={2}>
               <Text fontWeight="bold" textStyle="sm">
-                {"RESOURCES"}
+                {t("Resources")}
               </Text>
               {RESOURCES.map((link) => (
                 <Link
-                  key={link.label}
+                  key={link.labelKey}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -159,18 +174,18 @@ export function Footer() {
                   color="text.subtle"
                   _hover={{ color: "text.default" }}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </VStack>
 
             <VStack align="start" gap={2}>
               <Text fontWeight="bold" textStyle="sm">
-                {"GITHUB"}
+                {t("GITHUB")}
               </Text>
               {GITHUB_REPOS.map((link) => (
                 <Link
-                  key={link.label}
+                  key={link.labelKey}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -178,7 +193,7 @@ export function Footer() {
                   color="text.subtle"
                   _hover={{ color: "text.default" }}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </VStack>
@@ -194,7 +209,9 @@ export function Footer() {
           textAlign="center"
           pt={8}
         >
-          {`© ${new Date().getFullYear()} VeBetterDAO Relayer Ecosystem. All rights reserved.`}
+          {t("{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.", {
+            year: new Date().getFullYear(),
+          })}
         </Text>
       </Container>
     </Box>

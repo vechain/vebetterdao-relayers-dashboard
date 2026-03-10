@@ -3,6 +3,7 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
+import "@/i18n"
 import { Providers } from "./providers"
 
 const Navbar = dynamic(() => import("@/components/Layout").then(mod => mod.Navbar), {
