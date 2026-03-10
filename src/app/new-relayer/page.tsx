@@ -1,6 +1,9 @@
-"use client"
+import dynamic from "next/dynamic"
 
-import { SetupGuide } from "@/components/SetupGuide"
+const SetupGuide = dynamic(
+  () => import("@/components/SetupGuide").then(m => m.SetupGuide),
+  { ssr: false },
+)
 
 export default function NewRelayerPage() {
   return <SetupGuide />
