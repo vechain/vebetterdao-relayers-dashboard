@@ -62,7 +62,6 @@ export default function RelayerDetailPage() {
   const unclaimed = useUnclaimedRelayerRewards(
     relayerData,
     report?.rounds ?? [],
-    roundCtx,
   );
 
   if (!addressOrDomain) {
@@ -129,6 +128,7 @@ export default function RelayerDetailPage() {
           rounds={unclaimed.rounds}
           totalAmountRaw={unclaimed.totalAmountRaw}
           relayerAddress={resolvedAddress}
+          onClaimed={unclaimed.invalidate}
         />
       )}
       <RelayerDetailHeader
