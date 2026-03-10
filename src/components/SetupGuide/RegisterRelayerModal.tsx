@@ -18,6 +18,8 @@ import { useTranslation } from "react-i18next"
 import { encodeFunctionData } from "viem"
 import { LuCircleCheck, LuCircleAlert, LuLoaderCircle } from "react-icons/lu"
 
+import { useQueryClient } from "@tanstack/react-query"
+
 import { BaseModal } from "@/components/Base/BaseModal"
 import { relayerPoolAbi, relayerPoolAddress } from "@/hooks/contracts"
 
@@ -30,6 +32,7 @@ type Props = {
 export function RegisterRelayerModal({ isOpen, onClose, onSuccess }: Props) {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const queryClient = useQueryClient()
   const [relayerAddress, setRelayerAddress] = useState("")
   const [isCustomAddress, setIsCustomAddress] = useState(false)
 
@@ -42,6 +45,7 @@ export function RegisterRelayerModal({ isOpen, onClose, onSuccess }: Props) {
   } = useSendTransaction({
     signerAccountAddress: account?.address ?? "",
     onTxConfirmed: () => {
+      queryClient.invalidateQueries()
       onSuccess()
     },
   })

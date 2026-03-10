@@ -11,7 +11,8 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaXTwitter, FaTelegram, FaLink } from "react-icons/fa6"
-import { LuPartyPopper } from "react-icons/lu"
+import { LuPartyPopper, LuRadar } from "react-icons/lu"
+import NextLink from "next/link"
 
 import { BaseModal } from "@/components/Base/BaseModal"
 
@@ -182,7 +183,13 @@ export function ShareRelayerModal({ isOpen, onClose, relayerAddress }: Props) {
           </Button>
         </VStack>
 
-        <HStack zIndex={2}>
+        <HStack gap={3} zIndex={2}>
+          <NextLink href="/relayer" onClick={onClose}>
+            <Button variant="solid" size="sm" rounded="full" gap={2}>
+              <LuRadar />
+              {t("Manage Relayer")}
+            </Button>
+          </NextLink>
           <Button variant="ghost" size="sm" onClick={onClose}>
             {t("Maybe later")}
           </Button>
