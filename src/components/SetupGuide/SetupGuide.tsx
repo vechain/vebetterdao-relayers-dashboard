@@ -29,6 +29,7 @@ import {
   LuPencil,
   LuPlay,
   LuShare2,
+  LuRadar,
 } from "react-icons/lu";
 import { useWallet, useConnectModal, useVechainDomain, useAccountCustomizationModal } from "@vechain/vechain-kit";
 
@@ -118,6 +119,7 @@ export function SetupGuide() {
     if (step === 3) return isStepCompleted(2);
     if (step === 4) return isStepCompleted(2);
     if (step === 5) return isStepCompleted(2);
+    if (step === 6) return isStepCompleted(2);
     return false;
   };
 
@@ -284,6 +286,29 @@ export function SetupGuide() {
               >
                 <LuShare2 size={14} />
                 {t("Share")}
+              </Button>
+            )}
+          </Step>
+
+          {/* Step 6: Manage your relayer */}
+          <Step
+            number={6}
+            title={t("Manage Your Relayer")}
+            disabled={!isStepEnabled(6)}
+          >
+            <Text textStyle="sm" color="text.subtle">
+              {t("View your relayer's performance, track rewards, and manage your settings from the relayer dashboard.")}
+            </Text>
+            {isStepEnabled(6) && (
+              <Button
+                onClick={() => router.push("/relayer")}
+                variant="solid"
+                rounded="full"
+                size="sm"
+                gap={2}
+              >
+                <LuRadar size={14} />
+                {t("Manage Relayer")}
               </Button>
             )}
           </Step>
