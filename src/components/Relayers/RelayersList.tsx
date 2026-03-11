@@ -6,6 +6,7 @@ import {
   Button,
   Heading,
   HStack,
+  IconButton,
   Input,
   SimpleGrid,
   Skeleton,
@@ -20,10 +21,10 @@ import { useTranslation } from "react-i18next";
 import {
   LuArrowDown,
   LuArrowUp,
-  LuArrowUpDown,
   LuChevronsDown,
   LuPlus,
   LuSearch,
+  LuSlidersHorizontal,
 } from "react-icons/lu";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
@@ -37,6 +38,7 @@ import {
   isRelayerActive,
 } from "@/lib/relayer-utils";
 
+import { BaseBottomSheet } from "../Base/BaseBottomSheet";
 import { RelayerCard } from "./RelayerCard";
 
 const PAGE_SIZE = 10;
@@ -124,6 +126,7 @@ export function RelayersList() {
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
   const [sortField, setSortField] = useState<SortField>("b3tr");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const resolvedSearchAddress = useSearchAddress(search.trim());
 
@@ -272,9 +275,21 @@ export function RelayersList() {
             pl="10"
             size="sm"
           />
+
+          {/* Mobile filter button */}
+          <IconButton
+            aria-label={t("Filters")}
+            variant="ghost"
+            size="sm"
+            hideFrom="md"
+            onClick={() => setFilterOpen(true)}
+          >
+            <LuSlidersHorizontal />
+          </IconButton>
         </HStack>
 
-        <HStack gap="1">
+        {/* Desktop status filter */}
+        <HStack gap="1" hideBelow="md">
           {(["all", "active", "inactive"] as const).map((status) => (
             <Button
               key={status}
@@ -293,30 +308,73 @@ export function RelayersList() {
         </HStack>
       </HStack>
 
-      {/* Mobile sort controls */}
-      <HStack gap="1" hideFrom="md" flexWrap="wrap">
-        <HStack gap="1" color="text.subtle">
-          <LuArrowUpDown size={14} />
-          <Text textStyle="xs">{t("Sort by")}:</Text>
-        </HStack>
-        {SORT_COLUMNS.map((col) => (
-          <Button
-            key={col.field}
-            size="xs"
-            variant={sortField === col.field ? "subtle" : "ghost"}
-            fontWeight={sortField === col.field ? "bold" : "normal"}
-            onClick={() => handleSort(col.field)}
-          >
-            {t(col.labelKey)}
-            {sortField === col.field &&
-              (sortDir === "asc" ? (
-                <LuArrowUp size={12} />
-              ) : (
-                <LuArrowDown size={12} />
+      {/* Mobile filter & sort bottom sheet */}
+      <BaseBottomSheet
+        isOpen={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        ariaTitle={t("Filters")}
+        ariaDescription={t("Filter and sort relayers")}
+      >
+        <VStack gap="4" align="stretch">
+          <VStack gap="2" align="stretch">
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("Status")}
+            </Text>
+            <HStack gap="1" flexWrap="wrap">
+              {(["all", "active", "inactive"] as const).map((status) => (
+                <Button
+                  key={status}
+                  size="sm"
+                  variant={statusFilter === status ? "subtle" : "ghost"}
+                  fontWeight={statusFilter === status ? "bold" : "normal"}
+                  onClick={() => {
+                    setStatusFilter(status);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
+                  textTransform="capitalize"
+                >
+                  {t(status)}
+                </Button>
               ))}
+            </HStack>
+          </VStack>
+
+          <VStack gap="2" align="stretch">
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("Sort by")}
+            </Text>
+            <HStack gap="1" flexWrap="wrap">
+              {SORT_COLUMNS.map((col) => (
+                <Button
+                  key={col.field}
+                  size="sm"
+                  variant={sortField === col.field ? "subtle" : "ghost"}
+                  fontWeight={sortField === col.field ? "bold" : "normal"}
+                  onClick={() => handleSort(col.field)}
+                >
+                  {t(col.labelKey)}
+                  {sortField === col.field &&
+                    (sortDir === "asc" ? (
+                      <LuArrowUp size={12} />
+                    ) : (
+                      <LuArrowDown size={12} />
+                    ))}
+                </Button>
+              ))}
+            </HStack>
+          </VStack>
+
+          <Button
+            variant="subtle"
+            size="sm"
+            alignSelf="stretch"
+            mt="2"
+            onClick={() => setFilterOpen(false)}
+          >
+            {t("Done")}
           </Button>
-        ))}
-      </HStack>
+        </VStack>
+      </BaseBottomSheet>
 
       {/* Desktop column headers — aligned with RelayerCard's 7-column grid */}
       <Box mt="4" hideBelow="md" px="5">
