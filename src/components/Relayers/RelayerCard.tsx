@@ -99,17 +99,20 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
   ) : null;
 
   const identitySection = (
-    <VStack gap="0" align="start" minW="0">
+    <VStack gap="1" align="start" minW="0">
       <HStack gap="2">
         <Text fontWeight="bold" textStyle="sm" lineClamp={1}>
           {displayName}
         </Text>
+      </HStack>
+      <HStack>
+        <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
+          {shortAddress}
+        </Text>
         <Badge
-          size="sm"
+          size="xs"
           variant="solid"
-          colorPalette={
-            !isRegistered ? "red" : active ? "green" : "gray"
-          }
+          colorPalette={!isRegistered ? "red" : active ? "green" : "gray"}
         >
           {!isRegistered
             ? t("Unregistered")
@@ -118,9 +121,6 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
               : t("Inactive")}
         </Badge>
       </HStack>
-      <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
-        {shortAddress}
-      </Text>
     </VStack>
   );
 
@@ -158,7 +158,11 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
                 </HStack>
                 {stats}
               </SimpleGrid>
-              <IconButton aria-label={t("View relayer")} variant="ghost" size="sm">
+              <IconButton
+                aria-label={t("View relayer")}
+                variant="ghost"
+                size="sm"
+              >
                 <FaAngleRight />
               </IconButton>
             </HStack>
@@ -172,13 +176,20 @@ export function RelayerCard({ summary, currentRound }: RelayerCardProps) {
                   {avatarSection}
                   {identitySection}
                 </HStack>
-                <IconButton aria-label={t("View relayer")} variant="ghost" size="sm">
+                <IconButton
+                  aria-label={t("View relayer")}
+                  variant="ghost"
+                  size="sm"
+                >
                   <FaAngleRight />
                 </IconButton>
               </HStack>
-              <SimpleGrid columns={{ base: 2, sm: 3 }} gap="2">
-                {stats}
-              </SimpleGrid>
+
+              {(active || summary.totalVthoSpentRaw !== "0") && (
+                <SimpleGrid columns={{ base: 2, sm: 3 }} gap="2">
+                  {stats}
+                </SimpleGrid>
+              )}
             </VStack>
           </Box>
         </Card.Body>
