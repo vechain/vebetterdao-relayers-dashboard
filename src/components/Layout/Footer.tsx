@@ -46,9 +46,11 @@ const GITHUB_REPOS = [
 
 const NAVIGATION = [
   { labelKey: "Home", href: "/" },
+  { labelKey: "Rounds", href: "/round" },
   { labelKey: "Relayers", href: "/relayers" },
   { labelKey: "My Relayer", href: "/relayer" },
   { labelKey: "Become a Relayer", href: "/new-relayer" },
+  { labelKey: "Run a Relayer", href: "/run" },
   { labelKey: "Learn", href: "/learn" },
 ];
 

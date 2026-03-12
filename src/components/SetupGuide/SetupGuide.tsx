@@ -31,11 +31,17 @@ import {
   LuShare2,
   LuRadar,
 } from "react-icons/lu";
-import { useWallet, useConnectModal, useVechainDomain, useAccountCustomizationModal } from "@vechain/vechain-kit";
+import {
+  useWallet,
+  useConnectModal,
+  useVechainDomain,
+  useAccountCustomizationModal,
+} from "@vechain/vechain-kit";
 
 import { RegisterRelayerModal } from "./RegisterRelayerModal";
 import { ShareRelayerModal } from "./ShareRelayerModal";
 import { RunOptions } from "./RunOptions";
+import { Rules } from "./Rules";
 
 function Step({
   number,
@@ -153,7 +159,9 @@ export function SetupGuide() {
           {t("Become a Relayer")}
         </Heading>
         <Text textStyle="md" color="text.subtle">
-          {t("Follow these steps to join the network and start earning B3TR rewards.")}
+          {t(
+            "Follow these steps to join the network and start earning B3TR rewards.",
+          )}
         </Text>
       </VStack>
 
@@ -166,7 +174,9 @@ export function SetupGuide() {
             completed={isStepCompleted(1)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.")}
+              {t(
+                "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.",
+              )}
             </Text>
             {!isStepCompleted(1) && (
               <Button
@@ -190,7 +200,9 @@ export function SetupGuide() {
             completed={isStepCompleted(2)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Register your address on the RelayerRewardsPool contract to join the network. This is a one-time on-chain transaction.")}
+              {t(
+                "Register your address on the RelayerRewardsPool contract to join the network. This is a one-time on-chain transaction.",
+              )}
             </Text>
             {!isStepCompleted(2) && (
               <>
@@ -229,7 +241,9 @@ export function SetupGuide() {
             completed={isStepCompleted(3)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Switch to and connect with your relayer wallet, then customize your profile with an avatar, name, and description so users can recognize you.")}
+              {t(
+                "Switch to and connect with your relayer wallet, then customize your profile with an avatar, name, and description so users can recognize you.",
+              )}
             </Text>
             {!isStepCompleted(3) && isStepEnabled(3) && (
               <Button
@@ -256,7 +270,9 @@ export function SetupGuide() {
             completed={isStepCompleted(4)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Choose how to run your relayer node. You can run it directly in your browser, with Docker, or via npm.")}
+              {t(
+                "Choose how to run your relayer node. You can run it directly in your browser, with Docker, or via npm.",
+              )}
             </Text>
             {!isStepCompleted(4) && isStepEnabled(4) && (
               <RunOptions onRunInBrowser={handleRunInBrowser} />
@@ -271,7 +287,9 @@ export function SetupGuide() {
             completed={isStepCompleted(5)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("Let people know you're a relayer so they can choose you. The more users you serve, the more you earn.")}
+              {t(
+                "Let people know you're a relayer so they can choose you. The more users you serve, the more you earn.",
+              )}
             </Text>
             {!isStepCompleted(5) && isStepEnabled(5) && (
               <Button
@@ -297,7 +315,9 @@ export function SetupGuide() {
             disabled={!isStepEnabled(6)}
           >
             <Text textStyle="sm" color="text.subtle">
-              {t("View your relayer's performance, track rewards, and manage your settings from the relayer dashboard.")}
+              {t(
+                "View your relayer's performance, track rewards, and manage your settings from the relayer dashboard.",
+              )}
             </Text>
             {isStepEnabled(6) && (
               <Button
@@ -315,93 +335,7 @@ export function SetupGuide() {
         </VStack>
 
         {/* Sidebar */}
-        <Card.Root
-          variant="primary"
-          p={{ base: "5", md: "8" }}
-          w="full"
-          h="fit-content"
-          position="sticky"
-          top="4"
-        >
-          <VStack gap={6} align="stretch">
-            <VStack gap={2} align="start">
-              <Heading size="lg" fontWeight="bold">
-                {t("What Are Relayers?")}
-              </Heading>
-              <Text color="text.subtle">
-                {t("Relayers are services that cast votes and claim rewards for users who enabled auto-voting. Anyone can run one — apps, community members, developers. You earn a share of rewards for the work you do.")}
-              </Text>
-            </VStack>
-
-            <HStack gap={4} align="start">
-              <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-                <LuZap />
-              </Box>
-              <VStack gap={1} align="start">
-                <Text fontWeight="semibold">{t("What You Do")}</Text>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.")}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <HStack gap={4} align="start">
-              <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-                <LuCoins />
-              </Box>
-              <VStack gap={1} align="start">
-                <Text fontWeight="semibold">{t("How You Earn")}</Text>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("Each user you serve pays 10% of their weekly rewards (max 100 B3TR) into a shared pool. At the end of the week, the pool is split among relayers based on work done.")}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <HStack gap={4} align="start">
-              <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-                <LuServer />
-              </Box>
-              <VStack gap={1} align="start">
-                <Text fontWeight="semibold">{t("What You Need")}</Text>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("A wallet with some VTHO for gas, the relayer node software, and a connection to a VeChain Thor node.")}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <HStack gap={4} align="start">
-              <Box as="span" color="text.subtle" mt={1} flexShrink={0}>
-                <LuScale />
-              </Box>
-              <VStack gap={1} align="start">
-                <Text fontWeight="semibold">{t("The Rules")}</Text>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("Every user must be served. If even one gets missed, nobody gets paid — the whole pool stays locked.")}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <HStack w="full" justify="center">
-              <Image
-                src="/assets/b3mo/B3MO_coding_02 1.png"
-                maxW="200px"
-                alt="B3MO Relayer"
-                w="full"
-                h="auto"
-              />
-            </HStack>
-            <Link
-              href="https://docs.vebetterdao.org/vebetter/automation"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm" rounded="full" w="full">
-                {t("Full Documentation")}
-                <LuExternalLink />
-              </Button>
-            </Link>
-          </VStack>
-        </Card.Root>
+        <Rules />
       </Grid>
 
       <RegisterRelayerModal
