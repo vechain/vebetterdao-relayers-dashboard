@@ -34,7 +34,11 @@ export function TopRelayers() {
     return report.relayers
       .map((r) => computeRelayerSummary(r, roundCtx, report.currentRound))
       .filter((s) => isRelayerActive(s, report.currentRound))
-      .sort((a, b) => b.activeRoundsCount - a.activeRoundsCount)
+      .sort((a, b) => {
+        const va = BigInt(a.totalVthoSpentRaw);
+        const vb = BigInt(b.totalVthoSpentRaw);
+        return vb > va ? 1 : vb < va ? -1 : 0;
+      })
       .slice(0, TOP_COUNT);
   }, [report]);
 

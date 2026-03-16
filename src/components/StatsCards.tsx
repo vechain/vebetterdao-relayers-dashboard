@@ -14,7 +14,7 @@ import { LuChartLine, LuCircleCheck, LuCoins, LuRadar } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
-import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
+
 import { useReportData } from "@/hooks/useReportData";
 import { formatNumber, formatToken } from "@/lib/format";
 import { computeRelayersOverview } from "@/lib/relayer-utils";
@@ -65,8 +65,6 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
 
 export function StatsCards() {
   const { data: report, isLoading, error } = useReportData();
-  const { count: relayerCount, isLoading: relayersLoading } =
-    useRegisteredRelayers();
   const b3trToVtho = useB3trToVthoRate();
 
   const { t } = useTranslation();
@@ -118,11 +116,23 @@ export function StatsCards() {
         isLoading={isLoading}
       />
       <StatItem
-        label={t("Total relayers")}
-        value={relayersLoading ? "..." : String(relayerCount)}
-        sublabel={t("registered")}
+        label={t("Active relayers")}
+        value={
+          isLoading
+            ? "..."
+            : overview
+              ? String(overview.activeRelayers)
+              : "\u2014"
+        }
+        sublabel={
+          isLoading
+            ? ""
+            : overview
+              ? `${overview.totalRelayers} ${t("total")}`
+              : ""
+        }
         icon={LuRadar}
-        isLoading={relayersLoading}
+        isLoading={isLoading}
       />
       <StatItem
         label={t("B3TR distributed")}
@@ -146,13 +156,7 @@ export function StatsCards() {
               ? `${formatNumber(Math.round(avgRoi))}%`
               : "\u2014"
         }
-        sublabel={
-          b3trToVtho != null
-            ? t("rate: 1 B3TR = {{vtho}} VTHO", {
-                vtho: formatNumber(Math.round(b3trToVtho)),
-              })
-            : t("rate: 1 B3TR = … VTHO")
-        }
+        sublabel={""}
         icon={LuChartLine}
         isLoading={isLoading}
       />
