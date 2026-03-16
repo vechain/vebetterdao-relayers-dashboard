@@ -1788,10 +1788,37 @@ async function main(): Promise<void> {
           relayerRewardsClaimed.get(addr) ?? BigInt(0)
         ).toString(),
         vthoSpentOnVotingRaw: (votingVtho.get(addr) ?? BigInt(0)).toString(),
-        vthoSpentOnClaimingRaw: (
-          claimingVtho.get(addr) ?? BigInt(0)
-        ).toString(),
+        vthoSpentOnClaimingRaw: "0",
       });
+    }
+
+    // Attribute claiming VTHO to the round being claimed (prevRoundId)
+    // so it aligns with rewardsClaimedCount on the same round entry.
+    if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
+      for (const [addr, vtho] of claimingVtho) {
+        if (!checkpointRelayerMap.has(addr)) {
+          checkpointRelayerMap.set(addr, new Map());
+        }
+        const roundMap = checkpointRelayerMap.get(addr)!;
+        const prevEntry = roundMap.get(prevRoundId);
+        if (prevEntry) {
+          prevEntry.vthoSpentOnClaimingRaw = (
+            BigInt(prevEntry.vthoSpentOnClaimingRaw) + vtho
+          ).toString();
+        } else {
+          roundMap.set(prevRoundId, {
+            roundId: prevRoundId,
+            votedForCount: 0,
+            rewardsClaimedCount: 0,
+            weightedActions: 0,
+            actions: 0,
+            claimableRewardsRaw: "0",
+            relayerRewardsClaimedRaw: "0",
+            vthoSpentOnVotingRaw: "0",
+            vthoSpentOnClaimingRaw: vtho.toString(),
+          });
+        }
+      }
     }
   }
 

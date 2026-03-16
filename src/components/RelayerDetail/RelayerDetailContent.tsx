@@ -365,8 +365,12 @@ interface MergedRound {
 
 /**
  * Merge claim-only rounds into their adjacent voting round.
- * A claim-only round N-1 (votedForCount === 0) directly before a voting round N
- * represents catch-up claiming done during the same operational period as round N.
+ *
+ * Claiming for VBD round N happens during round N+1, so from the relayer's
+ * operational perspective claim-only work belongs to round N+1:
+ * - If a voting round N+1 exists, the claim-only round N is absorbed as catchUp.
+ * - Otherwise a synthetic round N+1 entry is created to display the claims
+ *   under the round the relayer was actually active in.
  */
 function mergeRelayerRounds(rounds: RelayerRoundBreakdown[]): MergedRound[] {
   const sorted = [...rounds].sort((a, b) => a.roundId - b.roundId);
@@ -388,7 +392,20 @@ function mergeRelayerRounds(rounds: RelayerRoundBreakdown[]): MergedRound[] {
     } else {
       const next = byId.get(rd.roundId + 1);
       if (next && next.votedForCount > 0) continue;
-      result.push({ main: rd, catchUp: null });
+      result.push({
+        main: {
+          roundId: rd.roundId + 1,
+          votedForCount: 0,
+          rewardsClaimedCount: 0,
+          weightedActions: 0,
+          actions: 0,
+          claimableRewardsRaw: "0",
+          relayerRewardsClaimedRaw: "0",
+          vthoSpentOnVotingRaw: "0",
+          vthoSpentOnClaimingRaw: "0",
+        },
+        catchUp: rd,
+      });
     }
   }
 
@@ -476,7 +493,11 @@ export function RelayerDetailContent({
               <SectionHeader title={t("Financials")} icon={<LuCoins />} />
               <SimpleGrid columns={2} gap="4">
                 <MetricCell
-                  label={t("B3TR earned")}
+                  label={
+                    summary.totalVotedFor > 0
+                      ? t("B3TR earned")
+                      : t("Projected B3TR")
+                  }
                   value={formatToken(summary.totalB3trEarnedRaw)}
                   unit="B3TR"
                 />
@@ -504,11 +525,14 @@ export function RelayerDetailContent({
                 <MetricCell
                   label={t("Avg VTHO / user")}
                   value={
-                    summary.totalVotedFor > 0
+                    summary.totalVotedFor + summary.totalRewardsClaimed > 0
                       ? formatToken(
                           (
                             BigInt(summary.totalVthoSpentRaw) /
-                            BigInt(summary.totalVotedFor)
+                            BigInt(
+                              summary.totalVotedFor +
+                                summary.totalRewardsClaimed,
+                            )
                           ).toString(),
                         )
                       : "\u2014"
@@ -552,6 +576,9 @@ export function RelayerDetailContent({
 
                   const combinedRd: RelayerRoundBreakdown = {
                     ...main,
+                    weightedActions:
+                      main.weightedActions +
+                      (catchUp?.weightedActions ?? 0),
                     vthoSpentOnVotingRaw: (
                       BigInt(main.vthoSpentOnVotingRaw) +
                       BigInt(catchUp?.vthoSpentOnVotingRaw ?? "0")
@@ -573,7 +600,12 @@ export function RelayerDetailContent({
                       isActive={isActiveRound}
                       isLocked={lockedRounds.has(main.roundId)}
                       b3trToVtho={b3trToVtho}
-                      totalWeighted={mainCtx?.totalWeighted}
+                      totalWeighted={
+                        mainCtx?.totalWeighted ??
+                        (catchUp
+                          ? roundCtx?.get(catchUp.roundId)?.totalWeighted
+                          : undefined)
+                      }
                       b3trRaw={b3trTotal.toString()}
                       t={t}
                     />

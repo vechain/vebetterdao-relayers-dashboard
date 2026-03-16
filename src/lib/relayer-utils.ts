@@ -68,14 +68,16 @@ export function computeRelayerSummary(
     totalVotedFor += rd.votedForCount
     totalRewardsClaimed += rd.rewardsClaimedCount
     totalWeightedActions += rd.weightedActions
-    const isActiveRound = currentRound != null && rd.roundId === currentRound
-    const isEstimated = isActiveRound
+    const isClaimOnly = rd.votedForCount === 0 && rd.rewardsClaimedCount > 0
+    const operationalRound = isClaimOnly ? rd.roundId + 1 : rd.roundId
+    const isEstimated = currentRound != null && operationalRound === currentRound
+    const useEstimatedPool = currentRound != null && rd.roundId === currentRound
     const isLocked = roundCtx?.get(rd.roundId)?.locked ?? false
     if (!isLocked) {
       if (roundCtx) {
         const ctx = roundCtx.get(rd.roundId)
         const effectiveCtx = ctx
-          ? isActiveRound
+          ? useEstimatedPool
             ? { poolRaw: ctx.estimatedPoolRaw, totalWeighted: ctx.totalWeighted }
             : { poolRaw: ctx.poolRaw, totalWeighted: ctx.totalWeighted }
           : undefined
@@ -110,7 +112,14 @@ export function computeRelayerSummary(
     estimatedB3trRaw: estimatedB3tr.toString(),
     totalVthoSpentRaw: totalVthoSpent.toString(),
     lastActiveRound,
-    activeRoundsCount: relayer.rounds.filter(rd => rd.actions > 0 && rd.votedForCount > 0).length,
+    activeRoundsCount: new Set(
+      relayer.rounds
+        .filter(rd => rd.actions > 0)
+        .map(rd => {
+          const claimOnly = rd.votedForCount === 0 && rd.rewardsClaimedCount > 0
+          return claimOnly ? rd.roundId + 1 : rd.roundId
+        }),
+    ).size,
   }
 }
 

@@ -59,9 +59,11 @@ function StatPill({
 function ActiveRelayerRow({
   relayer,
   totalWeighted,
+  prevTotalWeighted,
 }: {
   relayer: ActiveRelayer;
   totalWeighted: number;
+  prevTotalWeighted: number;
 }) {
   const { data: domain } = useVechainDomain(relayer.address);
   const { data: avatarSrc } = useGetAvatarOfAddress(relayer.address);
@@ -73,11 +75,15 @@ function ActiveRelayerRow({
 
   const { breakdown: rd, prevBreakdown } = relayer;
   const vthoSpentRaw = (
-    BigInt(rd.vthoSpentOnVotingRaw) + BigInt(rd.vthoSpentOnClaimingRaw)
+    BigInt(rd.vthoSpentOnVotingRaw) +
+    BigInt(prevBreakdown?.vthoSpentOnClaimingRaw ?? "0")
   ).toString();
+  const combinedWeighted =
+    rd.weightedActions + (prevBreakdown?.weightedActions ?? 0);
+  const combinedTotal = totalWeighted + prevTotalWeighted;
   const weightPct =
-    totalWeighted > 0
-      ? `${formatNumber(parseFloat(((rd.weightedActions / totalWeighted) * 100).toFixed(2)))}%`
+    combinedTotal > 0
+      ? `${formatNumber(parseFloat(((combinedWeighted / combinedTotal) * 100).toFixed(2)))}%`
       : "\u2014";
 
   return (
@@ -197,33 +203,60 @@ export function RoundActiveRelayers({ roundId }: RoundActiveRelayersProps) {
   const { t } = useTranslation();
   const { data: report } = useReportData();
 
-  const { activeRelayers, totalWeighted } = useMemo(() => {
+  const { activeRelayers, totalWeighted, prevTotalWeighted } = useMemo(() => {
     if (!report?.relayers)
-      return { activeRelayers: [] as ActiveRelayer[], totalWeighted: 0 };
+      return {
+        activeRelayers: [] as ActiveRelayer[],
+        totalWeighted: 0,
+        prevTotalWeighted: 0,
+      };
     const prevRoundId = roundId - 1;
     const result: ActiveRelayer[] = [];
+    const emptyBreakdown: RelayerRoundBreakdown = {
+      roundId,
+      votedForCount: 0,
+      rewardsClaimedCount: 0,
+      weightedActions: 0,
+      actions: 0,
+      claimableRewardsRaw: "0",
+      relayerRewardsClaimedRaw: "0",
+      vthoSpentOnVotingRaw: "0",
+      vthoSpentOnClaimingRaw: "0",
+    };
     for (const relayer of report.relayers) {
       const rd = relayer.rounds.find((r) => r.roundId === roundId);
       const prevRd = relayer.rounds.find((r) => r.roundId === prevRoundId);
-      if (rd) {
-        if (
-          rd.votedForCount > 0 ||
-          (prevRd && prevRd.rewardsClaimedCount > 0)
-        ) {
-          result.push({
-            address: relayer.address,
-            breakdown: rd,
-            prevBreakdown: prevRd,
-          });
-        }
+      if (rd && (rd.votedForCount > 0 || (prevRd && prevRd.rewardsClaimedCount > 0))) {
+        result.push({
+          address: relayer.address,
+          breakdown: rd,
+          prevBreakdown: prevRd,
+        });
+      } else if (!rd && prevRd && prevRd.rewardsClaimedCount > 0) {
+        result.push({
+          address: relayer.address,
+          breakdown: emptyBreakdown,
+          prevBreakdown: prevRd,
+        });
       }
     }
-    result.sort(
-      (a, b) => b.breakdown.votedForCount - a.breakdown.votedForCount,
-    );
+    result.sort((a, b) => {
+      const wa =
+        a.breakdown.weightedActions + (a.prevBreakdown?.weightedActions ?? 0);
+      const wb =
+        b.breakdown.weightedActions + (b.prevBreakdown?.weightedActions ?? 0);
+      return wb - wa;
+    });
     const roundExpected =
       report.rounds.find((r) => r.roundId === roundId)?.expectedActions ?? 0;
-    return { activeRelayers: result, totalWeighted: roundExpected };
+    const prevRoundExpected =
+      report.rounds.find((r) => r.roundId === roundId - 1)?.expectedActions ??
+      0;
+    return {
+      activeRelayers: result,
+      totalWeighted: roundExpected,
+      prevTotalWeighted: prevRoundExpected,
+    };
   }, [report, roundId]);
 
   if (activeRelayers.length === 0) return null;
@@ -254,6 +287,7 @@ export function RoundActiveRelayers({ roundId }: RoundActiveRelayersProps) {
             key={relayer.address}
             relayer={relayer}
             totalWeighted={totalWeighted}
+            prevTotalWeighted={prevTotalWeighted}
           />
         ))}
       </VStack>

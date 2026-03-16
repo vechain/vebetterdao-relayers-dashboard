@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-16T14:28:06.382Z",
+  "generatedAt": "2026-03-16T16:55:46.213Z",
   "network": "mainnet",
   "firstRound": 69,
   "currentRound": 90,
@@ -515,8 +515,8 @@
       "rewardsClaimedCount": 0,
       "totalRelayerRewards": "0.00 B3TR",
       "totalRelayerRewardsRaw": "0",
-      "estimatedRelayerRewards": "8457.45 B3TR",
-      "estimatedRelayerRewardsRaw": "8457455249682966890169",
+      "estimatedRelayerRewards": "8296.07 B3TR",
+      "estimatedRelayerRewardsRaw": "8296071466593121573926",
       "numRelayers": 39,
       "vthoSpentOnVoting": "8858.58 VTHO",
       "vthoSpentOnVotingRaw": "8858580708851040119585",
@@ -546,7 +546,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "1461355130556469005604",
           "vthoSpentOnVotingRaw": "0",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "1867371965601485787660"
         },
         {
           "roundId": 82,
@@ -557,7 +557,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "7290931775873796224485",
           "vthoSpentOnVotingRaw": "4881885913436551322059",
-          "vthoSpentOnClaimingRaw": "1867371965601485787660"
+          "vthoSpentOnClaimingRaw": "2021356442006105627808"
         },
         {
           "roundId": 83,
@@ -568,7 +568,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "6766625636224817544028",
           "vthoSpentOnVotingRaw": "5138121028795988715935",
-          "vthoSpentOnClaimingRaw": "2021356442006105627808"
+          "vthoSpentOnClaimingRaw": "2015649710006132475128"
         },
         {
           "roundId": 84,
@@ -579,7 +579,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "6817224730246267638476",
           "vthoSpentOnVotingRaw": "5292937221168871885325",
-          "vthoSpentOnClaimingRaw": "2015649710006132475128"
+          "vthoSpentOnClaimingRaw": "2059095782821790438967"
         },
         {
           "roundId": 85,
@@ -590,7 +590,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "4961521792116571136124",
           "vthoSpentOnVotingRaw": "5237974779332560072204",
-          "vthoSpentOnClaimingRaw": "2059095782821790438967"
+          "vthoSpentOnClaimingRaw": "2157311779760000000000"
         },
         {
           "roundId": 86,
@@ -601,7 +601,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "0",
           "vthoSpentOnVotingRaw": "5434370429720000000000",
-          "vthoSpentOnClaimingRaw": "2157311779760000000000"
+          "vthoSpentOnClaimingRaw": "2320476623409183098158"
         },
         {
           "roundId": 87,
@@ -612,7 +612,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "5746010201633582039804",
           "vthoSpentOnVotingRaw": "5810202464612842421155",
-          "vthoSpentOnClaimingRaw": "2320476623409183098158"
+          "vthoSpentOnClaimingRaw": "7959034333406669056278"
         },
         {
           "roundId": 88,
@@ -623,7 +623,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "7021140803310508504310",
           "vthoSpentOnVotingRaw": "55553677480858829800750",
-          "vthoSpentOnClaimingRaw": "7959034333406669056278"
+          "vthoSpentOnClaimingRaw": "2150655601177647983648"
         },
         {
           "roundId": 89,
@@ -634,7 +634,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "2701647741557724426359",
           "vthoSpentOnVotingRaw": "2884439863506315459313",
-          "vthoSpentOnClaimingRaw": "2150655601177647983648"
+          "vthoSpentOnClaimingRaw": "0"
         }
       ]
     },
@@ -705,12 +705,12 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "13265046194227779507",
           "vthoSpentOnVotingRaw": "0",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "38199650004305127088"
         }
       ]
     },
     {
-      "address": "0x699a951757b848d9ff29a9253d2802a774619aef",
+      "address": "0xd06b42d094324e50b9133fce875a845278254c30",
       "rounds": []
     },
     {
@@ -762,10 +762,10 @@
           "rewardsClaimedCount": 404,
           "weightedActions": 404,
           "actions": 404,
-          "claimableRewardsRaw": "595453184718669213447",
-          "relayerRewardsClaimedRaw": "0",
+          "claimableRewardsRaw": "0",
+          "relayerRewardsClaimedRaw": "595453184718669213447",
           "vthoSpentOnVotingRaw": "0",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "1159307403910604337138"
         },
         {
           "roundId": 90,
@@ -776,7 +776,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "0",
           "vthoSpentOnVotingRaw": "2746861379927400049749",
-          "vthoSpentOnClaimingRaw": "1159307403910604337138"
+          "vthoSpentOnClaimingRaw": "0"
         }
       ]
     },
@@ -792,7 +792,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "47164608690587660471",
           "vthoSpentOnVotingRaw": "0",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "106851019076981633006"
         }
       ]
     },
@@ -840,7 +840,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "1011091298804472971348",
           "vthoSpentOnVotingRaw": "0",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "2141341411114735697160"
         }
       ]
     },
@@ -949,7 +949,7 @@
       "rounds": []
     },
     {
-      "address": "0xd06b42d094324e50b9133fce875a845278254c30",
+      "address": "0x699a951757b848d9ff29a9253d2802a774619aef",
       "rounds": []
     },
     {
@@ -964,7 +964,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "24708728447052897322",
           "vthoSpentOnVotingRaw": "28018111788591555766",
-          "vthoSpentOnClaimingRaw": "0"
+          "vthoSpentOnClaimingRaw": "10279722160184348794"
         },
         {
           "roundId": 71,
@@ -975,7 +975,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "26201167211804685831",
           "vthoSpentOnVotingRaw": "28768547904759482139",
-          "vthoSpentOnClaimingRaw": "10279722160184348794"
+          "vthoSpentOnClaimingRaw": "9101131024187461623"
         },
         {
           "roundId": 72,
@@ -986,7 +986,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "26419990357333322776",
           "vthoSpentOnVotingRaw": "28417022616639237376",
-          "vthoSpentOnClaimingRaw": "9101131024187461623"
+          "vthoSpentOnClaimingRaw": "9289956288765035088"
         },
         {
           "roundId": 73,
@@ -997,7 +997,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "26944463362738018109",
           "vthoSpentOnVotingRaw": "31440008212804809564",
-          "vthoSpentOnClaimingRaw": "9289956288765035088"
+          "vthoSpentOnClaimingRaw": "10807320950933322834"
         },
         {
           "roundId": 74,
@@ -1008,7 +1008,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "29506592895852805779",
           "vthoSpentOnVotingRaw": "32688330487754338596",
-          "vthoSpentOnClaimingRaw": "10807320950933322834"
+          "vthoSpentOnClaimingRaw": "9233635430569225335"
         },
         {
           "roundId": 75,
@@ -1019,7 +1019,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "30084600800283524748",
           "vthoSpentOnVotingRaw": "29182251577953958587",
-          "vthoSpentOnClaimingRaw": "9233635430569225335"
+          "vthoSpentOnClaimingRaw": "9420678165781627236"
         },
         {
           "roundId": 76,
@@ -1030,7 +1030,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "26764633306040637711",
           "vthoSpentOnVotingRaw": "35891284972612136196",
-          "vthoSpentOnClaimingRaw": "9420678165781627236"
+          "vthoSpentOnClaimingRaw": "11291255802244387810"
         },
         {
           "roundId": 77,
@@ -1041,7 +1041,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "3487577735279466372067",
           "vthoSpentOnVotingRaw": "1587672653734223937565",
-          "vthoSpentOnClaimingRaw": "11291255802244387810"
+          "vthoSpentOnClaimingRaw": "736386589634793605754"
         },
         {
           "roundId": 78,
@@ -1052,7 +1052,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "5292417373679306266781",
           "vthoSpentOnVotingRaw": "3768739798786534039631",
-          "vthoSpentOnClaimingRaw": "736386589634793605754"
+          "vthoSpentOnClaimingRaw": "1502379645841652201394"
         },
         {
           "roundId": 79,
@@ -1063,7 +1063,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "4841310825866867961262",
           "vthoSpentOnVotingRaw": "4142476777017893427964",
-          "vthoSpentOnClaimingRaw": "1502379645841652201394"
+          "vthoSpentOnClaimingRaw": "1570788832368096131693"
         },
         {
           "roundId": 80,
@@ -1074,7 +1074,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "6891338152675216554101",
           "vthoSpentOnVotingRaw": "5101504406425698635717",
-          "vthoSpentOnClaimingRaw": "1570788832368096131693"
+          "vthoSpentOnClaimingRaw": "1729608986911939222459"
         },
         {
           "roundId": 81,
@@ -1085,7 +1085,7 @@
           "claimableRewardsRaw": "0",
           "relayerRewardsClaimedRaw": "4384065391669407016812",
           "vthoSpentOnVotingRaw": "9987230092256012266228",
-          "vthoSpentOnClaimingRaw": "1729608986911939222459"
+          "vthoSpentOnClaimingRaw": "0"
         }
       ]
     }

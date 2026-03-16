@@ -123,7 +123,7 @@ export function RelayersList() {
   const b3trToVtho = useB3trToVthoRate();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>("active");
   const [sortField, setSortField] = useState<SortField>("vtho");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [filterOpen, setFilterOpen] = useState(false);

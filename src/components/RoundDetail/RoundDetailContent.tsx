@@ -433,9 +433,7 @@ export function RoundDetailContent({
             <MiniStatCard
               label={t("Voted for")}
               value={formatNumber(round.votedForCount)}
-              secondaryValue={formatNumber(
-                round.autoVotingUsersCount - round.reducedUsersCount,
-              )}
+              secondaryValue={formatNumber(round.autoVotingUsersCount)}
               sublabel={t("users")}
             />
             <MiniStatCard
