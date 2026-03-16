@@ -1573,6 +1573,10 @@ async function main(): Promise<void> {
         ? Math.max(...completedFromCheckpoint.map((r) => r.roundId)) + 1
         : FIRST_AUTO_VOTING_ROUND;
 
+  // Because claiming VTHO for round N depends on data from round N+1,
+  // we also re-analyze the previous round when resuming from a checkpoint.
+  const analysisStartRoundId = Math.max(FIRST_AUTO_VOTING_ROUND, startRoundId - 1);
+
   if (startRoundId > currentRoundId && checkpoint) {
     console.log("Checkpoint is up to date; no new rounds to analyze.");
     const report: AnalyticsReport = {
@@ -1589,7 +1593,7 @@ async function main(): Promise<void> {
   }
 
   const newRounds: RoundAnalytics[] = [];
-  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
+  for (let roundId = analysisStartRoundId; roundId <= currentRoundId; roundId++) {
     try {
       const roundAnalytics = await analyzeRound(thor, roundId);
       newRounds.push(roundAnalytics);
@@ -1630,7 +1634,7 @@ async function main(): Promise<void> {
       const roundMap = new Map<number, RelayerRoundBreakdown>();
       for (const rd of rel.rounds) {
         // Keep checkpoint data for completed rounds we're not re-analyzing
-        if (rd.roundId < startRoundId) {
+        if (rd.roundId < analysisStartRoundId) {
           roundMap.set(rd.roundId, rd);
         }
       }
@@ -1639,7 +1643,7 @@ async function main(): Promise<void> {
   }
 
   // Collect per-relayer data for newly analyzed rounds
-  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
+  for (let roundId = analysisStartRoundId; roundId <= currentRoundId; roundId++) {
     console.log(`    - Analyzing relayer data for round ${roundId}...`);
 
     const roundSnapshot = await getRoundSnapshot(
