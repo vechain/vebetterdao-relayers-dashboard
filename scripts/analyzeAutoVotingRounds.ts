@@ -988,7 +988,7 @@ async function getPerRelayerVthoSpentOnVoting(
 async function getPerRelayerVthoSpentOnClaiming(
   thor: ThorClient,
   voterRewardsAddress: string,
-  prevRoundId: number,
+  roundId: number,
   fromBlock: number,
   toBlock: number,
 ): Promise<Map<string, bigint>> {
@@ -996,7 +996,7 @@ async function getPerRelayerVthoSpentOnClaiming(
   const relayerFeeTakenEvent = voterRewardsContract.getEvent(
     "RelayerFeeTaken",
   ) as any;
-  const cycleHex = "0x" + prevRoundId.toString(16).padStart(64, "0");
+  const cycleHex = "0x" + roundId.toString(16).padStart(64, "0");
 
   const txSet = new Set<string>();
   let offset = 0;
@@ -1263,32 +1263,35 @@ async function analyzeRound(
     `    - VTHO spent on voting (round ${roundId}): ${formatVTHO(vthoSpentOnVoting)} (${votingTxIds.size} txs)`,
   );
 
-  // Get VTHO spent on claiming transactions for PREVIOUS round
-  // During round N, we claim rewards for round N-1 (since N-1 just ended)
-  const prevRoundId = roundId - 1;
+  // Get VTHO spent on claiming transactions FOR THIS round.
+  // Claims for round N happen after it ends, typically during round N+1.
+  // We attribute claiming cost to the round being claimed (N) using the next round's window.
   let vthoSpentOnClaiming = BigInt(0);
   let claimingTxCount = 0;
+  const nextRoundId = roundId + 1;
 
-  if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
-    const prevRoundDeadline = await getRoundDeadline(
+  if (nextRoundId <= (await getCurrentRoundId(thor, CONFIG.xAllocationVotingContractAddress))) {
+    const nextRoundDeadline = await getRoundDeadline(
       thor,
       CONFIG.xAllocationVotingContractAddress,
-      prevRoundId,
+      nextRoundId,
     );
     const claimingTxIds = await getClaimingTransactionIds(
       thor,
       CONFIG.voterRewardsContractAddress,
-      prevRoundId, // Claims for previous round
-      prevRoundDeadline,
-      roundDeadline, // Limit to transactions during this round's period
+      roundId, // Claims for this round
+      roundDeadline, // From round end...
+      nextRoundDeadline, // ...to next round end
     );
     vthoSpentOnClaiming = await calculateVthoSpent(thor, claimingTxIds);
     claimingTxCount = claimingTxIds.size;
     console.log(
-      `    - VTHO spent on claiming (round ${prevRoundId}): ${formatVTHO(vthoSpentOnClaiming)} (${claimingTxCount} txs)`,
+      `    - VTHO spent on claiming (round ${roundId}): ${formatVTHO(vthoSpentOnClaiming)} (${claimingTxCount} txs)`,
     );
   } else {
-    console.log(`    - VTHO spent on claiming: N/A (first auto-voting round)`);
+    console.log(
+      `    - VTHO spent on claiming (round ${roundId}): N/A (next round not available yet)`,
+    );
   }
 
   const vthoSpentTotal = vthoSpentOnVoting + vthoSpentOnClaiming;
@@ -1669,20 +1672,21 @@ async function main(): Promise<void> {
     );
 
     // Get per-relayer VTHO spent on claiming (for previous round)
+    // Get per-relayer VTHO spent on claiming (claims for this round happen after it ends)
     let claimingVtho = new Map<string, bigint>();
-    const prevRoundId = roundId - 1;
-    if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
-      const prevDeadline = await getRoundDeadline(
+    const nextRoundId = roundId + 1;
+    if (nextRoundId <= currentRoundId) {
+      const nextDeadline = await getRoundDeadline(
         thor,
         CONFIG.xAllocationVotingContractAddress,
-        prevRoundId,
+        nextRoundId,
       );
       claimingVtho = await getPerRelayerVthoSpentOnClaiming(
         thor,
         CONFIG.voterRewardsContractAddress,
-        prevRoundId,
-        prevDeadline,
+        roundId,
         roundDeadline,
+        nextDeadline,
       );
     }
 
