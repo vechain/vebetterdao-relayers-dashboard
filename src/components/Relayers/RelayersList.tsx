@@ -9,7 +9,6 @@ import {
   IconButton,
   Input,
   SimpleGrid,
-  Skeleton,
   Stack,
   Text,
   VStack,
@@ -35,6 +34,7 @@ import { computeRelayerROI, isRelayerActive } from "@/lib/relayer-utils";
 
 import { BaseBottomSheet } from "../Base/BaseBottomSheet";
 import { RelayerCard } from "./RelayerCard";
+import { RelayersListSkeleton } from "./RelayersListSkeleton";
 
 const PAGE_SIZE = 10;
 
@@ -219,13 +219,7 @@ export function RelayersList() {
   if (error) return null;
 
   if (isLoading || !report) {
-    return (
-      <VStack gap="3" align="stretch">
-        <Skeleton height="16" rounded="xl" />
-        <Skeleton height="16" rounded="xl" />
-        <Skeleton height="16" rounded="xl" />
-      </VStack>
-    );
+    return <RelayersListSkeleton />;
   }
 
   const visible = filtered.slice(0, visibleCount);

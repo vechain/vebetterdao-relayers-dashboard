@@ -56,15 +56,6 @@ export function RoundDetailHeader({
             {t("Round #")}
             {roundId}
           </Heading>
-          {round?.isRoundEnded ? (
-            <Badge size="sm" variant="subtle" colorPalette="gray">
-              {t("Concluded")}
-            </Badge>
-          ) : (
-            <Badge size="sm" variant="solid" colorPalette="blue">
-              {t("Active")}
-            </Badge>
-          )}
         </HStack>
         <HStack gap="2">
           <IconButton

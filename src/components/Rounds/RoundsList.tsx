@@ -25,10 +25,10 @@ export function RoundsList() {
 
   if (isLoading || !report) {
     return (
-      <VStack gap="3" align="stretch">
-        <Skeleton height="16" rounded="xl" />
-        <Skeleton height="16" rounded="xl" />
-        <Skeleton height="16" rounded="xl" />
+      <VStack w="full" gap="3" align="stretch">
+        <Skeleton w="full" height="16" rounded="xl" />
+        <Skeleton w="full" height="16" rounded="xl" />
+        <Skeleton w="full" height="16" rounded="xl" />
       </VStack>
     );
   }
