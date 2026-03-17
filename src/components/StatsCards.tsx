@@ -14,10 +14,8 @@ import { LuChartLine, LuCircleCheck, LuCoins, LuRadar } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
-import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
-import { useReportData } from "@/hooks/useReportData";
+import { useRelayerReportDerived } from "@/hooks/useRelayerReportDerived";
 import { formatNumber, formatToken } from "@/lib/format";
-import { computeRelayersOverview } from "@/lib/relayer-utils";
 import { computeAverageROI } from "@/lib/roi";
 import { computeRoundCompletion, getRoundPhaseLabel } from "@/lib/round-utils";
 
@@ -64,9 +62,7 @@ function StatItem({ label, value, sublabel, icon, isLoading }: StatItemProps) {
 }
 
 export function StatsCards() {
-  const { data: report, isLoading, error } = useReportData();
-  const { count: relayerCount, isLoading: relayersLoading } =
-    useRegisteredRelayers();
+  const { report, overview, isLoading, error } = useRelayerReportDerived();
   const b3trToVtho = useB3trToVthoRate();
 
   const { t } = useTranslation();
@@ -83,8 +79,6 @@ export function StatsCards() {
   const currentRoundData = rounds.find(
     (r) => r.roundId === report?.currentRound,
   );
-
-  const overview = report ? computeRelayersOverview(report) : null;
 
   const concludedRounds = rounds.filter(
     (r) => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0",
@@ -118,11 +112,17 @@ export function StatsCards() {
         isLoading={isLoading}
       />
       <StatItem
-        label={t("Total relayers")}
-        value={relayersLoading ? "..." : String(relayerCount)}
-        sublabel={t("registered")}
+        label={t("Active relayers")}
+        value={
+          isLoading
+            ? "..."
+            : overview != null
+              ? String(overview.activeRelayers)
+              : "\u2014"
+        }
+        sublabel={t("in last 3 rounds")}
         icon={LuRadar}
-        isLoading={relayersLoading}
+        isLoading={isLoading}
       />
       <StatItem
         label={t("B3TR distributed")}

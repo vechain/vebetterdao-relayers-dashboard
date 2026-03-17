@@ -29,14 +29,9 @@ import {
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { useRegisteredRelayers } from "@/hooks/useRegisteredRelayers";
-import { useReportData } from "@/hooks/useReportData";
+import { useRelayerReportDerived } from "@/hooks/useRelayerReportDerived";
 import type { RelayerSummary } from "@/lib/relayer-utils";
-import {
-  buildRoundRewardsContext,
-  computeRelayerROI,
-  computeRelayerSummary,
-  isRelayerActive,
-} from "@/lib/relayer-utils";
+import { computeRelayerROI, isRelayerActive } from "@/lib/relayer-utils";
 
 import { BaseBottomSheet } from "../Base/BaseBottomSheet";
 import { RelayerCard } from "./RelayerCard";
@@ -118,13 +113,13 @@ function useSearchAddress(query: string) {
 
 export function RelayersList() {
   const { t } = useTranslation();
-  const { data: report, isLoading, error } = useReportData();
+  const { report, overview, isLoading, error } = useRelayerReportDerived();
   const { relayers: registeredRelayers } = useRegisteredRelayers();
   const b3trToVtho = useB3trToVthoRate();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
-  const [sortField, setSortField] = useState<SortField>("b3tr");
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>("active");
+  const [sortField, setSortField] = useState<SortField>("vtho");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -146,11 +141,10 @@ export function RelayersList() {
     const reportSummaries: RelayerSummary[] = [];
     const reportAddresses = new Set<string>();
 
-    if (report?.relayers) {
-      const roundCtx = buildRoundRewardsContext(report);
-      for (const r of report.relayers) {
-        reportSummaries.push(computeRelayerSummary(r, roundCtx));
-        reportAddresses.add(r.address.toLowerCase());
+    if (overview?.summaries) {
+      for (const s of overview.summaries) {
+        reportSummaries.push(s);
+        reportAddresses.add(s.address.toLowerCase());
       }
     }
 
@@ -183,7 +177,7 @@ export function RelayersList() {
         s.totalB3trEarnedRaw !== "0" ||
         s.totalVthoSpentRaw !== "0",
     );
-  }, [report, registeredRelayers]);
+  }, [overview, registeredRelayers]);
 
   const filtered = useMemo(() => {
     const currentRound = report?.currentRound ?? 0;

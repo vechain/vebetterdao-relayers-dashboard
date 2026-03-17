@@ -2,7 +2,8 @@
 
 import { formatEther } from "viem"
 
-import type { AnalyticsReport, RelayerAnalytics } from "./types"
+import { isRoundRewardsLocked } from "./round-utils"
+import type { AnalyticsReport, RelayerAnalytics, RoundAnalytics } from "./types"
 
 export interface RelayerSummary {
   address: string
@@ -53,10 +54,23 @@ export function computeRelayerRoundB3tr(
   return (roundCtx.poolRaw * BigInt(relayerWeighted)) / BigInt(roundCtx.totalWeighted)
 }
 
+/**
+ * Set of round IDs whose relayer reward pool is locked (not yet claimable).
+ * When passed to computeRelayerSummary, those rounds are excluded from total B3TR earned.
+ */
+export function getLockedRoundIds(rounds: RoundAnalytics[]): Set<number> {
+  const set = new Set<number>()
+  for (const r of rounds) {
+    if (isRoundRewardsLocked(r)) set.add(r.roundId)
+  }
+  return set
+}
+
 /** Compute summary stats for a single relayer from their round breakdowns. */
 export function computeRelayerSummary(
   relayer: RelayerAnalytics,
   roundCtx?: Map<number, { poolRaw: bigint; totalWeighted: number }>,
+  lockedRoundIds?: Set<number>,
 ): RelayerSummary {
   let totalActions = 0
   let totalVotedFor = 0
@@ -71,10 +85,12 @@ export function computeRelayerSummary(
     totalVotedFor += rd.votedForCount
     totalRewardsClaimed += rd.rewardsClaimedCount
     totalWeightedActions += rd.weightedActions
-    // Use proportional share from round pool when context available, else fall back to claimableRewards
-    totalB3trEarned += roundCtx
-      ? computeRelayerRoundB3tr(rd.weightedActions, roundCtx.get(rd.roundId))
-      : BigInt(rd.claimableRewardsRaw)
+    // Only count round toward total earned if its rewards are not locked
+    if (!lockedRoundIds?.has(rd.roundId)) {
+      totalB3trEarned += roundCtx
+        ? computeRelayerRoundB3tr(rd.weightedActions, roundCtx.get(rd.roundId))
+        : BigInt(rd.claimableRewardsRaw)
+    }
     totalVthoSpent += BigInt(rd.vthoSpentOnVotingRaw) + BigInt(rd.vthoSpentOnClaimingRaw)
     if (rd.actions > 0 && (lastActiveRound == null || rd.roundId > lastActiveRound)) {
       lastActiveRound = rd.roundId
@@ -103,7 +119,10 @@ export function isRelayerActive(summary: RelayerSummary, currentRound: number, w
 /** Compute overview stats from all relayers in the report. */
 export function computeRelayersOverview(report: AnalyticsReport) {
   const roundCtx = buildRoundRewardsContext(report)
-  const summaries = (report.relayers ?? []).map(r => computeRelayerSummary(r, roundCtx))
+  const lockedRoundIds = getLockedRoundIds(report.rounds ?? [])
+  const summaries = (report.relayers ?? []).map(r =>
+    computeRelayerSummary(r, roundCtx, lockedRoundIds),
+  )
   const currentRound = report.currentRound
 
   // Sum total B3TR from round-level pool data (total rewards generated, not just claimed)

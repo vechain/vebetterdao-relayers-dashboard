@@ -16,13 +16,9 @@ import {
   RelayerDetailSkeleton,
   UnclaimedRewardsBanner,
 } from "@/components/RelayerDetail";
-import { useReportData } from "@/hooks/useReportData";
+import { useRelayerReportDerived } from "@/hooks/useRelayerReportDerived";
 import { useUnclaimedRelayerRewards } from "@/hooks/useUnclaimedRelayerRewards";
-import {
-  buildRoundRewardsContext,
-  computeRelayerSummary,
-  isRelayerActive,
-} from "@/lib/relayer-utils";
+import { isRelayerActive } from "@/lib/relayer-utils";
 import { BecomeRelayerCard } from "@/components/RelayerInfo";
 import NextLink from "next/link";
 
@@ -48,7 +44,8 @@ export default function RelayerDetailPage() {
     : addressOrDomain.toLowerCase();
 
   const { open: openConnect } = useConnectModal();
-  const { data: report, isLoading: reportLoading } = useReportData();
+  const { report, getRelayerSummary, roundCtx, lockedRoundIds, isLoading: reportLoading } =
+    useRelayerReportDerived();
 
   const relayer = report?.relayers?.find(
     (r) => r.address.toLowerCase() === (resolvedAddress ?? ""),
@@ -57,7 +54,6 @@ export default function RelayerDetailPage() {
     address: resolvedAddress ?? "",
     rounds: [],
   };
-  const roundCtx = report ? buildRoundRewardsContext(report) : undefined;
 
   const unclaimed = useUnclaimedRelayerRewards(
     relayerData,
@@ -109,8 +105,8 @@ export default function RelayerDetailPage() {
   }
 
   const currentRound = report?.currentRound ?? 0;
-  const summary = computeRelayerSummary(relayerData, roundCtx);
-  const active = isRelayerActive(summary, currentRound);
+  const summary = getRelayerSummary(relayerData);
+  const active = summary ? isRelayerActive(summary, currentRound) : false;
   const isOwnRelayer = account?.address?.toLowerCase() === resolvedAddress;
 
   return (
@@ -142,6 +138,8 @@ export default function RelayerDetailPage() {
         currentRound={currentRound}
         reportRounds={report?.rounds}
         roundCtx={roundCtx}
+        lockedRoundIds={lockedRoundIds}
+        summary={summary ?? undefined}
       />
       {!isOwnRelayer && <BecomeRelayerCard mt={8} forceBanner />}
     </VStack>

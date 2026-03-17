@@ -32,10 +32,6 @@ export default function RoundDetailPage() {
     ? report.rounds.find((r) => r.roundId === effectiveRoundId) ?? null
     : null;
 
-  const prevRound = report
-    ? report.rounds.find((r) => r.roundId === effectiveRoundId - 1) ?? null
-    : null;
-
   if (isLoading || !report) {
     return (
       <VStack w="full" align="stretch" gap="4">
@@ -116,7 +112,6 @@ export default function RoundDetailPage() {
         />
         <RoundDetailContent
           round={placeholderRound}
-          prevRound={prevRound}
           generatedAt={report.generatedAt}
         />
       </VStack>
@@ -130,7 +125,7 @@ export default function RoundDetailPage() {
         firstRound={firstRound}
         currentRound={currentRound}
       />
-      <RoundDetailContent round={round} prevRound={prevRound} generatedAt={report.generatedAt} />
+      <RoundDetailContent round={round} generatedAt={report.generatedAt} />
     </VStack>
   );
 }

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "skills": {
+    "auto-voting-relayers": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "ea1bd28a9dc4b24dd3abdafa2b715f3000bb3fc1a4362fc6816dbd1549a7c201"
+    },
+    "create-vechain-dapp": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "881c53623c32a5c5a9a86dbb6123710aa3f74c02d6b7e428eba6666fdb7d97ec"
+    },
+    "frontend": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "8567b28fc75395adb33b6a104fabc6c7e4f29c758c147bc52779cda09fd2e8f7"
+    },
+    "grill-me": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "a096bc3a1b5f73b889f688b82cf806cc9ffc278551b47efee4465265280c555f"
+    },
+    "indexer-core": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "bbf9952b2afa7e28269b59d89ddb58618a9867bd81de915a675373626500b90d"
+    },
+    "vebetterdao": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "d12a3ebd1cca9c9ab71ae705654f5c798487470e4a9ef8f330945a2ccb5bcd99"
+    },
+    "vechain-core": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "66a5647e25c3b1adea55a123f9a9d19bf37f8378bd0fbad68a721a4070752d35"
+    },
+    "vechain-kit": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "computedHash": "4a219e68d9e155777e0394fa6d2e651ae694cad890323b102848552e3386f250"
+    }
+  }
+}

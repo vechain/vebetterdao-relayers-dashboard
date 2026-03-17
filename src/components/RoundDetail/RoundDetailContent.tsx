@@ -226,7 +226,6 @@ function MiniStatCard({
 
 interface RoundDetailContentProps {
   round: RoundAnalytics;
-  prevRound?: RoundAnalytics | null;
   generatedAt?: string;
 }
 
@@ -245,7 +244,6 @@ function rawToFiat(
 
 export function RoundDetailContent({
   round,
-  prevRound,
   generatedAt,
 }: RoundDetailContentProps) {
   const { t } = useTranslation();
@@ -440,20 +438,11 @@ export function RoundDetailContent({
             />
             <MiniStatCard
               label={t("Claimed for")}
-              value={
-                prevRound
-                  ? formatNumber(prevRound.rewardsClaimedCount)
-                  : "\u2014"
-              }
-              secondaryValue={
-                prevRound
-                  ? formatNumber(
-                      prevRound.autoVotingUsersCount -
-                        prevRound.reducedUsersCount,
-                    )
-                  : undefined
-              }
-              sublabel={prevRound ? t("users") : undefined}
+              value={formatNumber(round.rewardsClaimedCount)}
+              secondaryValue={formatNumber(
+                round.autoVotingUsersCount - round.reducedUsersCount,
+              )}
+              sublabel={t("users")}
             />
           </SimpleGrid>
         </VStack>

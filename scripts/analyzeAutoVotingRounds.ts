@@ -110,6 +110,26 @@ interface AnalyticsReport {
   relayers: RelayerAnalytics[];
 }
 
+/**
+ * Set each round's numRelayers to the count of relayers who were active in that round
+ * (voted for or claimed for at least one user).
+ */
+function setActiveRelayersCountPerRound(
+  rounds: RoundAnalytics[],
+  relayers: RelayerAnalytics[],
+): void {
+  for (const round of rounds) {
+    let activeCount = 0;
+    for (const relayer of relayers) {
+      const rd = relayer.rounds.find((r) => r.roundId === round.roundId);
+      if (rd && (rd.votedForCount > 0 || rd.rewardsClaimedCount > 0)) {
+        activeCount++;
+      }
+    }
+    round.numRelayers = activeCount;
+  }
+}
+
 // ============ Contract Helper Functions ============
 
 /**
@@ -983,20 +1003,20 @@ async function getPerRelayerVthoSpentOnVoting(
 }
 
 /**
- * Get per-relayer VTHO spent on claiming for a round (claims for prevRound during this round).
+ * Get per-relayer VTHO spent on claiming for a round (claims for cycle=roundId after round ends).
  */
 async function getPerRelayerVthoSpentOnClaiming(
   thor: ThorClient,
   voterRewardsAddress: string,
-  prevRoundId: number,
+  roundId: number,
   fromBlock: number,
-  toBlock: number,
+  toBlock?: number,
 ): Promise<Map<string, bigint>> {
   const voterRewardsContract = ABIContract.ofAbi(VoterRewards__factory.abi);
   const relayerFeeTakenEvent = voterRewardsContract.getEvent(
     "RelayerFeeTaken",
   ) as any;
-  const cycleHex = "0x" + prevRoundId.toString(16).padStart(64, "0");
+  const cycleHex = "0x" + roundId.toString(16).padStart(64, "0");
 
   const txSet = new Set<string>();
   let offset = 0;
@@ -1263,33 +1283,23 @@ async function analyzeRound(
     `    - VTHO spent on voting (round ${roundId}): ${formatVTHO(vthoSpentOnVoting)} (${votingTxIds.size} txs)`,
   );
 
-  // Get VTHO spent on claiming transactions for PREVIOUS round
-  // During round N, we claim rewards for round N-1 (since N-1 just ended)
-  const prevRoundId = roundId - 1;
+  // Get VTHO spent on claiming transactions for THIS round
+  // Claims for round N happen after round N ends (from roundDeadline onward); same cycle as rewardsClaimedCount
   let vthoSpentOnClaiming = BigInt(0);
   let claimingTxCount = 0;
 
-  if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
-    const prevRoundDeadline = await getRoundDeadline(
-      thor,
-      CONFIG.xAllocationVotingContractAddress,
-      prevRoundId,
-    );
-    const claimingTxIds = await getClaimingTransactionIds(
-      thor,
-      CONFIG.voterRewardsContractAddress,
-      prevRoundId, // Claims for previous round
-      prevRoundDeadline,
-      roundDeadline, // Limit to transactions during this round's period
-    );
-    vthoSpentOnClaiming = await calculateVthoSpent(thor, claimingTxIds);
-    claimingTxCount = claimingTxIds.size;
-    console.log(
-      `    - VTHO spent on claiming (round ${prevRoundId}): ${formatVTHO(vthoSpentOnClaiming)} (${claimingTxCount} txs)`,
-    );
-  } else {
-    console.log(`    - VTHO spent on claiming: N/A (first auto-voting round)`);
-  }
+  const claimingTxIds = await getClaimingTransactionIds(
+    thor,
+    CONFIG.voterRewardsContractAddress,
+    roundId,
+    roundDeadline,
+    undefined,
+  );
+  vthoSpentOnClaiming = await calculateVthoSpent(thor, claimingTxIds);
+  claimingTxCount = claimingTxIds.size;
+  console.log(
+    `    - VTHO spent on claiming (round ${roundId}): ${formatVTHO(vthoSpentOnClaiming)} (${claimingTxCount} txs)`,
+  );
 
   const vthoSpentTotal = vthoSpentOnVoting + vthoSpentOnClaiming;
   console.log(
@@ -1570,15 +1580,30 @@ async function main(): Promise<void> {
         ? Math.max(...completedFromCheckpoint.map((r) => r.roundId)) + 1
         : FIRST_AUTO_VOTING_ROUND;
 
+  // When using checkpoint, always re-analyze the previous round so we pick up new
+  // claims (RelayerFeeTaken for cycle N) that happened after the round ended (e.g. during round N+1).
+  const effectiveStartRoundId =
+    checkpoint && currentRoundId > FIRST_AUTO_VOTING_ROUND
+      ? Math.min(startRoundId, currentRoundId - 1)
+      : startRoundId;
+  if (effectiveStartRoundId < startRoundId) {
+    console.log(
+      `  Re-analyzing previous round ${effectiveStartRoundId} to capture new claim activity.`,
+    );
+  }
+
   if (startRoundId > currentRoundId && checkpoint) {
     console.log("Checkpoint is up to date; no new rounds to analyze.");
+    const rounds = checkpoint.rounds.sort((a, b) => a.roundId - b.roundId);
+    const relayers = checkpoint.relayers ?? [];
+    setActiveRelayersCountPerRound(rounds, relayers);
     const report: AnalyticsReport = {
       generatedAt: new Date().toISOString(),
       network: "mainnet",
       firstRound: checkpoint.firstRound,
       currentRound: currentRoundId,
-      rounds: checkpoint.rounds.sort((a, b) => a.roundId - b.roundId),
-      relayers: checkpoint.relayers ?? [],
+      rounds,
+      relayers,
     };
     const filepath = saveReport(report, outputPath);
     console.log(`Report saved to: ${filepath}`);
@@ -1586,7 +1611,7 @@ async function main(): Promise<void> {
   }
 
   const newRounds: RoundAnalytics[] = [];
-  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
+  for (let roundId = effectiveStartRoundId; roundId <= currentRoundId; roundId++) {
     try {
       const roundAnalytics = await analyzeRound(thor, roundId);
       newRounds.push(roundAnalytics);
@@ -1626,8 +1651,8 @@ async function main(): Promise<void> {
     for (const rel of checkpoint.relayers) {
       const roundMap = new Map<number, RelayerRoundBreakdown>();
       for (const rd of rel.rounds) {
-        // Keep checkpoint data for completed rounds we're not re-analyzing
-        if (rd.roundId < startRoundId) {
+        // Keep checkpoint data for rounds we're not re-analyzing
+        if (rd.roundId < effectiveStartRoundId) {
           roundMap.set(rd.roundId, rd);
         }
       }
@@ -1635,8 +1660,8 @@ async function main(): Promise<void> {
     }
   }
 
-  // Collect per-relayer data for newly analyzed rounds
-  for (let roundId = startRoundId; roundId <= currentRoundId; roundId++) {
+  // Collect per-relayer data for re-analyzed rounds (includes previous round for new claims)
+  for (let roundId = effectiveStartRoundId; roundId <= currentRoundId; roundId++) {
     console.log(`    - Analyzing relayer data for round ${roundId}...`);
 
     const roundSnapshot = await getRoundSnapshot(
@@ -1668,23 +1693,14 @@ async function main(): Promise<void> {
       roundDeadline,
     );
 
-    // Get per-relayer VTHO spent on claiming (for previous round)
-    let claimingVtho = new Map<string, bigint>();
-    const prevRoundId = roundId - 1;
-    if (prevRoundId >= FIRST_AUTO_VOTING_ROUND) {
-      const prevDeadline = await getRoundDeadline(
-        thor,
-        CONFIG.xAllocationVotingContractAddress,
-        prevRoundId,
-      );
-      claimingVtho = await getPerRelayerVthoSpentOnClaiming(
-        thor,
-        CONFIG.voterRewardsContractAddress,
-        prevRoundId,
-        prevDeadline,
-        roundDeadline,
-      );
-    }
+    // Get per-relayer VTHO spent on claiming for this round (claims for cycle=roundId after deadline)
+    const claimingVtho = await getPerRelayerVthoSpentOnClaiming(
+      thor,
+      CONFIG.voterRewardsContractAddress,
+      roundId,
+      roundDeadline,
+      undefined,
+    );
 
     // Get per-relayer claimable rewards
     const allRelayersForRound = new Set([
@@ -1758,6 +1774,8 @@ async function main(): Promise<void> {
   console.log(
     `    - Relayer analytics collected for ${relayers.length} relayers`,
   );
+
+  setActiveRelayersCountPerRound(rounds, relayers);
 
   const report: AnalyticsReport = {
     generatedAt: new Date().toISOString(),

@@ -13,9 +13,8 @@ import type { IconType } from "react-icons";
 import { useTranslation } from "react-i18next";
 import { LuActivity, LuFlame } from "react-icons/lu";
 
-import { useReportData } from "@/hooks/useReportData";
+import { useRelayerReportDerived } from "@/hooks/useRelayerReportDerived";
 import { formatNumber, formatToken } from "@/lib/format";
-import { computeRelayersOverview } from "@/lib/relayer-utils";
 
 function StatItem({
   label,
@@ -65,9 +64,7 @@ function StatItem({
 
 export function RelayersOverviewCards() {
   const { t } = useTranslation();
-  const { data: report, isLoading: reportLoading } = useReportData();
-
-  const overview = report ? computeRelayersOverview(report) : null;
+  const { overview, isLoading: reportLoading } = useRelayerReportDerived();
 
   return (
     <SimpleGrid w="full" columns={{ base: 1, md: 2 }} gap="4">

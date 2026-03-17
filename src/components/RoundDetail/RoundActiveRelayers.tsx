@@ -25,7 +25,6 @@ import type { RelayerRoundBreakdown } from "@/lib/types";
 interface ActiveRelayer {
   address: string;
   breakdown: RelayerRoundBreakdown;
-  prevBreakdown?: RelayerRoundBreakdown;
 }
 
 function StatPill({
@@ -71,7 +70,7 @@ function ActiveRelayerRow({
   const shortAddress = `${relayer.address.slice(0, 6)}...${relayer.address.slice(-4)}`;
   const href = `/relayer?address=${domain?.domain || relayer.address}`;
 
-  const { breakdown: rd, prevBreakdown } = relayer;
+  const { breakdown: rd } = relayer;
   const vthoSpentRaw = (
     BigInt(rd.vthoSpentOnVotingRaw) + BigInt(rd.vthoSpentOnClaimingRaw)
   ).toString();
@@ -118,7 +117,7 @@ function ActiveRelayerRow({
                 />
                 <StatPill
                   label={t("Claimed for")}
-                  value={formatNumber(prevBreakdown?.rewardsClaimedCount ?? 0)}
+                  value={formatNumber(rd.rewardsClaimedCount)}
                 />
                 <StatPill
                   label={t("VTHO spent")}
@@ -172,7 +171,7 @@ function ActiveRelayerRow({
                 />
                 <StatPill
                   label={t("Claimed for")}
-                  value={formatNumber(prevBreakdown?.rewardsClaimedCount ?? 0)}
+                  value={formatNumber(rd.rewardsClaimedCount)}
                 />
                 <StatPill
                   label={t("VTHO spent")}
@@ -200,24 +199,16 @@ export function RoundActiveRelayers({ roundId }: RoundActiveRelayersProps) {
   const { activeRelayers, totalWeighted } = useMemo(() => {
     if (!report?.relayers)
       return { activeRelayers: [] as ActiveRelayer[], totalWeighted: 0 };
-    const prevRoundId = roundId - 1;
     const result: ActiveRelayer[] = [];
     let weighted = 0;
     for (const relayer of report.relayers) {
       const rd = relayer.rounds.find((r) => r.roundId === roundId);
-      const prevRd = relayer.rounds.find((r) => r.roundId === prevRoundId);
-      if (rd) {
+      if (rd && (rd.votedForCount > 0 || rd.rewardsClaimedCount > 0)) {
         weighted += rd.weightedActions;
-        if (
-          rd.votedForCount > 0 ||
-          (prevRd && prevRd.rewardsClaimedCount > 0)
-        ) {
-          result.push({
-            address: relayer.address,
-            breakdown: rd,
-            prevBreakdown: prevRd,
-          });
-        }
+        result.push({
+          address: relayer.address,
+          breakdown: rd,
+        });
       }
     }
     result.sort(

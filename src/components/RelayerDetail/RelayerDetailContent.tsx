@@ -29,6 +29,7 @@ import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { formatNumber, formatToken } from "@/lib/format";
 import type { RelayerAnalytics, RelayerRoundBreakdown, RoundAnalytics } from "@/lib/types";
 import { isRoundRewardsLocked } from "@/lib/round-utils";
+import type { RelayerSummary } from "@/lib/relayer-utils";
 import {
   computeRelayerROI,
   computeRelayerRoundB3tr,
@@ -271,7 +272,7 @@ function RoundStat({
 
 function RoundRow({
   rd,
-  prevClaimedFor,
+  claimedFor,
   b3trRaw,
   b3trToVtho,
   isActive,
@@ -280,7 +281,7 @@ function RoundRow({
   t,
 }: {
   rd: RelayerAnalytics["rounds"][number];
-  prevClaimedFor: number;
+  claimedFor: number;
   b3trRaw: string;
   b3trToVtho: number | undefined;
   isActive?: boolean;
@@ -328,7 +329,7 @@ function RoundRow({
         <RoundStat label={t("Voted for")} value={rd.votedForCount} unit={t("users")} />
         <RoundStat
           label={t("Claimed for")}
-          value={prevClaimedFor}
+          value={claimedFor}
           unit={t("users")}
         />
         <RoundStat
@@ -369,6 +370,10 @@ interface RelayerDetailContentProps {
     number,
     { poolRaw: bigint; estimatedPoolRaw: bigint; totalWeighted: number }
   >;
+  /** When provided, used instead of computing (ensures consistency with list/top relayers). */
+  lockedRoundIds?: Set<number>;
+  /** When provided, used instead of computing (ensures consistency with list/top relayers). */
+  summary?: RelayerSummary;
 }
 
 export function RelayerDetailContent({
@@ -376,10 +381,22 @@ export function RelayerDetailContent({
   currentRound,
   reportRounds,
   roundCtx,
+  lockedRoundIds: lockedRoundIdsProp,
+  summary: summaryProp,
 }: RelayerDetailContentProps) {
   const { t } = useTranslation();
   const b3trToVtho = useB3trToVthoRate();
-  const summary = computeRelayerSummary(relayer, roundCtx);
+  const lockedRounds = useMemo(() => {
+    if (lockedRoundIdsProp) return lockedRoundIdsProp;
+    const set = new Set<number>();
+    for (const rd of reportRounds ?? []) {
+      if (isRoundRewardsLocked(rd)) set.add(rd.roundId);
+    }
+    return set;
+  }, [lockedRoundIdsProp, reportRounds]);
+  const summary =
+    summaryProp ??
+    computeRelayerSummary(relayer, roundCtx, lockedRounds);
   const roi = computeRelayerROI(
     summary.totalB3trEarnedRaw,
     summary.totalVthoSpentRaw,
@@ -392,22 +409,6 @@ export function RelayerDetailContent({
   const roundsDesc = [...relayer.rounds].sort((a, b) => b.roundId - a.roundId);
   const visibleRounds = roundsDesc.slice(0, visibleCount);
   const hasMore = visibleCount < roundsDesc.length;
-
-  const prevClaimedMap = useMemo(() => {
-    const map = new Map<number, number>();
-    for (const rd of relayer.rounds) {
-      map.set(rd.roundId, rd.rewardsClaimedCount);
-    }
-    return map;
-  }, [relayer.rounds]);
-
-  const lockedRounds = useMemo(() => {
-    const set = new Set<number>();
-    for (const rd of reportRounds ?? []) {
-      if (isRoundRewardsLocked(rd)) set.add(rd.roundId);
-    }
-    return set;
-  }, [reportRounds]);
 
   const activityItems = buildActivityItems(relayer.rounds);
   const visibleActivity = activityItems.slice(0, visibleActivityCount);
@@ -430,8 +431,9 @@ export function RelayerDetailContent({
                   value={formatNumber(summary.totalRewardsClaimed)}
                 />
                 <MetricCell
-                  label={t("Rounds active")}
+                  label={t("Participated in")}
                   value={formatNumber(summary.activeRoundsCount)}
+                  unit={t("rounds")}
                 />
               </SimpleGrid>
             </VStack>
@@ -463,13 +465,13 @@ export function RelayerDetailContent({
                   }
                 />
                 <MetricCell
-                  label={t("Avg VTHO / user")}
+                  label={t("Average per action")}
                   value={
-                    summary.totalVotedFor > 0
+                    summary.totalActions > 0
                       ? formatToken(
                           (
                             BigInt(summary.totalVthoSpentRaw) /
-                            BigInt(summary.totalVotedFor)
+                            BigInt(summary.totalActions)
                           ).toString(),
                         )
                       : "\u2014"
@@ -506,7 +508,7 @@ export function RelayerDetailContent({
                     <RoundRow
                       key={rd.roundId}
                       rd={rd}
-                      prevClaimedFor={prevClaimedMap.get(rd.roundId - 1) ?? 0}
+                      claimedFor={rd.rewardsClaimedCount}
                       isActive={isActiveRound}
                       isLocked={lockedRounds.has(rd.roundId)}
                       b3trToVtho={b3trToVtho}
