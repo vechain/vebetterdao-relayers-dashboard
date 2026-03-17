@@ -85,8 +85,9 @@ export function RoundCard({
 
   const stats = (
     <>
+      <StatPill label={t("Round")} value={`#${round.roundId}`} />
       <StatPill
-        label={t("Users")}
+        label={t("Users to serve")}
         value={formatNumber(round.autoVotingUsersCount)}
       />
       <StatPill label={t("Relayers")} value={round.numRelayers} />
@@ -125,15 +126,6 @@ export function RoundCard({
           <Box hideBelow="md">
             <HStack justify="space-between" w="full" gap="2">
               <SimpleGrid columns={7} gap="4" w="full" alignItems="center">
-                <VStack gap="0" align="start" minW="0" justifyContent="center">
-                  <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
-                    {t("Round")}
-                  </Text>
-                  <Text fontWeight="bold" textStyle="sm">
-                    {"#"}
-                    {round.roundId}
-                  </Text>
-                </VStack>
                 {stats}
                 <VStack gap="0" align="start" minW="0" justifyContent="center">
                   <Text textStyle="xxs" color="text.subtle" lineClamp={1}>

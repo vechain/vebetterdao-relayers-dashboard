@@ -97,38 +97,6 @@ function SummaryRow({
   );
 }
 
-function MetricCell({
-  label,
-  sublabel,
-  value,
-  valueColor,
-}: {
-  label: string;
-  sublabel?: string;
-  value: string | number;
-  valueColor?: string;
-}) {
-  return (
-    <VStack gap="1" align="start">
-      <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-        {label}
-      </Text>
-      {sublabel && (
-        <Text textStyle="xxs" color="text.subtle">
-          {sublabel}
-        </Text>
-      )}
-      <Text
-        textStyle={{ base: "xl", md: "2xl" }}
-        fontWeight="bold"
-        color={valueColor}
-      >
-        {value}
-      </Text>
-    </VStack>
-  );
-}
-
 function FinancialCell({
   label,
   value,
@@ -267,12 +235,6 @@ export function RoundDetailContent({
 
   const progress = computeRoundProgress(round, currentRoundId);
 
-  const participation = pct(round.votedForCount, round.autoVotingUsersCount);
-
-  const efficiencyDenom = round.autoVotingUsersCount - round.reducedUsersCount;
-  const efficiency =
-    efficiencyDenom > 0 ? pct(round.votedForCount, efficiencyDenom) : "\u2014";
-
   const roiRewardsRaw = round.isRoundEnded
     ? round.totalRelayerRewardsRaw
     : round.estimatedRelayerRewardsRaw;
@@ -286,7 +248,9 @@ export function RoundDetailContent({
   const { claimable, totalRewardsFormatted } = useRoundRewardStatus(
     round.isRoundEnded ? round.roundId : undefined,
   );
-  const rewardsLocked = isRoundRewardsLocked(round, currentRoundId) || (round.isRoundEnded && claimable === false);
+  const rewardsLocked =
+    isRoundRewardsLocked(round, currentRoundId) ||
+    (round.isRoundEnded && claimable === false);
   const missedClaims =
     round.isRoundEnded && round.expectedActions > 0
       ? Math.max(0, round.expectedActions - round.completedActions)
@@ -330,7 +294,9 @@ export function RoundDetailContent({
               >
                 {t("rewardsLockedDescription", {
                   missing: String(missedClaims),
-                  amount: totalRewardsFormatted ?? formatToken(round.totalRelayerRewardsRaw),
+                  amount:
+                    totalRewardsFormatted ??
+                    formatToken(round.totalRelayerRewardsRaw),
                 })}
               </Text>
             </VStack>

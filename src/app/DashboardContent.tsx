@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AiSkillBanner, FeelLostBanner } from "@/components/Banners";
 import { BecomeRelayerCard } from "@/components/RelayerInfo";
 import { TopRelayers } from "@/components/Relayers";
-import { RoundsChart, RoundsList } from "@/components/Rounds";
+import { RecentRounds, RoundsChart } from "@/components/Rounds";
 import { StatsCards } from "@/components/StatsCards";
 
 export default function DashboardContent() {
@@ -28,7 +28,7 @@ export default function DashboardContent() {
 
       <TopRelayers />
 
-      <RoundsList />
+      <RecentRounds />
 
       <SimpleGrid columns={{ base: 1, md: 3 }} gap="4">
         <FeelLostBanner />

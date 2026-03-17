@@ -46,7 +46,7 @@ type NavRoute = {
 const BASE_ROUTES: NavRoute[] = [
   { value: "home", labelKey: "Home", href: "/", icon: LuHouse },
   { value: "relayers", labelKey: "Relayers", href: "/relayers", icon: LuUsers },
-  { value: "rounds", labelKey: "Rounds", href: "/round", icon: LuTimer },
+  { value: "rounds", labelKey: "Rounds", href: "/rounds", icon: LuTimer },
   { value: "learn", labelKey: "Learn", href: "/learn", icon: LuInfo },
 ];
 

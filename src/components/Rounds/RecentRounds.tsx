@@ -1,9 +1,16 @@
 "use client";
 
-import { Button, Heading, Skeleton, Stack, VStack } from "@chakra-ui/react";
-import { useState } from "react";
+import {
+  Button,
+  Heading,
+  HStack,
+  Skeleton,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import NextLink from "next/link";
 import { useTranslation } from "react-i18next";
-import { LuChevronsDown } from "react-icons/lu";
+import { LuArrowRight } from "react-icons/lu";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { useReportData } from "@/hooks/useReportData";
@@ -11,12 +18,11 @@ import { computeROI } from "@/lib/roi";
 
 import { RoundCard } from "./RoundCard";
 
-const PAGE_SIZE = 8;
+const RECENT_COUNT = 4;
 
-export function RoundsList() {
+export function RecentRounds() {
   const { t } = useTranslation();
   const { data: report, isLoading, error } = useReportData();
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const b3trToVtho = useB3trToVthoRate();
 
   if (error) {
@@ -34,14 +40,24 @@ export function RoundsList() {
   }
 
   const rounds = [...report.rounds].sort((a, b) => b.roundId - a.roundId);
-  const visible = rounds.slice(0, visibleCount);
-  const hasMore = visibleCount < rounds.length;
+  const recent = rounds.slice(0, RECENT_COUNT);
+
+  if (recent.length === 0) return null;
 
   return (
-    <VStack gap="8" align="stretch">
-      <Heading size="lg">{t("VeBetter Rounds")}</Heading>
+    <VStack gap="4" align="stretch">
+      <HStack justify="space-between" align="center">
+        <Heading size="lg">{t("Voting rounds")}</Heading>
+        <NextLink href="/rounds">
+          <Button variant="ghost" size="sm">
+            {t("View all")}
+            <LuArrowRight />
+          </Button>
+        </NextLink>
+      </HStack>
+
       <Stack gap="3">
-        {visible.map((round) => {
+        {recent.map((round) => {
           const rewardsRaw = round.isRoundEnded
             ? round.totalRelayerRewardsRaw
             : round.estimatedRelayerRewardsRaw;
@@ -64,18 +80,6 @@ export function RoundsList() {
           );
         })}
       </Stack>
-      {hasMore && (
-        <Button
-          variant="ghost"
-          size="sm"
-          alignSelf="center"
-          onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-        >
-          <LuChevronsDown size={12} />
-          {t("Load more rounds")}
-          <LuChevronsDown size={12} />
-        </Button>
-      )}
     </VStack>
   );
 }

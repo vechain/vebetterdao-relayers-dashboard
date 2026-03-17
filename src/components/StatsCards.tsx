@@ -10,14 +10,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import type { IconType } from "react-icons";
-import { LuChartLine, LuCircleCheck, LuCoins, LuRadar } from "react-icons/lu";
+import { LuChartLine, LuCoins, LuFlame, LuRadar } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 
 import { useB3trToVthoRate } from "@/hooks/useB3trToVthoRate";
 import { useRelayerReportDerived } from "@/hooks/useRelayerReportDerived";
 import { formatNumber, formatToken } from "@/lib/format";
 import { computeAverageROI } from "@/lib/roi";
-import { computeRoundProgress, parseRoundStatus } from "@/lib/round-utils";
 
 interface StatItemProps {
   label: string;
@@ -75,43 +74,13 @@ export function StatsCards() {
   }
 
   const rounds = report?.rounds ?? [];
-
-  const currentRoundData = rounds.find(
-    (r) => r.roundId === report?.currentRound,
-  );
-
   const concludedRounds = rounds.filter(
     (r) => r.isRoundEnded && r.totalRelayerRewardsRaw !== "0",
   );
   const avgRoi = computeAverageROI(concludedRounds, b3trToVtho);
 
-  const currentRoundId = report?.currentRound;
-  const roundProgress =
-    currentRoundData != null ? computeRoundProgress(currentRoundData, currentRoundId) : null;
-  const roundStatus =
-    currentRoundData != null ? parseRoundStatus(currentRoundData, currentRoundId) : null;
-
   return (
     <SimpleGrid w="full" columns={{ base: 2, md: 2, lg: 2 }} gap="4">
-      <StatItem
-        label={t("Current round")}
-        value={
-          isLoading
-            ? "..."
-            : roundProgress != null
-              ? `${roundProgress.pct}%`
-              : "\u2014"
-        }
-        sublabel={
-          isLoading
-            ? ""
-            : currentRoundData && roundStatus
-              ? `#${currentRoundData.roundId} · ${t(roundStatus.label)}`
-              : t("no data")
-        }
-        icon={LuCircleCheck}
-        isLoading={isLoading}
-      />
       <StatItem
         label={t("Active relayers")}
         value={
@@ -126,7 +95,20 @@ export function StatsCards() {
         isLoading={isLoading}
       />
       <StatItem
-        label={t("B3TR distributed")}
+        label={t("Total VTHO Spent")}
+        value={
+          isLoading
+            ? "..."
+            : overview != null
+              ? `${formatToken(overview.totalVthoSpentRaw)} VTHO`
+              : "\u2014"
+        }
+        sublabel={t("for gas costs")}
+        icon={LuFlame}
+        isLoading={isLoading}
+      />
+      <StatItem
+        label={t("Total B3TR distributed")}
         value={
           isLoading
             ? "..."
@@ -147,13 +129,7 @@ export function StatsCards() {
               ? `${formatNumber(Math.round(avgRoi))}%`
               : "\u2014"
         }
-        sublabel={
-          b3trToVtho != null
-            ? t("rate: 1 B3TR = {{vtho}} VTHO", {
-                vtho: formatNumber(Math.round(b3trToVtho)),
-              })
-            : t("rate: 1 B3TR = … VTHO")
-        }
+        sublabel={"for relayers"}
         icon={LuChartLine}
         isLoading={isLoading}
       />
