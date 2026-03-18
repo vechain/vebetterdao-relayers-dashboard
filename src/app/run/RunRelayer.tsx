@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { Address, HDKey } from "@vechain/sdk-core";
 import { ThorClient } from "@vechain/sdk-network";
+import type { NetworkConfig } from "@vechain/vebetterdao-relayer-node/dist/types";
 import { getNetworkConfig } from "@vechain/vebetterdao-relayer-node/dist/config";
 import { fetchSummary } from "@vechain/vebetterdao-relayer-node/dist/contracts";
 import {
@@ -40,7 +41,12 @@ import {
 
 import { RelayerTerminal } from "@/components/RelayerTerminal";
 
-import { renderSummaryText, renderCycleResultText, ts } from "./format";
+import {
+  renderSummaryText,
+  renderCycleResultText,
+  logSectionHeaderText,
+  ts,
+} from "./format";
 
 function deriveWallet(
   mnemonic: string,
@@ -111,9 +117,21 @@ export function RunRelayer() {
     setIsFullscreen((prev) => !prev);
   }, []);
 
+  const activityLogRef = useRef<string[]>([]);
+  const MAX_ACTIVITY_LOG = 200;
+
   const log = useCallback((msg: string) => {
     if (suppressLogRef.current) return;
-    writelnRef.current?.(`${ts()} ${msg}`);
+    const entry = `${ts()} ${msg}`;
+    activityLogRef.current.push(entry);
+    if (activityLogRef.current.length > MAX_ACTIVITY_LOG) activityLogRef.current.shift();
+    writelnRef.current?.(entry);
+  }, []);
+
+  const logRaw = useCallback((msg: string) => {
+    activityLogRef.current.push(msg);
+    if (activityLogRef.current.length > MAX_ACTIVITY_LOG) activityLogRef.current.shift();
+    writelnRef.current?.(msg);
   }, []);
 
   const handleTerminalReady = useCallback(
@@ -127,7 +145,7 @@ export function RunRelayer() {
   const handleStart = useCallback(async () => {
     const wallet = deriveWallet(mnemonic);
     if (!wallet) {
-      log(
+      writelnRef.current?.(
         "\x1b[31mInvalid mnemonic. Enter a valid 12/24 word BIP39 phrase.\x1b[0m",
       );
       return;
@@ -139,6 +157,7 @@ export function RunRelayer() {
     setRunning(true);
     setStarted(true);
     setWalletAddress(wallet.walletAddress);
+    activityLogRef.current = [];
 
     const forceExitPromise = new Promise<"force">((r) => {
       forceExitResolveRef.current = () => r("force");
@@ -147,34 +166,94 @@ export function RunRelayer() {
       Promise.race([p, forceExitPromise.then(() => null)]);
 
     const network = process.env.NEXT_PUBLIC_APP_ENV || "mainnet";
-    const config = getNetworkConfig(network);
-    const thor = ThorClient.at(config.nodeUrl, { isPollingEnabled: false });
+    const config: NetworkConfig = getNetworkConfig(network);
+    const nodePool =
+      network === "mainnet"
+        ? [
+            "https://mainnet.vechain.org",
+            "https://vethor-node.vechain.com",
+            "https://node-mainnet.vechain.energy",
+            "https://mainnet.vecha.in",
+          ]
+        : ["https://testnet.vechain.org"];
+    let nodeIndex = 0;
+    let thor = ThorClient.at(config.nodeUrl, { isPollingEnabled: false });
 
-    log(`\x1b[36mVeBetterDAO Relayer Node\x1b[0m`);
-    log(`Network: \x1b[1m${config.name}\x1b[0m`);
-    log(`Address: \x1b[33m${wallet.walletAddress}\x1b[0m`);
-    log("");
+    const refreshScreen = (summary: Awaited<ReturnType<typeof fetchSummary>>) => {
+      clearRef.current?.();
+      renderSummaryText(summary).forEach((line) => writelnRef.current?.(line));
+      writelnRef.current?.("");
+      writelnRef.current?.("─── Activity Log " + "─".repeat(49));
+      for (const entry of activityLogRef.current.slice(-30)) {
+        writelnRef.current?.(entry);
+      }
+    };
+
+    const rotateNode = () => {
+      if (nodePool.length <= 1) return;
+      nodeIndex = (nodeIndex + 1) % nodePool.length;
+      const nextUrl = nodePool[nodeIndex];
+      if (nextUrl == null) return;
+      config.nodeUrl = nextUrl;
+      thor = ThorClient.at(config.nodeUrl, { isPollingEnabled: false });
+      const host = new URL(config.nodeUrl).hostname;
+      log(`\x1b[33mRotating to node: ${host}\x1b[0m`);
+    };
+
+    const cycleRetries = nodePool.length;
+    const retryMs = 3000;
+
+    // Initial summary on startup
+    try {
+      const initial = await raceForceExit(
+        fetchSummary(thor, config, wallet.walletAddress),
+      );
+      if (initial === null) {
+        setRunning(false);
+        setStopRequested(false);
+        return;
+      }
+      refreshScreen(initial);
+    } catch {
+      log("\x1b[33mCould not fetch initial summary, starting cycles...\x1b[0m");
+    }
 
     while (!abortRef.current) {
-      try {
-        log("Fetching on-chain state...");
-        const summary = await raceForceExit(
-          fetchSummary(thor, config, wallet.walletAddress),
-        );
-        if (summary === null) break;
+      let lastErr: unknown;
+      for (let attempt = 1; attempt <= cycleRetries; attempt++) {
+        try {
+          const summary = await raceForceExit(
+            fetchSummary(thor, config, wallet.walletAddress),
+          );
+          if (summary === null) break;
+          if (abortRef.current) break;
 
-        clearRef.current?.();
-        const summaryLines = renderSummaryText(summary);
-        summaryLines.forEach((line) => writelnRef.current?.(line));
-        writelnRef.current?.("");
+          if (summary.isRoundActive) {
+            logRaw(logSectionHeaderText("vote", summary.currentRoundId));
+            const voteResult = await raceForceExit(
+              runCastVoteCycle(
+                thor,
+                config,
+                wallet.walletAddress,
+                wallet.privateKey,
+                50,
+                false,
+                log,
+              ),
+            );
+            if (voteResult === null) break;
+            if (abortRef.current) break;
+            renderCycleResultText(voteResult).forEach(log);
+          } else {
+            log("\x1b[90mRound not active, skipping cast-vote\x1b[0m");
+          }
 
-        if (abortRef.current) break;
+          if (abortRef.current) break;
 
-        // Cast votes
-        if (summary.isRoundActive) {
-          log("Starting cast-vote cycle...");
-          const voteResult = await raceForceExit(
-            runCastVoteCycle(
+          logRaw("");
+          logRaw(logSectionHeaderText("claim", summary.previousRoundId));
+          const claimResult = await raceForceExit(
+            runClaimRewardCycle(
               thor,
               config,
               wallet.walletAddress,
@@ -184,68 +263,45 @@ export function RunRelayer() {
               log,
             ),
           );
-          if (voteResult === null) break;
+          if (claimResult === null) break;
           if (abortRef.current) break;
-          renderCycleResultText(voteResult).forEach(log);
-        } else {
-          log("\x1b[90mRound not active, skipping cast-vote\x1b[0m");
+          renderCycleResultText(claimResult).forEach(log);
+
+          const updated = await raceForceExit(
+            fetchSummary(thor, config, wallet.walletAddress),
+          );
+          if (updated === null) break;
+          refreshScreen(updated);
+
+          lastErr = undefined;
+          break;
+        } catch (err) {
+          lastErr = err;
+          if (attempt < cycleRetries) {
+            log(
+              `\x1b[33mCycle attempt ${attempt}/${cycleRetries} failed, retrying in ${retryMs / 1000}s...\x1b[0m`,
+            );
+            rotateNode();
+            await new Promise((r) => setTimeout(r, retryMs));
+          }
         }
+      }
 
-        if (abortRef.current) break;
-
-        // Claim rewards
-        log("Starting claim cycle...");
-        const claimResult = await raceForceExit(
-          runClaimRewardCycle(
-            thor,
-            config,
-            wallet.walletAddress,
-            wallet.privateKey,
-            50,
-            false,
-            log,
-          ),
-        );
-        if (claimResult === null) break;
-        if (abortRef.current) break;
-        renderCycleResultText(claimResult).forEach(log);
-
-        // Re-fetch summary
-        log("Refreshing state...");
-        const updated = await raceForceExit(
-          fetchSummary(thor, config, wallet.walletAddress),
-        );
-        if (updated === null) break;
-        clearRef.current?.();
-        renderSummaryText(updated).forEach((line) =>
-          writelnRef.current?.(line),
-        );
-        writelnRef.current?.("");
-
-        if (abortRef.current) break;
-
-        log(`Next cycle in 5m...`);
-        // Sleep 5 min, checking abort every second (force exit breaks immediately)
-        for (let i = 0; i < 300 && !abortRef.current; i++) {
-          const r = await Promise.race([
-            new Promise<"tick">((r) => setTimeout(() => r("tick"), 1000)),
-            forceExitPromise.then(() => "force" as const),
-          ]);
-          if (r === "force") break;
-        }
-      } catch (err) {
+      if (lastErr !== undefined) {
         log(
-          `\x1b[31mCycle error: ${err instanceof Error ? err.message : String(err)}\x1b[0m`,
+          `\x1b[31mCycle error: ${lastErr instanceof Error ? (lastErr as Error).message : String(lastErr)}\x1b[0m`,
         );
-        if (abortRef.current) break;
-        // Wait 30s before retry (force exit breaks immediately)
-        for (let i = 0; i < 30 && !abortRef.current; i++) {
-          const r = await Promise.race([
-            new Promise<"tick">((r) => setTimeout(() => r("tick"), 1000)),
-            forceExitPromise.then(() => "force" as const),
-          ]);
-          if (r === "force") break;
-        }
+      }
+      if (abortRef.current) break;
+
+      logRaw("");
+      log("\x1b[90mNext cycle in 5m...\x1b[0m");
+      for (let i = 0; i < 300 && !abortRef.current; i++) {
+        const r = await Promise.race([
+          new Promise<"tick">((r) => setTimeout(() => r("tick"), 1000)),
+          forceExitPromise.then(() => "force" as const),
+        ]);
+        if (r === "force") break;
       }
     }
 
@@ -256,7 +312,7 @@ export function RunRelayer() {
     }
     setRunning(false);
     setStopRequested(false);
-  }, [mnemonic, log]);
+  }, [mnemonic, log, logRaw]);
 
   const handleStop = useCallback(() => {
     setStopRequested(true);
@@ -363,10 +419,10 @@ export function RunRelayer() {
                       wordBreak="break-all"
                     >
                       {
-                        'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node'
+                        'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0'
                       }
                     </Code>
-                    <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node' />
+                    <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0' />
                   </HStack>
                 </VStack>
 
@@ -398,9 +454,9 @@ export function RunRelayer() {
                       fontFamily="mono"
                       wordBreak="break-all"
                     >
-                      {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node'}
+                      {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0'}
                     </Code>
-                    <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node' />
+                    <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0' />
                   </HStack>
                 </VStack>
               </Card.Body>
@@ -555,8 +611,9 @@ export function RunRelayer() {
             zIndex={isFullscreen ? 9999 : 1}
             bg="#1a1a2e"
             borderRadius={isFullscreen ? 0 : "12px"}
-            display={isFullscreen ? "flex" : undefined}
+            display={isFullscreen ? "flex" : "block"}
             flexDirection={isFullscreen ? "column" : undefined}
+            minH={isFullscreen ? undefined : { base: "360px", md: "420px" }}
             css={isFullscreen ? { overscrollBehavior: "none" } : undefined}
           >
             {isFullscreen && (

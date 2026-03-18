@@ -82,9 +82,9 @@ export function RunOptions({ onRunInBrowser }: Props) {
               </HStack>
               <HStack bg="bg.tertiary" borderRadius="md" px={3} py={2} justify="space-between">
                 <Code bg="transparent" textStyle="xs" fontFamily="mono" wordBreak="break-all">
-                  {'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node'}
+                  {'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0'}
                 </Code>
-                <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node' />
+                <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0' />
               </HStack>
             </VStack>
 
@@ -104,9 +104,9 @@ export function RunOptions({ onRunInBrowser }: Props) {
               </HStack>
               <HStack bg="bg.tertiary" borderRadius="md" px={3} py={2} justify="space-between" w="full">
                 <Code bg="transparent" textStyle="xs" fontFamily="mono" wordBreak="break-all">
-                  {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node'}
+                  {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0'}
                 </Code>
-                <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node' />
+                <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0' />
               </HStack>
             </VStack>
           </Card.Body>

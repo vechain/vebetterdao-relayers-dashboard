@@ -1,10 +1,13 @@
-import { RelayerSummary, CycleResult } from "@vechain/vebetterdao-relayer-node/dist/types"
+import type { RelayerSummary, CycleResult } from "@vechain/vebetterdao-relayer-node/dist/types"
+
+const RELAYER_NODE_VERSION = "1.0.0"
 
 // ANSI color helpers for xterm
 const c = {
   reset: "\x1b[0m",
   bold: "\x1b[1m",
   dim: "\x1b[2m",
+  italic: "\x1b[3m",
   cyan: "\x1b[36m",
   green: "\x1b[32m",
   yellow: "\x1b[33m",
@@ -12,6 +15,8 @@ const c = {
   gray: "\x1b[90m",
   white: "\x1b[37m",
   brightGreen: "\x1b[92m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
 }
 
 function formatB3TR(wei: bigint): string {
@@ -35,8 +40,100 @@ function pct(num: bigint, den: bigint): string {
   return ((Number(num) / Number(den)) * 100).toFixed(2) + "%"
 }
 
+function stripAnsi(str: string): number {
+  return str.replace(/\x1b\[[0-9;]*m/g, "").length
+}
+
+function pad(left: string, right: string, width: number = 62): string {
+  const gap = width - stripAnsi(left) - stripAnsi(right)
+  return left + " ".repeat(Math.max(1, gap)) + right
+}
+
+// Round status (aligned with relayer-node display logic)
+interface RoundStatus {
+  label: string
+  color: string
+  hint: string
+}
+
+function getCurrentRoundStatus(s: RelayerSummary): RoundStatus {
+  if (s.autoVotingUsers === 0) {
+    return {
+      label: "N/A",
+      color: c.gray,
+      hint: "No auto-voting users registered for this round.",
+    }
+  }
+  if (!s.isRoundActive) {
+    return {
+      label: "Voting complete",
+      color: c.blue,
+      hint: "Round ended. Waiting for new round to start.",
+    }
+  }
+  const votingPortion = s.currentTotalWeighted * 3n / 4n
+  if (s.currentTotalWeighted > 0n && s.currentCompletedWeighted >= votingPortion) {
+    return {
+      label: "Voting complete",
+      color: c.blue,
+      hint: "All votes cast. Waiting for round to end to start claiming rewards.",
+    }
+  }
+  return {
+    label: "Voting in progress",
+    color: c.yellow,
+    hint: "Cast votes for remaining users.",
+  }
+}
+
+function getPreviousRoundStatus(s: RelayerSummary): RoundStatus {
+  const prevId = s.previousRoundId ?? 0
+  const prevTotalWeighted = s.previousTotalWeighted ?? 0n
+  if (prevId === 0 || prevTotalWeighted === 0n) {
+    return {
+      label: "N/A",
+      color: c.gray,
+      hint: "No auto-voting users were registered for this round.",
+    }
+  }
+  if (s.previousRewardClaimable) {
+    const hasShare = (s.previousRelayerClaimable ?? 0n) > 0n
+    return {
+      label: "Actions completed",
+      color: c.green,
+      hint: hasShare
+        ? "All actions done. Pool unlocked — claim your relayer rewards!"
+        : "All actions done. Pool unlocked.",
+    }
+  }
+  const votingPortion = prevTotalWeighted * 3n / 4n
+  const prevCompleted = s.previousCompletedWeighted ?? 0n
+  if (prevCompleted < votingPortion) {
+    return {
+      label: "Rewards Locked",
+      color: c.red,
+      hint: "Some users were never voted for. Pool is locked — no relayer can claim rewards.",
+    }
+  }
+  return {
+    label: "Claiming in progress",
+    color: c.magenta,
+    hint: "All votes done. Claim rewards for remaining users to unlock the pool.",
+  }
+}
+
 export function ts(): string {
   return `${c.gray}[${new Date().toLocaleTimeString()}]${c.reset}`
+}
+
+export function logSectionHeaderText(phase: "vote" | "claim", roundId: number): string {
+  const icon = phase === "vote" ? "🗳" : "💰"
+  const label = phase === "vote" ? "Cast Vote" : "Claim Rewards"
+  const text = ` ${icon}  ${label} · Round #${roundId} `
+  const lineLen = 60 - text.length
+  const left = Math.max(1, Math.floor(lineLen / 2))
+  const right = Math.max(1, lineLen - left)
+  return `${c.bold}${"─".repeat(left)}${text}${"─".repeat(right)}${c.reset}`
 }
 
 export function renderSummaryText(s: RelayerSummary): string[] {
@@ -44,7 +141,7 @@ export function renderSummaryText(s: RelayerSummary): string[] {
   const div = `${c.dim}${"─".repeat(60)}${c.reset}`
 
   out.push("")
-  out.push(`  ${c.cyan}${c.bold}VeBetterDAO Relayer Node${c.reset}`)
+  out.push(`  ${c.cyan}${c.bold}VeBetterDAO Relayer Node${c.reset}  ${c.dim}v${RELAYER_NODE_VERSION}${c.reset}`)
   out.push(`  ${div}`)
   out.push("")
 
@@ -54,22 +151,9 @@ export function renderSummaryText(s: RelayerSummary): string[] {
   )
   out.push(`  ${c.dim}Node${c.reset}     ${c.gray}${new URL(s.nodeUrl).hostname}${c.reset}`)
   out.push(`  ${c.dim}Address${c.reset}  ${c.yellow}${shortAddr(s.relayerAddress)}${c.reset}              ${reg}`)
-
-  out.push("")
-  out.push(`  ${div}`)
-  out.push("")
-
-  const roundStatus = s.isRoundActive ? `${c.green}Active${c.reset}` : `${c.dim}Ended${c.reset}`
-  out.push(`  ${c.cyan}${c.bold}Round #${s.currentRoundId}${c.reset}  ${roundStatus}`)
-  out.push(
-    `  ${c.dim}Snapshot${c.reset}  ${c.white}${s.roundSnapshot}${c.reset}              ${c.dim}Deadline${c.reset}  ${c.white}${s.roundDeadline}${c.reset}`,
-  )
-  out.push(
-    `  ${c.dim}Auto-voters${c.reset} ${c.bold}${c.white}${s.autoVotingUsers}${c.reset}              ${c.dim}Relayers${c.reset} ${c.bold}${c.white}${s.registeredRelayers.length}${c.reset}`,
-  )
-  out.push(
-    `  ${c.dim}Voters${c.reset}      ${c.white}${s.totalVoters}${c.reset}              ${c.dim}Total${c.reset} ${c.cyan}${formatVOT3(s.totalVotes)}${c.reset}`,
-  )
+  if (!s.isRegistered) {
+    out.push(`  ${c.red}${c.italic}  Go to relayer.vebetterdao.org/new-relayer to register as a relayer${c.reset}`)
+  }
 
   out.push("")
   out.push(`  ${div}`)
@@ -77,43 +161,128 @@ export function renderSummaryText(s: RelayerSummary): string[] {
 
   const feeStr = s.feeDenominator > 0n ? pct(s.feePercentage, s.feeDenominator) : "—"
   out.push(
-    `  ${c.dim}Vote Weight${c.reset}  ${c.bold}${c.white}${s.voteWeight}${c.reset}              ${c.dim}Claim Weight${c.reset} ${c.bold}${c.white}${s.claimWeight}${c.reset}`,
+    `  ${c.dim}Weights${c.reset}  ${c.white}vote=${s.voteWeight}${c.reset}${c.dim} / ${c.reset}${c.white}claim=${s.claimWeight}${c.reset}    ${c.dim}Fee${c.reset} ${c.yellow}${feeStr}${c.reset}${c.dim} cap ${c.reset}${c.yellow}${formatB3TR(s.feeCap)}${c.reset}`,
   )
-  out.push(
-    `  ${c.dim}Fee${c.reset}          ${c.yellow}${feeStr}${c.reset}              ${c.dim}Cap${c.reset} ${c.yellow}${formatB3TR(s.feeCap)}${c.reset}`,
-  )
-  out.push(`  ${c.dim}Early Access${c.reset} ${c.white}${s.earlyAccessBlocks}${c.reset}${c.dim} blocks${c.reset}`)
 
   out.push("")
   out.push(`  ${div}`)
   out.push("")
 
-  out.push(`  ${c.cyan}${c.bold}This Round${c.reset}`)
-  const completionPct = s.currentTotalWeighted > 0n ? pct(s.currentCompletedWeighted, s.currentTotalWeighted) : "—"
-  const completionColor =
-    s.currentTotalWeighted > 0n && s.currentCompletedWeighted >= s.currentTotalWeighted ? c.green : c.yellow
-  const missedColor = s.currentMissedUsers > 0n ? c.red : c.green
+  const currentStatus = getCurrentRoundStatus(s)
+  out.push(`  ${c.cyan}${c.bold}Round #${s.currentRoundId}${c.reset}  ${currentStatus.color}${currentStatus.label}${c.reset}`)
+  out.push(`  ${c.dim}${c.italic}  ${currentStatus.hint}${c.reset}`)
+  out.push("")
   out.push(
-    `  ${c.dim}Completion${c.reset} ${completionColor}${completionPct}${c.reset}              ${c.dim}Missed${c.reset} ${missedColor}${s.currentMissedUsers}${c.reset}`,
+    `  ${c.dim}Auto-voters${c.reset} ${c.bold}${c.white}${s.autoVotingUsers}${c.reset}              ${c.dim}Relayers${c.reset} ${c.bold}${c.white}${s.registeredRelayers.length}${c.reset}`,
   )
+  out.push(`  ${c.dim}Voters${c.reset}      ${c.white}${s.totalVoters}${c.reset}`)
   out.push(
-    `  ${c.dim}Pool${c.reset}       ${c.green}${formatB3TR(s.currentTotalRewards)}${c.reset}              ${c.dim}Your share${c.reset} ${c.brightGreen}${c.bold}${formatB3TR(s.currentRelayerClaimable)}${c.reset}`,
+    `  ${c.dim}Snapshot${c.reset}    ${c.white}${s.roundSnapshot}${c.reset}              ${c.dim}Deadline${c.reset} ${c.white}${s.roundDeadline}${c.reset}`,
   )
+
+  const voteEaEnd = s.roundSnapshot + Number(s.earlyAccessBlocks)
+  const voteEaRemaining = voteEaEnd - s.latestBlock
+  if (voteEaRemaining > 0) {
+    out.push(`  ${c.dim}Early access${c.reset} ${c.white}ends in ${voteEaRemaining.toLocaleString()} blocks${c.reset}`)
+  } else {
+    out.push(`  ${c.dim}Early access${c.reset} ${c.dim}ended${c.reset}`)
+  }
+
+  out.push("")
+
+  const votingPortion = s.currentTotalWeighted > 0n ? s.currentTotalWeighted * 3n / 4n : 0n
+  const cappedVoting = s.currentCompletedWeighted > votingPortion ? votingPortion : s.currentCompletedWeighted
+  const votingPctStr = votingPortion > 0n ? pct(cappedVoting, votingPortion) : "—"
+  const votingDone = votingPortion > 0n && s.currentCompletedWeighted >= votingPortion
+  const votingColor = votingDone ? c.green : c.yellow
+  out.push(`  ${pad(`${c.dim}Voting${c.reset}      ${votingColor}${votingPctStr}${c.reset}`, "")}`)
+
+  const projectedShareStr =
+    s.currentTotalWeighted > 0n && s.currentRelayerWeighted > 0n
+      ? pct(s.currentRelayerWeighted, s.currentTotalWeighted)
+      : "—"
   out.push(
-    `  ${c.dim}Actions${c.reset}    ${c.white}${s.currentRelayerActions}${c.reset}${c.dim} (wt: ${c.reset}${c.white}${s.currentRelayerWeighted}${c.reset}${c.dim})${c.reset}              ${c.dim}Total${c.reset} ${c.white}${s.currentTotalActions}${c.reset}`,
+    `  ${pad(
+      `${c.dim}Your actions${c.reset} ${c.white}${s.currentRelayerActions}${c.reset}${c.dim} (wt: ${c.reset}${c.white}${s.currentRelayerWeighted}${c.reset}${c.dim})${c.reset}`,
+      `${c.dim}Est. share${c.reset} ${c.cyan}${projectedShareStr}${c.reset}`,
+    )}`,
   )
 
   if (s.previousRoundId > 0) {
     out.push("")
     out.push(`  ${div}`)
     out.push("")
-    const claimStatus = s.previousRewardClaimable ? `${c.green}Claimable${c.reset}` : `${c.dim}Not yet${c.reset}`
-    out.push(`  ${c.cyan}${c.bold}Previous Round #${s.previousRoundId}${c.reset}`)
+
+    const prevStatus = getPreviousRoundStatus(s)
+    out.push(`  ${c.cyan}${c.bold}Round #${s.previousRoundId}${c.reset}  ${prevStatus.color}${prevStatus.label}${c.reset}`)
+    out.push(`  ${c.dim}${c.italic}  ${prevStatus.hint}${c.reset}`)
+
+    const prevDeadline = s.previousRoundDeadline ?? 0
+    if (prevStatus.label === "Claiming in progress" && prevDeadline > 0) {
+      const claimEaEnd = prevDeadline + Number(s.earlyAccessBlocks)
+      const claimEaRemaining = claimEaEnd - s.latestBlock
+      if (claimEaRemaining > 0) {
+        out.push(`  ${c.dim}  Early access${c.reset} ${c.white}ends in ${claimEaRemaining.toLocaleString()} blocks${c.reset}`)
+      } else {
+        out.push(`  ${c.dim}  Early access${c.reset} ${c.dim}ended${c.reset}`)
+      }
+    }
+
+    out.push("")
+
+    const prevTotalWeighted = s.previousTotalWeighted ?? 0n
+    if (prevTotalWeighted > 0n) {
+      const prevCompleted = s.previousCompletedWeighted ?? 0n
+      const overallPct = pct(prevCompleted, prevTotalWeighted)
+      let progressColor: string
+      if (prevStatus.label === "Actions completed") progressColor = c.green
+      else if (prevStatus.label === "Rewards Locked") progressColor = c.red
+      else progressColor = c.magenta
+      const prevMissed = s.previousMissedUsers ?? 0n
+      out.push(
+        `  ${pad(
+          `${c.dim}Progress${c.reset}    ${progressColor}${overallPct}${c.reset}`,
+          `${c.dim}Missed${c.reset} ${prevMissed > 0n ? c.red : c.green}${prevMissed}${c.reset}`,
+        )}`,
+      )
+    }
+
+    out.push(`  ${pad(`${c.dim}Pool${c.reset}        ${c.green}${formatB3TR(s.previousTotalRewards)}${c.reset}`, "")}`)
+
+    const prevCompleted = s.previousCompletedWeighted ?? 0n
+    const prevRelayerWeighted = s.previousRelayerWeighted ?? 0n
+    const earnedWei =
+      prevCompleted > 0n && prevRelayerWeighted > 0n
+        ? (s.previousTotalRewards * prevRelayerWeighted) / prevCompleted
+        : 0n
+    const previousRelayerClaimable = s.previousRelayerClaimable ?? 0n
+    const alreadyClaimed = earnedWei > 0n && previousRelayerClaimable === 0n
+
+    if (alreadyClaimed) {
+      out.push(
+        `  ${pad(
+          `${c.dim}You earned${c.reset}  ${c.brightGreen}${c.bold}${formatB3TR(earnedWei)}${c.reset}`,
+          `${c.green}✓ Claimed${c.reset}`,
+        )}`,
+      )
+    } else if (previousRelayerClaimable > 0n) {
+      out.push(
+        `  ${pad(
+          `${c.dim}Your share${c.reset}  ${c.brightGreen}${c.bold}${formatB3TR(previousRelayerClaimable)}${c.reset}`,
+          `${c.yellow}Unclaimed${c.reset}`,
+        )}`,
+      )
+    } else {
+      out.push(`  ${pad(`${c.dim}Your share${c.reset}  ${c.dim}0.00 B3TR${c.reset}`, "")}`)
+    }
+
+    const prevActions = s.previousRelayerActions ?? 0n
+    const prevWeighted = s.previousRelayerWeighted ?? 0n
     out.push(
-      `  ${c.dim}Pool${c.reset}       ${c.green}${formatB3TR(s.previousTotalRewards)}${c.reset}              ${c.dim}Your share${c.reset} ${c.brightGreen}${c.bold}${formatB3TR(s.previousRelayerClaimable)}${c.reset}`,
-    )
-    out.push(
-      `  ${c.dim}Actions${c.reset}    ${c.white}${s.previousRelayerActions}${c.reset}              ${claimStatus}`,
+      `  ${pad(
+        `${c.dim}Your actions${c.reset} ${c.white}${prevActions}${c.reset}${c.dim} (wt: ${c.reset}${c.white}${prevWeighted}${c.reset}${c.dim})${c.reset}`,
+        "",
+      )}`,
     )
   }
 
@@ -123,11 +292,11 @@ export function renderSummaryText(s: RelayerSummary): string[] {
 
 export function renderCycleResultText(r: CycleResult): string[] {
   const lines: string[] = []
-  const label = r.phase === "vote" ? "Cast-vote" : "Claim"
-  const dryTag = r.dryRun ? `${c.yellow} (DRY RUN)${c.reset}` : ""
+  const tag = r.phase === "vote" ? `${c.cyan}Vote${c.reset}` : `${c.magenta}Claim${c.reset}`
+  const dryTag = r.dryRun ? ` ${c.yellow}(DRY RUN)${c.reset}` : ""
 
   if (r.totalUsers === 0) {
-    lines.push(`${label} round #${r.roundId}: ${c.dim}no users${c.reset}${dryTag}`)
+    lines.push(`${tag} ${c.dim}no users to process${c.reset}${dryTag}`)
     return lines
   }
 
@@ -135,20 +304,20 @@ export function renderCycleResultText(r: CycleResult): string[] {
     r.successful === r.totalUsers
       ? `${c.green}${c.bold}${r.successful}/${r.totalUsers}${c.reset}`
       : `${c.yellow}${r.successful}/${r.totalUsers}${c.reset}`
-  lines.push(`${label} round #${r.roundId}: ${ratio} successful${dryTag}`)
+  lines.push(`${tag} ${ratio} successful${dryTag}`)
 
   if (r.failed.length > 0)
     lines.push(
       `${c.red}  ${r.failed.length} failed${c.reset}${c.gray} (${r.failed
         .slice(0, 3)
-        .map(f => shortAddr(f.user))
+        .map((f) => shortAddr(f.user))
         .join(", ")}${r.failed.length > 3 ? "..." : ""})${c.reset}`,
     )
 
   if (r.transient.length > 0) lines.push(`${c.yellow}  ${r.transient.length} transient failures${c.reset}`)
 
   if (r.txIds.length > 0 && !r.dryRun)
-    lines.push(`${c.gray}  txs: ${r.txIds.map(t => t.slice(0, 10) + "...").join(", ")}${c.reset}`)
+    lines.push(`${c.gray}  txs: ${r.txIds.map((t) => t.slice(0, 10) + "...").join(", ")}${c.reset}`)
 
   return lines
 }

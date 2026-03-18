@@ -69,16 +69,26 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
 
   useEffect(() => {
     initTerminal()
+  }, [initTerminal])
 
-    const handleResize = () => {
-      fitAddonRef.current?.fit()
-    }
-    window.addEventListener("resize", handleResize)
+  // Fit terminal to container when it gets or changes size (handles initial layout and resize)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const fit = () => fitAddonRef.current?.fit()
+    const ro = new ResizeObserver(() => {
+      requestAnimationFrame(fit)
+    })
+    ro.observe(el)
+    window.addEventListener("resize", fit)
 
     return () => {
-      window.removeEventListener("resize", handleResize)
+      ro.disconnect()
+      window.removeEventListener("resize", fit)
       terminalRef.current?.dispose()
       terminalRef.current = null
+      fitAddonRef.current = null
     }
   }, [initTerminal])
 
@@ -99,8 +109,8 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
   return (
     <Box
       w="full"
-      h={fullscreen ? "100%" : { base: "400px", md: "500px" }}
-      minH={fullscreen ? "100%" : { base: "400px", md: "500px" }}
+      h={fullscreen ? "100%" : { base: "min(480px, 70vh)", md: "min(560px, 70vh)" }}
+      minH={fullscreen ? "100%" : { base: "360px", md: "420px" }}
       flex={fullscreen ? 1 : undefined}
       borderRadius="12px"
       overflow="hidden"
@@ -115,6 +125,7 @@ export function RelayerTerminal({ onReady, fullscreen }: RelayerTerminalProps) {
         ref={containerRef}
         w="full"
         h="full"
+        minH="200px"
         css={{
           "& .xterm-viewport": {
             overflow: "auto !important",
