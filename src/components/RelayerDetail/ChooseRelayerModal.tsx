@@ -1,12 +1,15 @@
 "use client"
 
 import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useSendTransaction, useWallet } from "@vechain/vechain-kit"
+import { useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { LuExternalLink, LuHeart, LuInfo } from "react-icons/lu"
+import { encodeFunctionData } from "viem"
 
 import { getConfig } from "@/config"
 import { useIsAutoVotingEnabled } from "@/hooks/useIsAutoVotingEnabled"
+import { relayerPoolAbi, relayerPoolAddress } from "@/hooks/contracts"
 
 import { BaseModal } from "../Base/BaseModal"
 
@@ -17,12 +20,39 @@ interface ChooseRelayerModalProps {
   relayerName: string
 }
 
-export function ChooseRelayerModal({ isOpen, onClose, relayerName }: ChooseRelayerModalProps) {
+export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerName }: ChooseRelayerModalProps) {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: isAutoVotingEnabled, isLoading } = useIsAutoVotingEnabled(account?.address)
   const { governanceUrl } = getConfig()
   const allocationsUrl = `${governanceUrl}/allocations`
+  const queryClient = useQueryClient()
+
+  const { sendTransaction, isTransactionPending, resetStatus } =
+    useSendTransaction({
+      signerAccountAddress: account?.address ?? "",
+      onTxConfirmed: () => {
+        queryClient.invalidateQueries()
+        onClose()
+      },
+    })
+
+  const handleConfirm = async () => {
+    resetStatus()
+
+    await sendTransaction([
+      {
+        to: relayerPoolAddress,
+        value: "0x0",
+        data: encodeFunctionData({
+          abi: relayerPoolAbi,
+          functionName: "setPreferredRelayer",
+          args: [relayerAddress as `0x${string}`],
+        }),
+        comment: `Set ${relayerName} as preferred relayer`,
+      },
+    ])
+  }
 
   if (!isLoading && !isAutoVotingEnabled) {
     return (
@@ -73,12 +103,15 @@ export function ChooseRelayerModal({ isOpen, onClose, relayerName }: ChooseRelay
           {t("You are about to set {{name}} as your preferred relayer. This relayer will be prioritized to handle your votes and reward claims each round.", { name: relayerName })}
         </Text>
 
-        <Text color="text.subtle" textStyle="xxs">
-          {t("This feature is coming soon. Preferred relayer selection will be available in a future contract upgrade.")}
-        </Text>
-
         <HStack gap="3" pt="2">
-          <Button variant="primary" size="md" rounded="full" disabled>
+          <Button
+            variant="primary"
+            size="md"
+            rounded="full"
+            onClick={handleConfirm}
+            loading={isTransactionPending}
+            loadingText={t("Confirming...")}
+          >
             <LuHeart />
             {t("Confirm")}
           </Button>

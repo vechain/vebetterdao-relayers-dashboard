@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR talep edilmemiş ödüller",
+  "{{count}} preferred users": "{{count}} tercih edilen kullanıcı",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. Tüm hakları saklıdır.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 sürdürülebilir eylem",
   "10% of weekly rewards (max 100 B3TR)": "Haftalık ödüllerin %10'u (maks 100 B3TR)",
@@ -39,6 +40,7 @@
   "Claims missing desc": "Tüm uygun kullanıcılar için oy kullanıldı, ancak bazı ödül talepleri tamamlanmadı. Tüm talepler karşılanana kadar ödül havuzu kilitli kalır.",
   "Completion Progress": "Tamamlanma ilerlemesi",
   "Concluded": "Sonuçlandı",
+  "Confirming...": "Onaylanıyor...",
   "Connect Wallet": "Cüzdanı bağla",
   "Contract Source": "Sözleşme kaynağı",
   "Contracts": "Sözleşmeler",
@@ -109,6 +111,7 @@
   "Overview": "Genel bakış",
   "Performance Overview": "Performans özeti",
   "Phase": "Aşama",
+  "Preferred": "Tercih edilen",
   "Prepare a Wallet": "Cüzdan hazırlayın",
   "Previous round": "Önceki tur",
   "Projected B3TR rewards": "Tahmini B3TR ödülleri",
@@ -145,6 +148,7 @@
   "Run the Node": "Node'u çalıştır",
   "Search by address or VET domain...": "Adres veya VET alan adıyla ara...",
   "See all registered relayers": "Tüm kayıtlı Relayers'ı gör",
+  "Set as default": "Varsayılan olarak ayarla",
   "Set as default relayer": "Varsayılan relayer yap",
   "Share": "Paylaş",
   "Share Your Profile": "Profilinizi paylaşın",
@@ -192,5 +196,6 @@
   "Who Can Be a Relayer?": "Kim Relayer olabilir?",
   "Who claims the relayer payout?": "relayer ödemesini kim talep eder?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "Gas ücretleri için VTHO'lu bir VeChain cüzdanı gerekir. Bunun için özel bir cüzdan oluşturmanızı öneririz — özel anahtarı relayer node'u çalıştırmak için kullanılacağından ana cüzdanınızdan ayrı tutmanız en iyisidir.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Blok zincirini izleyen bir Relayer node çalıştırırsınız. Yeni tur başladığında oto-oylama açık kullanıcıları tespit eder, oylarını gönderir ve ödüllerini toplu talep eder."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Blok zincirini izleyen bir Relayer node çalıştırırsınız. Yeni tur başladığında oto-oylama açık kullanıcıları tespit eder, oylarını gönderir ve ödüllerini toplu talep eder.",
+  "Your preferred relayer": "Tercih ettiğiniz relayer"
 }

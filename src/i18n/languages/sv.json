@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR oupphämtade belöningar",
+  "{{count}} preferred users": "{{count}} föredragna användare",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. Alla rättigheter förbehållna.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 hållbara handlingar",
   "10% of weekly rewards (max 100 B3TR)": "10 % av veckobelöningarna (max 100 B3TR)",
@@ -39,6 +40,7 @@
   "Claims missing desc": "Alla berättigade användare röstades för, men vissa belöningsanspråk slutfördes inte. Belöningspoolen förblir låst tills alla anspråk är uppfyllda.",
   "Completion Progress": "Slutförandeframsteg",
   "Concluded": "Avslutad",
+  "Confirming...": "Bekräftar...",
   "Connect Wallet": "Anslut plånbok",
   "Contract Source": "Källkod till kontrakt",
   "Contracts": "Kontrakt",
@@ -108,6 +110,7 @@
   "Overview": "Översikt",
   "Performance Overview": "Prestandaöversikt",
   "Phase": "Fas",
+  "Preferred": "Föredragen",
   "Prepare a Wallet": "Förbered en plånbok",
   "Previous round": "Föregående omgång",
   "Projected B3TR rewards": "Beräknade B3TR-belöningar",
@@ -144,6 +147,7 @@
   "Run the Node": "Kör noden",
   "Search by address or VET domain...": "Sök på adress eller VET-domän...",
   "See all registered relayers": "Se alla registrerade Relayers",
+  "Set as default": "Ange som standard",
   "Set as default relayer": "Ange som standard relayer",
   "Share": "Dela",
   "Share Your Profile": "Dela din profil",
@@ -190,5 +194,6 @@
   "Who Can Be a Relayer?": "Vem kan vara Relayer?",
   "Who claims the relayer payout?": "Vem tar ut relayer-utbetalningen?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "Du behöver en VeChain-plånbok med VTHO för gaskostnader. Vi rekommenderar att skapa en dedikerad plånbok — dess privata nyckel kommer att användas för att köra relayer-noden, så det är bäst att hålla den separerad från din huvudplånbok.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Du kör en Relayer-nod som bevakar blockchain. När en ny omgång startar ser den vilka som har autoröstning aktiverat, skickar in deras röster och tar ut deras belöningar i batchar."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Du kör en Relayer-nod som bevakar blockchain. När en ny omgång startar ser den vilka som har autoröstning aktiverat, skickar in deras röster och tar ut deras belöningar i batchar.",
+  "Your preferred relayer": "Din föredragna relayer"
 }

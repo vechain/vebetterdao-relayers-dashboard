@@ -40,8 +40,11 @@ import {
   LuPlay,
   LuShare2,
   LuTriangleAlert,
+  LuUsers,
 } from "react-icons/lu";
 
+import { usePreferredRelayer } from "@/hooks/usePreferredRelayer";
+import { usePreferredRelayerCount } from "@/hooks/usePreferredRelayerCount";
 import { useRelayerRegistration } from "@/hooks/useRelayerRegistration";
 
 import { ShareRelayerModal } from "@/components/SetupGuide/ShareRelayerModal";
@@ -67,6 +70,8 @@ export function RelayerDetailHeader({
   const { account } = useWallet();
   const { open: openConnect } = useConnectModal();
   const { open: openCustomization } = useAccountCustomizationModal();
+  const { data: preferredRelayer } = usePreferredRelayer(account?.address);
+  const { data: preferredCount } = usePreferredRelayerCount(address);
   const [showModal, setShowModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUnregisterModal, setShowUnregisterModal] = useState(false);
@@ -76,6 +81,7 @@ export function RelayerDetailHeader({
   const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
   const explorerUrl = `https://explore.vechain.org/address/${address}`;
   const description = textRecords?.description;
+  const isPreferred = preferredRelayer === address.toLowerCase();
 
   const handleChooseRelayer = () => {
     if (!account?.address) {
@@ -186,6 +192,17 @@ export function RelayerDetailHeader({
                       {description}
                     </Text>
                   )}
+
+                  {preferredCount != null && preferredCount > 0 && (
+                    <HStack gap="1" color="text.subtle">
+                      <LuUsers size={12} />
+                      <Text textStyle="xs">
+                        {t("{{count}} preferred users", {
+                          count: preferredCount,
+                        })}
+                      </Text>
+                    </HStack>
+                  )}
                 </VStack>
               </HStack>
 
@@ -220,7 +237,20 @@ export function RelayerDetailHeader({
                     </Button>
                   </NextLink>
                 ) : (
-                  isRegistered && (
+                  isRegistered &&
+                  (isPreferred ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      rounded="full"
+                      flex={{ base: 1, sm: "initial" }}
+                      disabled
+                    >
+                      <LuCheck />
+                      <Box hideBelow="md">{t("Your preferred relayer")}</Box>
+                      <Box hideFrom="md">{t("Preferred")}</Box>
+                    </Button>
+                  ) : (
                     <Button
                       variant="primary"
                       size="sm"
@@ -232,7 +262,7 @@ export function RelayerDetailHeader({
                       <Box hideBelow="md">{t("Set as default relayer")}</Box>
                       <Box hideFrom="md">{t("Set as default")}</Box>
                     </Button>
-                  )
+                  ))
                 )}
 
                 <Box {...(!isOwnRelayer && { hideFrom: "sm" })}>

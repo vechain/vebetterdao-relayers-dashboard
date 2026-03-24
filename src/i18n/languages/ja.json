@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR 未請求報酬",
+  "{{count}} preferred users": "{{count}}人の優先ユーザー",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3つのサステナブルアクション",
   "10% of weekly rewards (max 100 B3TR)": "週次報酬の10%（最大100 B3TR）",
@@ -39,6 +40,7 @@
   "Claims missing desc": "すべての対象ユーザーに投票されましたが、一部の報酬請求が完了していません。すべての請求が完了するまで報酬プールはロックされたままです。",
   "Completion Progress": "完了進捗",
   "Concluded": "終了",
+  "Confirming...": "確認中...",
   "Connect Wallet": "ウォレット接続",
   "Contract Source": "契約ソース",
   "Contracts": "契約",
@@ -107,6 +109,7 @@
   "Overview": "概要",
   "Performance Overview": "パフォーマンス概要",
   "Phase": "フェーズ",
+  "Preferred": "優先",
   "Prepare a Wallet": "ウォレットを準備",
   "Previous round": "前のラウンド",
   "Projected B3TR rewards": "予想B3TR報酬",
@@ -143,6 +146,7 @@
   "Run the Node": "ノードを実行",
   "Search by address or VET domain...": "アドレスまたはVETドメインで検索...",
   "See all registered relayers": "登録Relayersをすべて見る",
+  "Set as default": "デフォルトに設定",
   "Set as default relayer": "デフォルトrelayerに設定",
   "Share": "共有",
   "Share Your Profile": "プロフィールを共有",
@@ -190,5 +194,6 @@
   "Who Can Be a Relayer?": "誰がRelayerになれますか？",
   "Who claims the relayer payout?": "relayerの報酬は誰がクレームしますか？",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "ガス代用のVTHOがあるVeChainウォレットが必要です。専用ウォレットの作成を推奨します — その秘密鍵はrelayerノードの実行に使用されるため、メインウォレットとは別にすることをお勧めします。",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "ブロックチェーンを監視するRelayerノードを動かします。新ラウンド開始時に自動投票ユーザーを検出し、投票を送信し、報酬を一括クレームします。"
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "ブロックチェーンを監視するRelayerノードを動かします。新ラウンド開始時に自動投票ユーザーを検出し、投票を送信し、報酬を一括クレームします。",
+  "Your preferred relayer": "優先リレイヤー"
 }

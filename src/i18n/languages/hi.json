@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR अदाव न किए गए पुरस्कार",
+  "{{count}} preferred users": "{{count}} पसंदीदा उपयोगकर्ता",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. सर्वाधिकार सुरक्षित।",
   "0x... or name.vet": "0x... या name.vet",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 टिकाऊ कार्य",
@@ -62,6 +63,7 @@
   "Completion Progress": "पूर्णता प्रगति",
   "Concluded": "समाप्त",
   "Confirm": "पुष्टि करें",
+  "Confirming...": "पुष्टि हो रही है...",
   "Connect Wallet": "वॉलेट कनेक्ट करें",
   "Connect your wallet to view your relayer dashboard.": "अपना relayer डैशबोर्ड देखने के लिए वॉलेट कनेक्ट करें।",
   "Continue": "जारी रखें",
@@ -178,6 +180,7 @@
   "Persistent, headless, auto-restarts.": "लगातार, हेडलेस, ऑटो-रिस्टार्ट।",
   "Phase": "चरण",
   "Pick at least one app to vote for": "वोट देने के लिए कम से कम एक ऐप चुनें",
+  "Preferred": "पसंदीदा",
   "Prepare a Wallet": "वॉलेट तैयार करें",
   "Previous round": "पिछला राउंड",
   "Projected B3TR rewards": "अनुमानित B3TR पुरस्कार",
@@ -238,6 +241,7 @@
   "SDK Coming Soon": "SDK जल्द आ रहा है",
   "Search by address or VET domain...": "पते या VET डोमेन से खोजें...",
   "See all registered relayers": "सभी पंजीकृत Relayers देखें",
+  "Set as default": "डिफ़ॉल्ट के रूप में सेट करें",
   "Set as default relayer": "डिफ़ॉल्ट relayer के रूप में सेट करें",
   "Share": "शेयर करें",
   "Share on Telegram": "Telegram पर साझा करें",
@@ -328,6 +332,7 @@
   "You're All Set!": "आप तैयार हैं!",
   "You're basically volunteering to press the \"vote\" and \"claim\" buttons for other people who turned on auto-voting. In return, you get a cut of their rewards.": "आप मूल रूप से उन लोगों के लिए \"वोट\" और \"क्लेम\" बटन दबाने के लिए स्वेच्छा से काम कर रहे हैं जिन्होंने ऑटो-वोटिंग चालू किया। बदले में आपको उनके पुरस्कारों में हिस्सा मिलता है।",
   "Your connected wallet address is pre-filled. You can change it or enter a .vet domain.": "आपका कनेक्टेड वॉलेट पता पहले से भरा है। आप इसे बदल सकते हैं या .vet डोमेन दर्ज कर सकते हैं।",
+  "Your preferred relayer": "आपका पसंदीदा रिलेयर",
   "Your tokens never leave your wallet. Unlike delegation-based approaches where you transfer your voting power to someone else, auto-voting keeps full custody with you. Relayers can only do two things: cast your vote with YOUR preferences, and send YOUR rewards to YOUR wallet. That's it.": "आपके टोकन आपके वॉलेट से कभी नहीं निकलते। प्रतिनिधिमंडल-आधारित तरीकों के विपरीत जहाँ आप अपनी वोटिंग शक्ति किसी और को दे देते हैं, ऑटो-वोटिंग पूरी कस्टडी आपके पास रखती है। Relayers सिर्फ दो काम कर सकते हैं: आपकी पसंद के साथ वोट डालना, और आपके पुरस्कार आपके वॉलेट में भेजना। बस।",
   "Your VOT3 balance drops below 1": "आपका VOT3 बैलेंस 1 से नीचे चला जाता है"
 }
