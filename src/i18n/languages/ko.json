@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR 미수령 보상",
+  "{{count}} preferred users": "{{count}}명의 선호 사용자",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 지속 가능한 행동 3가지",
   "10% of weekly rewards (max 100 B3TR)": "주간 보상의 10%(최대 100 B3TR)",
@@ -39,6 +40,7 @@
   "Claims missing desc": "모든 자격 있는 사용자에 대해 투표가 완료되었지만, 일부 보상 청구가 완료되지 않았습니다. 모든 청구가 완료될 때까지 보상 풀은 잠긴 상태로 유지됩니다.",
   "Completion Progress": "완료 진행률",
   "Concluded": "종료됨",
+  "Confirming...": "확인 중...",
   "Connect Wallet": "지갑 연결",
   "Contract Source": "계약 소스",
   "Contracts": "계약",
@@ -107,6 +109,7 @@
   "Overview": "개요",
   "Performance Overview": "성과 개요",
   "Phase": "단계",
+  "Preferred": "선호",
   "Prepare a Wallet": "지갑 준비",
   "Previous round": "이전 라운드",
   "Projected B3TR rewards": "예상 B3TR 보상",
@@ -143,6 +146,7 @@
   "Run the Node": "노드 실행",
   "Search by address or VET domain...": "주소 또는 VET 도메인으로 검색...",
   "See all registered relayers": "등록된 Relayers 모두 보기",
+  "Set as default": "기본으로 설정",
   "Set as default relayer": "기본 relayer로 설정",
   "Share": "공유",
   "Share Your Profile": "프로필 공유",
@@ -190,5 +194,6 @@
   "Who Can Be a Relayer?": "누가 Relayer가 될 수 있나요?",
   "Who claims the relayer payout?": "relayer 보상은 누가 청구하나요?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "가스 수수료용 VTHO가 있는 VeChain 지갑이 필요합니다. 전용 지갑을 새로 만드는 것을 권장합니다 — 해당 지갑의 개인 키가 relayer 노드 실행에 사용되므로 메인 지갑과 분리하는 것이 좋습니다.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "블록체인을 감시하는 Relayer 노드를 실행합니다. 새 라운드가 시작되면 자동 투표 사용자를 찾아 투표를 제출하고 보상을 일괄 청구합니다."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "블록체인을 감시하는 Relayer 노드를 실행합니다. 새 라운드가 시작되면 자동 투표 사용자를 찾아 투표를 제출하고 보상을 일괄 청구합니다.",
+  "Your preferred relayer": "선호 릴레이어"
 }

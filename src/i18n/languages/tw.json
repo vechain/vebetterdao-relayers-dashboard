@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR 未領取獎勵",
+  "{{count}} preferred users": "{{count}} 個首選用戶",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. 保留所有權利。",
   "0x... or name.vet": "0x... 或 name.vet",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 項永續行動",
@@ -62,6 +63,7 @@
   "Completion Progress": "完成進度",
   "Concluded": "已結束",
   "Confirm": "確認",
+  "Confirming...": "確認中...",
   "Connect Wallet": "連接錢包",
   "Connect your wallet to view your relayer dashboard.": "Verbinden Sie Ihr Wallet, um Ihr Relayer-Dashboard anzuzeigen.",
   "Continue": "繼續",
@@ -178,6 +180,7 @@
   "Persistent, headless, auto-restarts.": "Dauerhafte, kopflose, automatische Neustarts.",
   "Phase": "階段",
   "Pick at least one app to vote for": "Wählen Sie mindestens eine App aus, für die Sie stimmen möchten",
+  "Preferred": "首選",
   "Prepare a Wallet": "準備錢包",
   "Previous round": "上一輪",
   "Projected B3TR rewards": "預估 B3TR 獎勵",
@@ -238,6 +241,7 @@
   "SDK Coming Soon": "SDK kommt bald",
   "Search by address or VET domain...": "依地址或 VET 網域搜尋...",
   "See all registered relayers": "檢視全部已註冊 Relayers",
+  "Set as default": "設為預設",
   "Set as default relayer": "設為預設 relayer",
   "Share": "分享",
   "Share on Telegram": "Auf Telegram teilen",
@@ -328,6 +332,7 @@
   "You're All Set!": "一切就緒！",
   "You're basically volunteering to press the \"vote\" and \"claim\" buttons for other people who turned on auto-voting. In return, you get a cut of their rewards.": "您相當於在替開啟自動投票的人按「投票」和「申領」按鈕，並從中分得一部分獎勵。",
   "Your connected wallet address is pre-filled. You can change it or enter a .vet domain.": "已預填您連接的錢包地址。您可以修改或輸入 .vet 網域。",
+  "Your preferred relayer": "您的首選中繼者",
   "Your tokens never leave your wallet. Unlike delegation-based approaches where you transfer your voting power to someone else, auto-voting keeps full custody with you. Relayers can only do two things: cast your vote with YOUR preferences, and send YOUR rewards to YOUR wallet. That's it.": "您的代幣不會離開錢包。與委託不同，自動投票由您完全掌控。中繼者只能做兩件事：依您的偏好投票，並將您的獎勵發到您的錢包。",
   "Your VOT3 balance drops below 1": "您的 VOT3 餘額降至 1 以下"
 }

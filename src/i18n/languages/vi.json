@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR phần thưởng chưa nhận",
+  "{{count}} preferred users": "{{count}} người dùng ưu tiên",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. Bảo lưu mọi quyền.",
   "0x... or name.vet": "0x... hoặc name.vet",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 hành động bền vững",
@@ -62,6 +63,7 @@
   "Completion Progress": "Tiến độ hoàn thành",
   "Concluded": "Kết thúc",
   "Confirm": "Xác nhận",
+  "Confirming...": "Đang xác nhận...",
   "Connect Wallet": "Kết nối ví",
   "Connect your wallet to view your relayer dashboard.": "Verbinden Sie Ihr Wallet, um Ihr Relayer-Dashboard anzuzeigen.",
   "Continue": "Tiếp tục",
@@ -178,6 +180,7 @@
   "Persistent, headless, auto-restarts.": "Dauerhafte, kopflose, automatische Neustarts.",
   "Phase": "Giai đoạn",
   "Pick at least one app to vote for": "Wählen Sie mindestens eine App aus, für die Sie stimmen möchten",
+  "Preferred": "Ưu tiên",
   "Prepare a Wallet": "Chuẩn bị ví",
   "Previous round": "Vòng trước",
   "Projected B3TR rewards": "Phần thưởng B3TR dự kiến",
@@ -238,6 +241,7 @@
   "SDK Coming Soon": "SDK kommt bald",
   "Search by address or VET domain...": "Tìm theo địa chỉ hoặc tên miền VET...",
   "See all registered relayers": "Xem tất cả Relayers đã đăng ký",
+  "Set as default": "Đặt làm mặc định",
   "Set as default relayer": "Đặt làm relayer mặc định",
   "Share": "Chia sẻ",
   "Share on Telegram": "Auf Telegram teilen",
@@ -328,6 +332,7 @@
   "You're All Set!": "Bạn đã sẵn sàng!",
   "You're basically volunteering to press the \"vote\" and \"claim\" buttons for other people who turned on auto-voting. In return, you get a cut of their rewards.": "Bạn đang tình nguyện bấm \"bỏ phiếu\" và \"nhận thưởng\" cho người bật bỏ phiếu tự động. Đổi lại bạn nhận một phần thưởng của họ.",
   "Your connected wallet address is pre-filled. You can change it or enter a .vet domain.": "Địa chỉ ví đã kết nối được điền sẵn. Bạn có thể đổi hoặc nhập tên miền .vet.",
+  "Your preferred relayer": "Relayer ưu tiên của bạn",
   "Your tokens never leave your wallet. Unlike delegation-based approaches where you transfer your voting power to someone else, auto-voting keeps full custody with you. Relayers can only do two things: cast your vote with YOUR preferences, and send YOUR rewards to YOUR wallet. That's it.": "Token của bạn không rời ví. Khác với ủy quyền, bỏ phiếu tự động giữ quyền kiểm soát ở bạn. Relayers chỉ làm hai việc: bỏ phiếu theo ý bạn và gửi thưởng vào ví bạn.",
   "Your VOT3 balance drops below 1": "Số dư VOT3 của bạn xuống dưới 1"
 }

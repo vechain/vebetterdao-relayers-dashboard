@@ -4444,10 +4444,10 @@
     ethers "^6.14.0"
     viem "^2.21.54"
 
-"@vechain/vebetterdao-contracts@^8.0.0", "@vechain/vebetterdao-contracts@^8.3.3":
-  version "8.3.3"
-  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-contracts/-/vebetterdao-contracts-8.3.3.tgz#66123783048926af4fc4e3d80d9d8cd2af51d1a2"
-  integrity sha512-xRVaKQwiBJlCYP8fZjrkczg8Gb3r2eeQ/oGHGOfkw4U+RS05OouCE8qsgMfc9Gz8jweEWnunch3TQOzg2RBhUg==
+"@vechain/vebetterdao-contracts@8.4.0":
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-contracts/-/vebetterdao-contracts-8.4.0.tgz#751952ad4d42939393b22c6685705f26176f7e7e"
+  integrity sha512-UoW+FdUApsyXqqlICAwunxjXGqQ/fSTkm59pJdCJrIvNLyzfRnE/7HOw9PSclteG8UiBESmYBcnLPj2/ojMZPg==
   dependencies:
     "@nomicfoundation/hardhat-chai-matchers" "^2.0.2"
     "@nomicfoundation/hardhat-ethers" "^3.0.4"
@@ -4478,14 +4478,14 @@
     typechain "^8.1.0"
     typescript ">=4.5.0"
 
-"@vechain/vebetterdao-relayer-node@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-1.0.0.tgz#0c136926b01501e8b78e34e656adf919591ae695"
-  integrity sha512-SHiGpQm2ZxhVqGHKGfCvqyW0ByXVg0jyJyQKyD3EJd9mhorDUy4K6EjhP0brOUnzfa4nZ8H6DKbpqC+XoIgvcw==
+"@vechain/vebetterdao-relayer-node@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-1.1.0.tgz#4f2c2abe8e5dcc8cadfad0c2e73d88537adfa3ac"
+  integrity sha512-v27DLGnY1Zw9hkrZ3dLIsEkelTtyHoj+02Zs1BUYX90G+k1IbB2ZSP/PSY6xE16lc6QvKbkpZ6qioxrtWZj4cg==
   dependencies:
     "@vechain/sdk-core" "2.0.7"
     "@vechain/sdk-network" "2.0.7"
-    "@vechain/vebetterdao-contracts" "^8.0.0"
+    "@vechain/vebetterdao-contracts" "8.4.0"
     chalk "^4.1.2"
 
 "@vechain/vechain-contract-types@1.6.0-rc":

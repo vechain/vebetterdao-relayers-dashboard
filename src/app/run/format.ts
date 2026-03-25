@@ -1,6 +1,6 @@
 import type { RelayerSummary, CycleResult } from "@vechain/vebetterdao-relayer-node/dist/types"
 
-const RELAYER_NODE_VERSION = "1.0.0"
+const RELAYER_NODE_VERSION = "1.1.0"
 
 // ANSI color helpers for xterm
 const c = {
@@ -154,6 +154,10 @@ export function renderSummaryText(s: RelayerSummary): string[] {
   if (!s.isRegistered) {
     out.push(`  ${c.red}${c.italic}  Go to relayer.vebetterdao.org/new-relayer to register as a relayer${c.reset}`)
   }
+  const prefCount = s.preferredUsersCount > 0
+    ? `${c.cyan}${c.bold}${s.preferredUsersCount}${c.reset}${c.dim} users chose you as default${c.reset}`
+    : `${c.dim}no users yet${c.reset}`
+  out.push(`  ${c.dim}Preferred${c.reset} ${prefCount}`)
 
   out.push("")
   out.push(`  ${div}`)

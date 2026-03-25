@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR niet-opgeëiste beloningen",
+  "{{count}} preferred users": "{{count}} voorkeurgebruikers",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. Alle rechten voorbehouden.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 duurzame acties",
   "10% of weekly rewards (max 100 B3TR)": "10% van wekelijkse beloningen (max 100 B3TR)",
@@ -39,6 +40,7 @@
   "Claims missing desc": "Alle in aanmerking komende gebruikers zijn gestemd, maar sommige beloningsclaims zijn niet voltooid. De beloningspool blijft vergrendeld totdat alle claims zijn vervuld.",
   "Completion Progress": "Voortgang",
   "Concluded": "Afgerond",
+  "Confirming...": "Bevestigen...",
   "Connect Wallet": "Verbind wallet",
   "Contract Source": "Contractbron",
   "Contracts": "Contracten",
@@ -105,6 +107,7 @@
   "Overview": "Overzicht",
   "Performance Overview": "Prestatie-overzicht",
   "Phase": "Fase",
+  "Preferred": "Voorkeur",
   "Prepare a Wallet": "Bereid een wallet voor",
   "Previous round": "Vorige ronde",
   "Projected B3TR rewards": "Verwachte B3TR-beloningen",
@@ -141,6 +144,7 @@
   "Run the Node": "Draai de node",
   "Search by address or VET domain...": "Zoeken op adres of VET-domein...",
   "See all registered relayers": "Alle geregistreerde Relayers bekijken",
+  "Set as default": "Als standaard instellen",
   "Set as default relayer": "Stel in als standaard relayer",
   "Share": "Delen",
   "Share Your Profile": "Deel je profiel",
@@ -186,5 +190,6 @@
   "Who Can Be a Relayer?": "Wie kan Relayer zijn?",
   "Who claims the relayer payout?": "Wie claimt de relayer-uitbetaling?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "Je hebt een VeChain wallet met VTHO nodig voor gaskosten. We raden aan een aparte wallet hiervoor te maken — de privésleutel wordt gebruikt om de relayer node te draaien, dus het is beter deze gescheiden te houden van je hoofdwallet.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Je draait een Relayer node die de blockchain volgt. Bij een nieuwe ronde ziet deze wie auto-voting heeft, stuurt hun stemmen in en claimt hun beloningen in batches."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Je draait een Relayer node die de blockchain volgt. Bij een nieuwe ronde ziet deze wie auto-voting heeft, stuurt hun stemmen in en claimt hun beloningen in batches.",
+  "Your preferred relayer": "Uw voorkeur relayer"
 }

@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR recompensas não reclamadas",
+  "{{count}} preferred users": "{{count}} usuários preferidos",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer Ecosystem. Todos os direitos reservados.",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 ações sustentáveis",
   "10% of weekly rewards (max 100 B3TR)": "10% das recompensas semanais (máx. 100 B3TR)",
@@ -39,6 +40,7 @@
   "Claims missing desc": "Todos os usuários elegíveis foram votados, mas algumas reivindicações de recompensas não foram concluídas. O pool de recompensas permanece bloqueado até que todas as reivindicações sejam cumpridas.",
   "Completion Progress": "Progresso de conclusão",
   "Concluded": "Concluído",
+  "Confirming...": "Confirmando...",
   "Connect Wallet": "Ligar carteira",
   "Contract Source": "Código do contrato",
   "Contracts": "Contratos",
@@ -108,6 +110,7 @@
   "Overview": "Visão geral",
   "Performance Overview": "Visão geral de desempenho",
   "Phase": "Fase",
+  "Preferred": "Preferido",
   "Prepare a Wallet": "Preparar uma carteira",
   "Previous round": "Ronda anterior",
   "Projected B3TR rewards": "Recompensas B3TR projetadas",
@@ -145,6 +148,7 @@
   "Run the Node": "Executar o nó",
   "Search by address or VET domain...": "Pesquisar por endereço ou domínio VET...",
   "See all registered relayers": "Ver todos os Relayers registados",
+  "Set as default": "Definir como padrão",
   "Set as default relayer": "Definir como relayer predefinido",
   "Share": "Partilhar",
   "Share Your Profile": "Partilha o teu perfil",
@@ -191,5 +195,6 @@
   "Who Can Be a Relayer?": "Quem pode ser Relayer?",
   "Who claims the relayer payout?": "Quem reivindica o pagamento do relayer?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "Precisas de uma carteira VeChain com VTHO para taxas de gas. Recomendamos criar uma carteira dedicada — a sua chave privada será usada para executar o nó relayer, por isso é melhor mantê-la separada da carteira principal.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Executas um nó Relayer que observa a blockchain. Quando uma nova ronda começa, deteta quem tem auto-voto, envia os votos e reivindica as recompensas em lotes."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Executas um nó Relayer que observa a blockchain. Quando uma nova ronda começa, deteta quem tem auto-voto, envia os votos e reivindica as recompensas em lotes.",
+  "Your preferred relayer": "Seu relayer preferido"
 }

@@ -419,10 +419,10 @@ export function RunRelayer() {
                       wordBreak="break-all"
                     >
                       {
-                        'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0'
+                        'docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.1.0'
                       }
                     </Code>
-                    <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.0.0' />
+                    <CopyButton text='docker run -it --env MNEMONIC="..." ghcr.io/vechain/vebetterdao-relayer-node:1.1.0' />
                   </HStack>
                 </VStack>
 
@@ -454,9 +454,9 @@ export function RunRelayer() {
                       fontFamily="mono"
                       wordBreak="break-all"
                     >
-                      {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0'}
+                      {'MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.1.0'}
                     </Code>
-                    <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.0.0' />
+                    <CopyButton text='MNEMONIC="..." npx @vechain/vebetterdao-relayer-node@1.1.0' />
                   </HStack>
                 </VStack>
               </Card.Body>

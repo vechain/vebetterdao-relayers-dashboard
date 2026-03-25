@@ -1,5 +1,6 @@
 {
   "{{amount}} B3TR unclaimed rewards": "{{amount}} B3TR nicht abgeholte Belohnungen",
+  "{{count}} preferred users": "{{count}} bevorzugte Nutzer",
   "{{year}} VeBetterDAO Relayer Ecosystem. All rights reserved.": "© {{year}} VeBetterDAO Relayer-Ökosystem. Alle Rechte vorbehalten.",
   "0x... or name.vet": "0x... oder name.vet",
   "1 VOT3 + 3 sustainable actions": "1 VOT3 + 3 nachhaltige Aktionen",
@@ -62,6 +63,7 @@
   "Completion Progress": "Fortschritt Abschluss",
   "Concluded": "Abgeschlossen",
   "Confirm": "Bestätigen",
+  "Confirming...": "Bestätigung...",
   "Connect Wallet": "Wallet verbinden",
   "Connect your wallet to view your relayer dashboard.": "Verbinden Sie Ihr Wallet, um Ihr Relayer-Dashboard anzuzeigen.",
   "Continue": "Weitermachen",
@@ -170,6 +172,7 @@
   "Performance Overview": "Leistungsübersicht",
   "Persistent, headless, auto-restarts.": "Dauerhafte, kopflose, automatische Neustarts.",
   "Pick at least one app to vote for": "Wählen Sie mindestens eine App aus, für die Sie stimmen möchten",
+  "Preferred": "Bevorzugt",
   "Prepare a Wallet": "Wallet vorbereiten",
   "Previous round": "Vorherige Runde",
   "Projected B3TR rewards": "Prognostizierte B3TR-Belohnungen",
@@ -229,6 +232,7 @@
   "SDK Coming Soon": "SDK kommt bald",
   "Search by address or VET domain...": "Nach Adresse oder VET-Domain suchen...",
   "See all registered relayers": "Alle registrierten Relayer anzeigen",
+  "Set as default": "Als Standard festlegen",
   "Set as default relayer": "Als Standard-Relayer festlegen",
   "Share": "Teilen",
   "Share on Telegram": "Auf Telegram teilen",
@@ -288,5 +292,6 @@
   "Who Can Be a Relayer?": "Wer kann Relayer sein?",
   "Who claims the relayer payout?": "Wer holt die Relayer-Auszahlung ab?",
   "You need a VeChain wallet with some VTHO for gas fees. We recommend creating a dedicated wallet for this purpose — its private key will be used to run the relayer node, so it's best to keep it separate from your main wallet.": "Du brauchst eine VeChain-Wallet mit etwas VTHO für Gasgebühren. Wir empfehlen, eine eigene Wallet dafür zu erstellen — ihr privater Schlüssel wird zum Betrieb des Relayer-Nodes verwendet, daher sollte sie von deiner Haupt-Wallet getrennt sein.",
-  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Du betreibst einen Relayer-Node, der die Blockchain überwacht. Wenn eine neue Runde startet, erkennt er, wer Auto-Voting aktiviert hat, gibt deren Stimmen ab und holt die Belohnungen gebündelt ab."
+  "You run a relayer node that watches the blockchain. When a new round starts, it sees who has auto-voting enabled, submits their votes, and claims their rewards in batches.": "Du betreibst einen Relayer-Node, der die Blockchain überwacht. Wenn eine neue Runde startet, erkennt er, wer Auto-Voting aktiviert hat, gibt deren Stimmen ab und holt die Belohnungen gebündelt ab.",
+  "Your preferred relayer": "Ihr bevorzugter Relayer"
 }
