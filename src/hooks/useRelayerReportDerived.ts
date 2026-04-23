@@ -21,6 +21,10 @@ const ZERO_SUMMARY: Omit<RelayerSummary, "address"> = {
   totalVthoSpentRaw: "0",
   lastActiveRound: null,
   activeRoundsCount: 0,
+  totalCitizenVotedFor: 0,
+  totalCitizenGovernanceVotedFor: 0,
+  totalCitizenClaimed: 0,
+  totalCitizenVthoSpentRaw: "0",
 };
 
 /**

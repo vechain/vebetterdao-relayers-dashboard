@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { formatEther } from "viem"
 
 import { useReportData } from "@/hooks/useReportData"
@@ -35,6 +35,8 @@ const METRIC_CONFIG_KEYS: Record<ChartMetric, { labelKey: string; colorKey: stri
   users: { labelKey: "Auto-voting Users", colorKey: "purple.400", unit: "" },
 }
 
+const CITIZEN_COLOR_KEY = "teal.400"
+
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 })
 
 function CustomTooltip({
@@ -44,13 +46,32 @@ function CustomTooltip({
   metric,
 }: {
   active?: boolean
-  payload?: { value: number; color: string }[]
+  payload?: { value: number; color: string; dataKey: string; name: string }[]
   label?: number
   metric: ChartMetric
 }) {
   const { t } = useTranslation()
   const unit = METRIC_CONFIG_KEYS[metric].unit
   if (!active || !payload?.length) return null
+
+  if (metric === "users") {
+    return (
+      <Box bg="bg.primary" border="1px solid" borderColor="border.secondary" borderRadius="lg" p={3} boxShadow="lg">
+        <Text textStyle="xs" fontWeight="semibold" mb={1}>
+          {t("Round #")}
+          {label}
+        </Text>
+        {payload.map((entry) => (
+          <HStack key={entry.dataKey} gap={1}>
+            <Box w="8px" h="8px" borderRadius="sm" bg={entry.color} />
+            <Text textStyle="xs" color="text.subtle">
+              {entry.name}: {compact.format(entry.value)}
+            </Text>
+          </HStack>
+        ))}
+      </Box>
+    )
+  }
 
   return (
     <Box bg="bg.primary" border="1px solid" borderColor="border.secondary" borderRadius="lg" p={3} boxShadow="lg">
@@ -72,7 +93,7 @@ export function RoundsChart() {
   const [metric, setMetric] = useState<ChartMetric>("rewards")
   const [period, setPeriod] = useState<Period>("3M")
 
-  const allColorKeys = Object.values(METRIC_CONFIG_KEYS).map(c => c.colorKey)
+  const allColorKeys = [...Object.values(METRIC_CONFIG_KEYS).map(c => c.colorKey), CITIZEN_COLOR_KEY]
   const tokenColors = useToken("colors", allColorKeys)
   const colorMap = Object.fromEntries(allColorKeys.map((key, i) => [key, tokenColors[i]]))
   const METRIC_CONFIG: Record<ChartMetric, { label: string; colorKey: string; unit: string }> =
@@ -93,12 +114,18 @@ export function RoundsChart() {
       vthoSpent: Number(formatEther(BigInt(r.vthoSpentTotalRaw))),
       rewards: Number(formatEther(BigInt(r.totalRelayerRewardsRaw))),
       users: r.autoVotingUsersCount,
+      citizens: r.citizenUsersCount ?? 0,
     }))
 
     const limit = PERIOD_ROUND_LIMITS[period]
     if (limit == null) return mapped
     return mapped.slice(-limit)
   }, [report, period])
+
+  const hasCitizens = useMemo(
+    () => chartData.some(d => d.citizens > 0),
+    [chartData],
+  )
 
   if (isLoading) {
     return <Skeleton w="full" h="340px" borderRadius="xl" />
@@ -176,7 +203,19 @@ export function RoundsChart() {
                   tickLine={false}
                 />
                 <Tooltip content={<CustomTooltip metric={metric} />} />
-                <Bar dataKey={metric} fill={colorMap[METRIC_CONFIG_KEYS[metric].colorKey]} radius={[4, 4, 0, 0]} />
+                {metric === "users" && hasCitizens ? (
+                  <>
+                    <Legend
+                      verticalAlign="top"
+                      height={28}
+                      formatter={(value: string) => <Text as="span" textStyle="xs" color="text.subtle">{value}</Text>}
+                    />
+                    <Bar dataKey="users" stackId="usersStack" name={t("Auto-voters")} fill={colorMap[METRIC_CONFIG_KEYS.users.colorKey]} radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="citizens" stackId="usersStack" name={t("Citizens")} fill={colorMap[CITIZEN_COLOR_KEY]} radius={[4, 4, 0, 0]} />
+                  </>
+                ) : (
+                  <Bar dataKey={metric} fill={colorMap[METRIC_CONFIG_KEYS[metric].colorKey]} radius={[4, 4, 0, 0]} />
+                )}
               </BarChart>
             </ResponsiveContainer>
           </Box>

@@ -15,6 +15,10 @@ export interface RelayerSummary {
   totalVthoSpentRaw: string
   lastActiveRound: number | null
   activeRoundsCount: number
+  totalCitizenVotedFor: number
+  totalCitizenGovernanceVotedFor: number
+  totalCitizenClaimed: number
+  totalCitizenVthoSpentRaw: string
 }
 
 /**
@@ -79,13 +83,16 @@ export function computeRelayerSummary(
   let totalB3trEarned = BigInt(0)
   let totalVthoSpent = BigInt(0)
   let lastActiveRound: number | null = null
+  let totalCitizenVotedFor = 0
+  let totalCitizenGovernanceVotedFor = 0
+  let totalCitizenClaimed = 0
+  let totalCitizenVthoSpent = BigInt(0)
 
   for (const rd of relayer.rounds) {
     totalActions += rd.actions
     totalVotedFor += rd.votedForCount
     totalRewardsClaimed += rd.rewardsClaimedCount
     totalWeightedActions += rd.weightedActions
-    // Only count round toward total earned if its rewards are not locked
     if (!lockedRoundIds?.has(rd.roundId)) {
       totalB3trEarned += roundCtx
         ? computeRelayerRoundB3tr(rd.weightedActions, roundCtx.get(rd.roundId))
@@ -95,6 +102,10 @@ export function computeRelayerSummary(
     if (rd.actions > 0 && (lastActiveRound == null || rd.roundId > lastActiveRound)) {
       lastActiveRound = rd.roundId
     }
+    totalCitizenVotedFor += rd.citizenVotedForCount ?? 0
+    totalCitizenGovernanceVotedFor += rd.citizenGovernanceVotedForCount ?? 0
+    totalCitizenClaimed += rd.citizenRewardsClaimedCount ?? 0
+    totalCitizenVthoSpent += BigInt(rd.vthoSpentOnCitizenVotingRaw ?? "0") + BigInt(rd.vthoSpentOnCitizenClaimingRaw ?? "0")
   }
 
   return {
@@ -107,6 +118,10 @@ export function computeRelayerSummary(
     totalVthoSpentRaw: totalVthoSpent.toString(),
     lastActiveRound,
     activeRoundsCount: relayer.rounds.filter(rd => rd.actions > 0).length,
+    totalCitizenVotedFor,
+    totalCitizenGovernanceVotedFor,
+    totalCitizenClaimed,
+    totalCitizenVthoSpentRaw: totalCitizenVthoSpent.toString(),
   }
 }
 

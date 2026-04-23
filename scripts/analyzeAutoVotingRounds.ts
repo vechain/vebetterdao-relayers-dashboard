@@ -32,7 +32,44 @@ const mainnetConfig = {
     "0x34b56f892c9e977b9ba2e43ba64c27d368ab3c86",
   voterRewardsContractAddress: "0x838A33AF756a6366f93e201423E1425f67eC0Fa7",
   emissionsContractAddress: "0xDf94739bd169C84fe6478D8420Bb807F1f47b135",
+  navigatorRegistryAddress: "0x0000000000000000000000000000000000000000",
+  b3trGovernorAddress: "0x0000000000000000000000000000000000000000",
 };
+
+// ── Navigator / citizen inline ABIs (contracts package not yet published) ──
+
+const NAVIGATOR_REGISTRY_EVENT_ABI = [
+  { type: "event", name: "DelegationCreated", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "amount", type: "uint256", indexed: false }] },
+  { type: "event", name: "DelegationRemoved", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "amount", type: "uint256", indexed: false }] },
+  { type: "event", name: "ExitAnnounced", inputs: [{ name: "navigator", type: "address", indexed: true }, { name: "announcedAtRound", type: "uint256", indexed: false }, { name: "effectiveDeadline", type: "uint256", indexed: false }] },
+  { type: "event", name: "NavigatorDeactivatedEvent", inputs: [{ name: "navigator", type: "address", indexed: true }, { name: "slashPercentage", type: "uint256", indexed: false }] },
+] as const;
+
+const NAVIGATOR_VOTE_EVENT_ABI = [
+  { type: "event", name: "NavigatorVoteCast", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "roundId", type: "uint256", indexed: true }, { name: "appsIds", type: "bytes32[]", indexed: false }, { name: "voteWeights", type: "uint256[]", indexed: false }] },
+  { type: "event", name: "NavigatorVoteSkipped", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "roundId", type: "uint256", indexed: true }] },
+] as const;
+
+const NAVIGATOR_GOVERNANCE_EVENT_ABI = [
+  { type: "event", name: "NavigatorGovernanceVoteCast", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "proposalId", type: "uint256", indexed: true }, { name: "support", type: "uint8", indexed: false }, { name: "weight", type: "uint256", indexed: false }, { name: "power", type: "uint256", indexed: false }] },
+  { type: "event", name: "NavigatorGovernanceVoteSkipped", inputs: [{ name: "citizen", type: "address", indexed: true }, { name: "navigator", type: "address", indexed: true }, { name: "proposalId", type: "uint256", indexed: true }] },
+] as const;
+
+const NAVIGATOR_FEE_EVENT_ABI = [
+  { type: "event", name: "NavigatorFeeTaken", inputs: [{ name: "navigator", type: "address", indexed: true }, { name: "citizen", type: "address", indexed: true }, { name: "fee", type: "uint256", indexed: false }, { name: "cycle", type: "uint256", indexed: true }] },
+] as const;
+
+const GOVERNOR_PROPOSALS_ABI = [
+  { type: "function", name: "getActiveProposals", inputs: [], outputs: [{ type: "uint256[]" }], stateMutability: "view" },
+] as const;
+
+const navRegistryAbi = ABIContract.ofAbi(NAVIGATOR_REGISTRY_EVENT_ABI as any);
+const navVoteAbi = ABIContract.ofAbi(NAVIGATOR_VOTE_EVENT_ABI as any);
+const navGovAbi = ABIContract.ofAbi(NAVIGATOR_GOVERNANCE_EVENT_ABI as any);
+const navFeeAbi = ABIContract.ofAbi(NAVIGATOR_FEE_EVENT_ABI as any);
+const govProposalsAbi = ABIContract.ofAbi(GOVERNOR_PROPOSALS_ABI as any);
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -53,10 +90,19 @@ async function withRetry<T>(
 }
 
 // First round with auto-voting enabled on mainnet
-const FIRST_AUTO_VOTING_ROUND = 69;
+const FIRST_AUTO_VOTING_ROUND = Number(process.env.FIRST_ROUND ?? 69);
 
-// Contract addresses from mainnet config
-const CONFIG = mainnetConfig;
+// Contract addresses: env vars override mainnet defaults
+const CONFIG = {
+  xAllocationVotingContractAddress: process.env.X_ALLOCATION_VOTING_ADDRESS ?? mainnetConfig.xAllocationVotingContractAddress,
+  relayerRewardsPoolContractAddress: process.env.RELAYER_REWARDS_POOL_ADDRESS ?? mainnetConfig.relayerRewardsPoolContractAddress,
+  voterRewardsContractAddress: process.env.VOTER_REWARDS_ADDRESS ?? mainnetConfig.voterRewardsContractAddress,
+  emissionsContractAddress: process.env.EMISSIONS_ADDRESS ?? mainnetConfig.emissionsContractAddress,
+  navigatorRegistryAddress: process.env.NAVIGATOR_REGISTRY_ADDRESS ?? mainnetConfig.navigatorRegistryAddress,
+  b3trGovernorAddress: process.env.B3TR_GOVERNOR_ADDRESS ?? mainnetConfig.b3trGovernorAddress,
+};
+const NODE_URL = process.env.NODE_URL ?? MAINNET_URL;
+const NETWORK_NAME = process.env.NETWORK_NAME ?? "mainnet";
 
 interface RoundAnalytics {
   roundId: number;
@@ -67,7 +113,7 @@ interface RoundAnalytics {
   rewardsClaimedCount: number;
   totalRelayerRewards: string;
   totalRelayerRewardsRaw: string;
-  estimatedRelayerRewards: string; // Estimated from summing getRelayerFee for all voted users
+  estimatedRelayerRewards: string;
   estimatedRelayerRewardsRaw: string;
   numRelayers: number;
   vthoSpentOnVoting: string;
@@ -76,14 +122,21 @@ interface RoundAnalytics {
   vthoSpentOnClaimingRaw: string;
   vthoSpentTotal: string;
   vthoSpentTotalRaw: string;
-  // Action verification
-  expectedActions: number; // Total weighted actions expected
-  completedActions: number; // Total weighted actions completed
-  reducedUsersCount: number; // Users legitimately skipped (VOT3→B3TR, invalid passport)
-  missedUsersCount: number; // Users actually missed by relayer
-  allActionsOk: boolean; // True if all expected work was done
-  actionStatus: string; // Human readable status
-  isRoundEnded: boolean; // True if the round has ended
+  expectedActions: number;
+  completedActions: number;
+  reducedUsersCount: number;
+  missedUsersCount: number;
+  allActionsOk: boolean;
+  actionStatus: string;
+  isRoundEnded: boolean;
+  citizenUsersCount?: number;
+  citizenVotedForCount?: number;
+  citizenGovernanceVotedForCount?: number;
+  citizenRewardsClaimedCount?: number;
+  citizenSkippedVotesCount?: number;
+  activeGovernanceProposals?: number;
+  vthoSpentOnCitizenVotingRaw?: string;
+  vthoSpentOnCitizenClaimingRaw?: string;
 }
 
 interface RelayerRoundBreakdown {
@@ -96,6 +149,11 @@ interface RelayerRoundBreakdown {
   relayerRewardsClaimedRaw: string;
   vthoSpentOnVotingRaw: string;
   vthoSpentOnClaimingRaw: string;
+  citizenVotedForCount?: number;
+  citizenGovernanceVotedForCount?: number;
+  citizenRewardsClaimedCount?: number;
+  vthoSpentOnCitizenVotingRaw?: string;
+  vthoSpentOnCitizenClaimingRaw?: string;
 }
 
 interface RelayerAnalytics {
@@ -1269,6 +1327,222 @@ function formatVTHO(amountWei: bigint): string {
   return formatTokenAmount(amountWei, "VTHO");
 }
 
+// ============ Citizen / Navigator Helpers ============
+
+const citizenNavigatorsEnabled =
+  CONFIG.navigatorRegistryAddress !== ZERO_ADDRESS;
+
+/**
+ * Incremental delegation cache: replayed from genesis to `lastBlock`.
+ * Same pattern as `getAllAutoVotingEnabledUsers`.
+ */
+const citizenDelegationCache = {
+  lastBlock: 0,
+  /** citizen -> navigator */
+  delegations: new Map<string, string>(),
+  /** navigators removed by exit/deactivation */
+  removedNavigators: new Set<string>(),
+};
+
+async function paginateEvents(
+  thor: ThorClient,
+  address: string,
+  eventAbi: any,
+  fromBlock: number,
+  toBlock: number | undefined,
+  extraTopics?: { topic1?: string; topic2?: string; topic3?: string },
+): Promise<any[]> {
+  const allLogs: any[] = [];
+  let offset = 0;
+  const LIMIT = 1000;
+
+  while (true) {
+    const logs = await thor.logs.filterEventLogs({
+      range: { unit: "block" as const, from: fromBlock, to: toBlock },
+      options: { offset, limit: LIMIT },
+      order: "asc",
+      criteriaSet: [{
+        criteria: {
+          address,
+          topic0: eventAbi.encodeFilterTopicsNoNull({})[0],
+          ...extraTopics,
+        },
+        eventAbi,
+      }],
+    });
+    allLogs.push(...logs);
+    if (logs.length < LIMIT) break;
+    offset += LIMIT;
+  }
+  return allLogs;
+}
+
+/**
+ * Update the delegation cache up to `toBlock`.
+ * Scans DelegationCreated / DelegationRemoved / ExitAnnounced / NavigatorDeactivatedEvent incrementally.
+ */
+async function updateDelegationCache(thor: ThorClient, toBlock: number): Promise<void> {
+  if (!citizenNavigatorsEnabled) return;
+  const fromBlock = citizenDelegationCache.lastBlock + 1;
+  if (fromBlock > toBlock) return;
+
+  const navAddr = CONFIG.navigatorRegistryAddress;
+  const delegCreatedEvt = navRegistryAbi.getEvent("DelegationCreated") as any;
+  const delegRemovedEvt = navRegistryAbi.getEvent("DelegationRemoved") as any;
+  const exitEvt = navRegistryAbi.getEvent("ExitAnnounced") as any;
+  const deactivatedEvt = navRegistryAbi.getEvent("NavigatorDeactivatedEvent") as any;
+
+  const [createdLogs, removedLogs, exitLogs, deactivatedLogs] = await Promise.all([
+    paginateEvents(thor, navAddr, delegCreatedEvt, fromBlock, toBlock),
+    paginateEvents(thor, navAddr, delegRemovedEvt, fromBlock, toBlock),
+    paginateEvents(thor, navAddr, exitEvt, fromBlock, toBlock),
+    paginateEvents(thor, navAddr, deactivatedEvt, fromBlock, toBlock),
+  ]);
+
+  // Merge all events and sort by block number then log index
+  type EventEntry = { block: number; logIndex: number; kind: string; args: any };
+  const events: EventEntry[] = [];
+  const decode = (logs: any[], evt: any, kind: string) => {
+    for (const log of logs) {
+      const decoded = evt.decodeEventLog({
+        topics: log.topics.map((t: string) => Hex.of(t)),
+        data: Hex.of(log.data),
+      });
+      events.push({ block: log.meta?.blockNumber ?? 0, logIndex: log.meta?.logIndex ?? 0, kind, args: decoded.args });
+    }
+  };
+  decode(createdLogs, delegCreatedEvt, "created");
+  decode(removedLogs, delegRemovedEvt, "removed");
+  decode(exitLogs, exitEvt, "exit");
+  decode(deactivatedLogs, deactivatedEvt, "deactivated");
+  events.sort((a, b) => a.block - b.block || a.logIndex - b.logIndex);
+
+  for (const e of events) {
+    if (e.kind === "created") {
+      const citizen = (e.args.citizen as string).toLowerCase();
+      const navigator = (e.args.navigator as string).toLowerCase();
+      citizenDelegationCache.delegations.set(citizen, navigator);
+    } else if (e.kind === "removed") {
+      const citizen = (e.args.citizen as string).toLowerCase();
+      citizenDelegationCache.delegations.delete(citizen);
+    } else if (e.kind === "exit" || e.kind === "deactivated") {
+      const navigator = (e.args.navigator as string).toLowerCase();
+      citizenDelegationCache.removedNavigators.add(navigator);
+      for (const [c, n] of citizenDelegationCache.delegations) {
+        if (n === navigator) citizenDelegationCache.delegations.delete(c);
+      }
+    }
+  }
+
+  citizenDelegationCache.lastBlock = toBlock;
+}
+
+/** Snapshot: how many citizens are delegated at `toBlock`. */
+async function getCitizenCountAtBlock(thor: ThorClient, toBlock: number): Promise<number> {
+  if (!citizenNavigatorsEnabled) return 0;
+  await updateDelegationCache(thor, toBlock);
+  return citizenDelegationCache.delegations.size;
+}
+
+/** Scan NavigatorVoteCast on XAllocationVoting for a round. Returns citizen addresses + txIDs. */
+async function getCitizenAllocationVotes(
+  thor: ThorClient, roundId: number, fromBlock: number, toBlock: number,
+): Promise<{ citizens: Set<string>; txIds: Set<string> }> {
+  if (!citizenNavigatorsEnabled) return { citizens: new Set(), txIds: new Set() };
+  const evt = navVoteAbi.getEvent("NavigatorVoteCast") as any;
+  const roundIdHex = "0x" + roundId.toString(16).padStart(64, "0");
+  const logs = await paginateEvents(thor, CONFIG.xAllocationVotingContractAddress, evt, fromBlock, toBlock, { topic3: roundIdHex });
+
+  const citizens = new Set<string>();
+  const txIds = new Set<string>();
+  for (const log of logs) {
+    const decoded = evt.decodeEventLog({ topics: log.topics.map((t: string) => Hex.of(t)), data: Hex.of(log.data) });
+    citizens.add((decoded.args.citizen as string).toLowerCase());
+    if (log.meta?.txID) txIds.add(log.meta.txID);
+  }
+  return { citizens, txIds };
+}
+
+/** Scan NavigatorGovernanceVoteCast on B3TRGovernor. Returns citizen addresses + txIDs. */
+async function getCitizenGovernanceVotes(
+  thor: ThorClient, fromBlock: number, toBlock: number,
+): Promise<{ citizens: Set<string>; txIds: Set<string> }> {
+  if (!citizenNavigatorsEnabled || CONFIG.b3trGovernorAddress === ZERO_ADDRESS) {
+    return { citizens: new Set(), txIds: new Set() };
+  }
+  const evt = navGovAbi.getEvent("NavigatorGovernanceVoteCast") as any;
+  const logs = await paginateEvents(thor, CONFIG.b3trGovernorAddress, evt, fromBlock, toBlock);
+
+  const citizens = new Set<string>();
+  const txIds = new Set<string>();
+  for (const log of logs) {
+    const decoded = evt.decodeEventLog({ topics: log.topics.map((t: string) => Hex.of(t)), data: Hex.of(log.data) });
+    citizens.add((decoded.args.citizen as string).toLowerCase());
+    if (log.meta?.txID) txIds.add(log.meta.txID);
+  }
+  return { citizens, txIds };
+}
+
+/** Scan NavigatorFeeTaken on VoterRewards for a cycle. Returns citizen addresses + txIDs. */
+async function getCitizenClaimsForRound(
+  thor: ThorClient, roundId: number, fromBlock: number, toBlock?: number,
+): Promise<{ citizens: Set<string>; txIds: Set<string> }> {
+  if (!citizenNavigatorsEnabled) return { citizens: new Set(), txIds: new Set() };
+  const evt = navFeeAbi.getEvent("NavigatorFeeTaken") as any;
+  const cycleHex = "0x" + roundId.toString(16).padStart(64, "0");
+  const logs = await paginateEvents(thor, CONFIG.voterRewardsContractAddress, evt, fromBlock, toBlock, { topic3: cycleHex });
+
+  const citizens = new Set<string>();
+  const txIds = new Set<string>();
+  for (const log of logs) {
+    const decoded = evt.decodeEventLog({ topics: log.topics.map((t: string) => Hex.of(t)), data: Hex.of(log.data) });
+    citizens.add((decoded.args.citizen as string).toLowerCase());
+    if (log.meta?.txID) txIds.add(log.meta.txID);
+  }
+  return { citizens, txIds };
+}
+
+/** Count NavigatorVoteSkipped + NavigatorGovernanceVoteSkipped events for a round. */
+async function getCitizenSkippedCount(
+  thor: ThorClient, roundId: number, fromBlock: number, toBlock: number,
+): Promise<number> {
+  if (!citizenNavigatorsEnabled) return 0;
+  let count = 0;
+
+  // Allocation skips
+  const allocSkipEvt = navVoteAbi.getEvent("NavigatorVoteSkipped") as any;
+  const roundIdHex = "0x" + roundId.toString(16).padStart(64, "0");
+  const allocLogs = await paginateEvents(
+    thor, CONFIG.xAllocationVotingContractAddress, allocSkipEvt, fromBlock, toBlock, { topic3: roundIdHex },
+  );
+  count += allocLogs.length;
+
+  // Governance skips (scan all proposals -- no roundId filter, just block range)
+  if (CONFIG.b3trGovernorAddress !== ZERO_ADDRESS) {
+    const govSkipEvt = navGovAbi.getEvent("NavigatorGovernanceVoteSkipped") as any;
+    const govLogs = await paginateEvents(
+      thor, CONFIG.b3trGovernorAddress, govSkipEvt, fromBlock, toBlock,
+    );
+    count += govLogs.length;
+  }
+
+  return count;
+}
+
+/** Get active governance proposals count from B3TRGovernor. */
+async function getActiveGovernanceProposals(thor: ThorClient): Promise<number> {
+  if (CONFIG.b3trGovernorAddress === ZERO_ADDRESS) return 0;
+  try {
+    const fn = govProposalsAbi.getFunction("getActiveProposals");
+    const result = await thor.contracts.executeCall(CONFIG.b3trGovernorAddress, fn, []);
+    if (!result.success) return 0;
+    const arr = result.result?.array?.[0] as any[] | undefined;
+    return arr?.length ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 /**
  * Analyze a single round
  */
@@ -1424,6 +1698,25 @@ async function analyzeRound(
   );
   console.log(`    - Reduced users (legit skips): ${reducedUsersCount}`);
 
+  // ── Citizen / Navigator data ──
+  const citizenUsersCount = await getCitizenCountAtBlock(thor, roundSnapshot);
+  const { citizens: citizenVoters, txIds: citizenVoteTxIds } = await getCitizenAllocationVotes(thor, roundId, roundSnapshot, roundDeadline);
+  const { citizens: citizenGovVoters, txIds: citizenGovTxIds } = await getCitizenGovernanceVotes(thor, roundSnapshot, roundDeadline);
+  const { citizens: citizenClaimers, txIds: citizenClaimTxIds } = await getCitizenClaimsForRound(thor, roundId, roundDeadline, undefined);
+  const citizenSkippedVotesCount = await getCitizenSkippedCount(thor, roundId, roundSnapshot, roundDeadline);
+
+  const citizenVotingTxIds = new Set([...citizenVoteTxIds, ...citizenGovTxIds]);
+  const vthoSpentOnCitizenVoting = citizenVotingTxIds.size > 0 ? await calculateVthoSpent(thor, citizenVotingTxIds) : BigInt(0);
+  const vthoSpentOnCitizenClaiming = citizenClaimTxIds.size > 0 ? await calculateVthoSpent(thor, citizenClaimTxIds) : BigInt(0);
+
+  if (citizenUsersCount > 0) {
+    console.log(`    - Citizens at snapshot: ${citizenUsersCount}`);
+    console.log(`    - Citizen allocation votes: ${citizenVoters.size}`);
+    console.log(`    - Citizen governance votes: ${citizenGovVoters.size}`);
+    console.log(`    - Citizen claims: ${citizenClaimers.size}`);
+    console.log(`    - Citizen skipped votes: ${citizenSkippedVotesCount}`);
+  }
+
   // Check if round has ended
   const isRoundEnded = await isCycleEnded(
     thor,
@@ -1431,6 +1724,9 @@ async function analyzeRound(
     roundId,
   );
   console.log(`    - Round ended: ${isRoundEnded ? "Yes" : "No"}`);
+
+  // Active governance proposals (only meaningful for non-ended rounds)
+  const activeGovernanceProposals = !isRoundEnded ? await getActiveGovernanceProposals(thor) : 0;
 
   // Status check: voting + claiming completion
   const expectedToVote = autoVotingUsers.length - reducedUsersCount;
@@ -1484,6 +1780,14 @@ async function analyzeRound(
     allActionsOk,
     actionStatus,
     isRoundEnded,
+    citizenUsersCount,
+    citizenVotedForCount: citizenVoters.size,
+    citizenGovernanceVotedForCount: citizenGovVoters.size,
+    citizenRewardsClaimedCount: citizenClaimers.size,
+    citizenSkippedVotesCount,
+    activeGovernanceProposals,
+    vthoSpentOnCitizenVotingRaw: vthoSpentOnCitizenVoting.toString(),
+    vthoSpentOnCitizenClaimingRaw: vthoSpentOnCitizenClaiming.toString(),
   };
 }
 
@@ -1654,12 +1958,12 @@ async function main(): Promise<void> {
 
   console.log("Auto-Voting Round Analytics");
   console.log("===========================");
-  console.log(`Network: Mainnet`);
+  console.log(`Network: ${NETWORK_NAME}`);
   console.log(`Starting from round: ${FIRST_AUTO_VOTING_ROUND}`);
   if (checkpointPath) console.log(`Checkpoint: ${checkpointPath}`);
   if (outputPath) console.log(`Output: ${outputPath}`);
 
-  const thor = ThorClient.at(MAINNET_URL, { isPollingEnabled: false });
+  const thor = ThorClient.at(NODE_URL, { isPollingEnabled: false });
 
   const currentRoundId = await getCurrentRoundId(
     thor,
@@ -1699,8 +2003,8 @@ async function main(): Promise<void> {
     setActiveRelayersCountPerRound(rounds, relayers);
     const report: AnalyticsReport = {
       generatedAt: new Date().toISOString(),
-      network: "mainnet",
-      firstRound: checkpoint.firstRound,
+    network: NETWORK_NAME,
+    firstRound: checkpoint.firstRound,
       currentRound: currentRoundId,
       rounds,
       relayers,
@@ -1809,7 +2113,7 @@ async function main(): Promise<void> {
       undefined,
     );
 
-    // Get per-relayer claimable rewards
+    // Get per-relayer claimable rewards (citizenPerRelayer populated below)
     const allRelayersForRound = new Set([
       ...registeredRelayers,
       ...relayerActions.keys(),
@@ -1830,6 +2134,73 @@ async function main(): Promise<void> {
       undefined,
     );
 
+    // ── Per-relayer citizen attribution ──
+    type CitizenRelayerBreakdown = { votes: number; govVotes: number; claims: number; votingVtho: bigint; claimingVtho: bigint };
+    const citizenPerRelayer = new Map<string, CitizenRelayerBreakdown>();
+
+    if (citizenNavigatorsEnabled) {
+      // Citizen allocation votes
+      const citizenVoteEvt = navVoteAbi.getEvent("NavigatorVoteCast") as any;
+      const cRoundHex = "0x" + roundId.toString(16).padStart(64, "0");
+      const citizenVoteLogs = await paginateEvents(
+        thor, CONFIG.xAllocationVotingContractAddress, citizenVoteEvt, roundSnapshot, roundDeadline, { topic3: cRoundHex },
+      );
+      const citizenVoteTxIdSet = new Set<string>();
+      for (const log of citizenVoteLogs) {
+        if (log.meta?.txID) citizenVoteTxIdSet.add(log.meta.txID);
+      }
+      // Citizen governance votes
+      const citizenGovEvt = navGovAbi.getEvent("NavigatorGovernanceVoteCast") as any;
+      const citizenGovLogs = await paginateEvents(
+        thor, CONFIG.b3trGovernorAddress, citizenGovEvt, roundSnapshot, roundDeadline,
+      );
+      const citizenGovTxIdSet = new Set<string>();
+      for (const log of citizenGovLogs) {
+        if (log.meta?.txID) citizenGovTxIdSet.add(log.meta.txID);
+      }
+      // Citizen claims
+      const citizenClaimEvt = navFeeAbi.getEvent("NavigatorFeeTaken") as any;
+      const cCycleHex = "0x" + roundId.toString(16).padStart(64, "0");
+      const citizenClaimLogs = await paginateEvents(
+        thor, CONFIG.voterRewardsContractAddress, citizenClaimEvt, roundDeadline, undefined, { topic3: cCycleHex },
+      );
+      const citizenClaimTxIdSet = new Set<string>();
+      for (const log of citizenClaimLogs) {
+        if (log.meta?.txID) citizenClaimTxIdSet.add(log.meta.txID);
+      }
+
+      // Attribute by txOrigin
+      const attributeTxs = async (txIds: Set<string>, field: "votes" | "govVotes" | "claims", vthoField: "votingVtho" | "claimingVtho") => {
+        for (const txId of txIds) {
+          try {
+            const receipt = await thor.transactions.getTransactionReceipt(txId);
+            if (!receipt) continue;
+            const origin = (receipt.meta?.txOrigin ?? "").toLowerCase();
+            const paid = BigInt(receipt.paid ?? 0);
+            const entry = citizenPerRelayer.get(origin) ?? { votes: 0, govVotes: 0, claims: 0, votingVtho: BigInt(0), claimingVtho: BigInt(0) };
+            // Count events per tx: a multi-clause tx can contain multiple citizen votes
+            const eventsInTx = field === "votes" ? citizenVoteLogs.filter(l => l.meta?.txID === txId).length
+              : field === "govVotes" ? citizenGovLogs.filter(l => l.meta?.txID === txId).length
+              : citizenClaimLogs.filter(l => l.meta?.txID === txId).length;
+            entry[field] += eventsInTx;
+            entry[vthoField] += paid;
+            citizenPerRelayer.set(origin, entry);
+          } catch {
+            // skip
+          }
+        }
+      };
+
+      await attributeTxs(citizenVoteTxIdSet, "votes", "votingVtho");
+      await attributeTxs(citizenGovTxIdSet, "govVotes", "votingVtho");
+      await attributeTxs(citizenClaimTxIdSet, "claims", "claimingVtho");
+    }
+
+    // Include citizen relayers in the round's relayer set
+    for (const addr of citizenPerRelayer.keys()) {
+      allRelayersForRound.add(addr);
+    }
+
     // Merge into relayer map
     for (const addr of allRelayersForRound) {
       if (!checkpointRelayerMap.has(addr)) {
@@ -1837,6 +2208,7 @@ async function main(): Promise<void> {
       }
       const roundMap = checkpointRelayerMap.get(addr)!;
       const actions = relayerActions.get(addr);
+      const citizenData = citizenPerRelayer.get(addr);
 
       roundMap.set(roundId, {
         roundId,
@@ -1856,6 +2228,11 @@ async function main(): Promise<void> {
         vthoSpentOnClaimingRaw: (
           claimingVtho.get(addr) ?? BigInt(0)
         ).toString(),
+        citizenVotedForCount: citizenData?.votes ?? 0,
+        citizenGovernanceVotedForCount: citizenData?.govVotes ?? 0,
+        citizenRewardsClaimedCount: citizenData?.claims ?? 0,
+        vthoSpentOnCitizenVotingRaw: (citizenData?.votingVtho ?? BigInt(0)).toString(),
+        vthoSpentOnCitizenClaimingRaw: (citizenData?.claimingVtho ?? BigInt(0)).toString(),
       });
     }
   }
@@ -1874,7 +2251,10 @@ async function main(): Promise<void> {
             rd.actions > 0 ||
             rd.weightedActions > 0 ||
             BigInt(rd.claimableRewardsRaw) > BigInt(0) ||
-            BigInt(rd.relayerRewardsClaimedRaw) > BigInt(0),
+            BigInt(rd.relayerRewardsClaimedRaw) > BigInt(0) ||
+            (rd.citizenVotedForCount ?? 0) > 0 ||
+            (rd.citizenGovernanceVotedForCount ?? 0) > 0 ||
+            (rd.citizenRewardsClaimedCount ?? 0) > 0,
         )
         .sort((a, b) => a.roundId - b.roundId),
     }),
@@ -1890,7 +2270,7 @@ async function main(): Promise<void> {
 
   const report: AnalyticsReport = {
     generatedAt: new Date().toISOString(),
-    network: "mainnet",
+    network: NETWORK_NAME,
     firstRound: FIRST_AUTO_VOTING_ROUND,
     currentRound: currentRoundId,
     rounds,

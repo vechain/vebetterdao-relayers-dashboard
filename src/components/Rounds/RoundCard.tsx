@@ -83,6 +83,8 @@ export function RoundCard({
     </HStack>
   );
 
+  const hasCitizens = (round.citizenUsersCount ?? 0) > 0;
+
   const stats = (
     <>
       <StatPill label={t("Round")} value={`#${round.roundId}`} />
@@ -90,6 +92,12 @@ export function RoundCard({
         label={t("Users to serve")}
         value={formatNumber(round.autoVotingUsersCount)}
       />
+      {hasCitizens && (
+        <StatPill
+          label={t("Citizens")}
+          value={formatNumber(round.citizenUsersCount ?? 0)}
+        />
+      )}
       <StatPill label={t("Relayers")} value={round.numRelayers} />
       <StatPill
         label={t("VTHO spent")}
@@ -125,7 +133,7 @@ export function RoundCard({
           {/* Desktop: single row */}
           <Box hideBelow="md">
             <HStack justify="space-between" w="full" gap="2">
-              <SimpleGrid columns={7} gap="4" w="full" alignItems="center">
+              <SimpleGrid columns={hasCitizens ? 8 : 7} gap="4" w="full" alignItems="center">
                 {stats}
                 <VStack gap="0" align="start" minW="0" justifyContent="center">
                   <Text textStyle="xxs" color="text.subtle" lineClamp={1}>

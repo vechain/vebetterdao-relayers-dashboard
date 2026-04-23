@@ -366,6 +366,18 @@ export function RoundDetailContent({
                       </Box>
                     </HStack>
                   </HStack>
+                  {(round.citizenUsersCount ?? 0) > 0 && (
+                    <SummaryRow
+                      label={t("Citizens to Serve")}
+                      value={formatNumber(round.citizenUsersCount ?? 0)}
+                    />
+                  )}
+                  {(round.activeGovernanceProposals ?? 0) > 0 && (
+                    <SummaryRow
+                      label={t("Governance Proposals")}
+                      value={round.activeGovernanceProposals ?? 0}
+                    />
+                  )}
                   <SummaryRow
                     label={t("Active Relayers")}
                     value={round.numRelayers}
@@ -434,6 +446,22 @@ export function RoundDetailContent({
               )}
               sublabel={t("users")}
             />
+            {(round.citizenUsersCount ?? 0) > 0 && (
+              <>
+                <MiniStatCard
+                  label={t("Citizen Votes")}
+                  value={formatNumber(round.citizenVotedForCount ?? 0)}
+                  secondaryValue={formatNumber(round.citizenUsersCount ?? 0)}
+                  sublabel={t("citizens")}
+                />
+                <MiniStatCard
+                  label={t("Citizen Claims")}
+                  value={formatNumber(round.citizenRewardsClaimedCount ?? 0)}
+                  secondaryValue={formatNumber(round.citizenUsersCount ?? 0)}
+                  sublabel={t("citizens")}
+                />
+              </>
+            )}
           </SimpleGrid>
         </VStack>
 

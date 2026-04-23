@@ -319,6 +319,8 @@ function RoundRow({
     ? parseRoundStatus(roundAnalytics, currentRound)
     : null;
 
+  const hasCitizenData = (rd.citizenVotedForCount ?? 0) > 0 || (rd.citizenRewardsClaimedCount ?? 0) > 0;
+
   const stats = (
     <>
       <StatPill
@@ -327,6 +329,20 @@ function RoundRow({
         unit={t("users")}
       />
       <StatPill label={t("Claimed for")} value={claimedFor} unit={t("users")} />
+      {hasCitizenData && (
+        <StatPill
+          label={t("Citizen voted for")}
+          value={rd.citizenVotedForCount ?? 0}
+          unit={t("citizens")}
+        />
+      )}
+      {hasCitizenData && (
+        <StatPill
+          label={t("Citizen claimed for")}
+          value={rd.citizenRewardsClaimedCount ?? 0}
+          unit={t("citizens")}
+        />
+      )}
       <StatPill
         label={t("Weight")}
         value={
@@ -363,7 +379,7 @@ function RoundRow({
           {/* Desktop */}
           <Box hideBelow="md">
             <HStack justify="space-between" w="full" gap="2">
-              <SimpleGrid columns={8} gap="4" w="full" alignItems="center">
+              <SimpleGrid columns={hasCitizenData ? 10 : 8} gap="4" w="full" alignItems="center">
                 <VStack gap="0" align="start" minW="0" justifyContent="center">
                   <Text textStyle="xxs" color="text.subtle" lineClamp={1}>
                     {t("Round")}
@@ -523,6 +539,20 @@ export function RelayerDetailContent({
                   value={formatNumber(summary.activeRoundsCount)}
                   unit={t("rounds")}
                 />
+                {summary.totalCitizenVotedFor > 0 && (
+                  <MetricCell
+                    label={t("Citizen voted for")}
+                    value={formatNumber(summary.totalCitizenVotedFor)}
+                    unit={t("citizens")}
+                  />
+                )}
+                {summary.totalCitizenClaimed > 0 && (
+                  <MetricCell
+                    label={t("Citizen claimed for")}
+                    value={formatNumber(summary.totalCitizenClaimed)}
+                    unit={t("citizens")}
+                  />
+                )}
               </SimpleGrid>
             </VStack>
           </Card.Body>
@@ -566,6 +596,13 @@ export function RelayerDetailContent({
                   }
                   unit="VTHO"
                 />
+                {BigInt(summary.totalCitizenVthoSpentRaw) > BigInt(0) && (
+                  <MetricCell
+                    label={t("VTHO spent") + " (" + t("citizens") + ")"}
+                    value={formatToken(summary.totalCitizenVthoSpentRaw)}
+                    unit="VTHO"
+                  />
+                )}
               </SimpleGrid>
             </VStack>
           </Card.Body>
