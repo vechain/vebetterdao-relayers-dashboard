@@ -5,9 +5,17 @@ on:
   schedule:
     # Every 6 hours (UTC)
     - cron: "0 */6 * * *"
-    # Monday 6:40–7:10 UTC: every 10 minutes (6:40, 6:50, 7:00, 7:10)
-    - cron: "40,50 6 * * 1"
-    - cron: "0,10 7 * * 1"
+    # Shortly after the Monday round rollover.
+    # Deliberately a single run: a full analysis takes far longer than the 10-minute
+    # spacing the old burst used, so the extra jobs could never deliver a faster refresh —
+    # they just overlapped each other and lost the race to push.
+    - cron: "40 6 * * 1"
+
+# One run at a time. Without this, overlapping runs each commit against a main that another
+# run has already moved, and every loser dies on `! [rejected] main -> main (fetch first)`.
+concurrency:
+  group: update-data
+  cancel-in-progress: false
 
 jobs:
   update-data:
@@ -43,5 +51,7 @@ jobs:
             echo "No changes to report.json"
           else
             git commit -m "chore: update auto-voting report [skip ci]"
+            # Analysis takes hours; main may well have moved. Rebase rather than fail.
+            git pull --rebase --autostash
             git push
           fi
