@@ -142,7 +142,7 @@
   "Rewards": "Beloningen",
   "Rewards claimed": "Geclaimde beloningen",
   "Rewards Locked": "Beloningen vergrendeld",
-  "rewardsLockedDescription": "{{missing}} acties zijn niet voltooid. De volledige beloningspool ({{amount}}) is vergrendeld — geen enkele relayer wordt betaald totdat elke gebruiker volledig bediend is.",
+  "rewardsLockedDescription": "{{missing}} acties zijn nooit voltooid, dus de beloningspool van {{amount}} van deze ronde vervalt. Dat is met opzet, geen storing: relayers worden pas betaald wanneer elke gebruiker die ze bedienen zijn stem uitgebracht en beloningen geclaimd heeft. Het geldt alleen voor ronde {{roundId}} — alle andere rondes blijven onaangetast.",
   "Round #": "Ronde #",
   "Round ended": "Ronde beëindigd",
   "Round History": "Rondegeschiedenis",

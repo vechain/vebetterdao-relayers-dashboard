@@ -301,6 +301,7 @@ export function RoundDetailContent({
                   amount:
                     totalRewardsFormatted ??
                     formatToken(round.totalRelayerRewardsRaw),
+                  roundId: String(round.roundId),
                 })}
               </Text>
             </VStack>

@@ -144,7 +144,7 @@
   "Rewards": "보상",
   "Rewards claimed": "수령한 보상",
   "Rewards Locked": "보상 잠김",
-  "rewardsLockedDescription": "{{missing}}개의 작업이 완료되지 않았습니다. 전체 보상 풀({{amount}})이 잠겨 있습니다 — 모든 사용자가 완전히 처리될 때까지 릴레이어에게 보상이 지급되지 않습니다.",
+  "rewardsLockedDescription": "{{missing}}개의 작업이 완료되지 않아 이 라운드의 {{amount}} 보상 풀은 몰수됩니다. 이는 오류가 아니라 의도된 설계입니다. 릴레이어는 담당한 모든 사용자의 투표가 이루어지고 보상이 청구된 경우에만 지급받습니다. 라운드 {{roundId}}에만 적용되며 다른 라운드에는 영향이 없습니다.",
   "Round #": "라운드 #",
   "Round ended": "라운드 종료",
   "Round History": "라운드 기록",

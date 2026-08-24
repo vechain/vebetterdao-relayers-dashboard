@@ -228,7 +228,7 @@
   "Rewards": "獎勵",
   "Rewards claimed": "已領取獎勵",
   "Rewards Locked": "獎勵已鎖定",
-  "rewardsLockedDescription": "{{missing}} 項操作未完成。整個獎勵池（{{amount}}）已鎖定 — 在所有用戶完全服務之前，沒有中繼者會獲得報酬。",
+  "rewardsLockedDescription": "{{missing}} 項操作從未完成，因此本輪的 {{amount}} 獎勵池已被沒收。這是設計使然，並非故障：只有當中繼者服務的每位使用者都完成投票並領取獎勵時，中繼者才會獲得報酬。這僅影響第 {{roundId}} 輪，其他輪次不受影響。",
   "ROI": "投資回報率",
   "Round #": "輪次 #",
   "Round ended": "輪次已結束",

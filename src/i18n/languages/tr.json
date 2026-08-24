@@ -146,7 +146,7 @@
   "Rewards": "Ödüller",
   "Rewards claimed": "Talep edilen ödüller",
   "Rewards Locked": "Ödüller kilitli",
-  "rewardsLockedDescription": "{{missing}} işlem tamamlanmadı. Tüm ödül havuzu ({{amount}}) kilitli — her kullanıcı tam olarak hizmet alana kadar hiçbir aktarıcı ödeme almaz.",
+  "rewardsLockedDescription": "{{missing}} işlem hiç tamamlanmadı, bu nedenle bu turun {{amount}} tutarındaki ödül havuzu kaybedildi. Bu bir arıza değil, tasarım gereğidir: aktarıcılar yalnızca hizmet verdikleri her kullanıcının oyu kullanıldığında ve ödülleri talep edildiğinde ödeme alır. Yalnızca {{roundId}} numaralı turu etkiler — diğer tüm turlar etkilenmez.",
   "Round #": "Tur #",
   "Round ended": "Tur bitti",
   "Round History": "Tur geçmişi",
