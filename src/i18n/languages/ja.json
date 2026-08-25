@@ -144,7 +144,7 @@
   "Rewards": "報酬",
   "Rewards claimed": "請求済み報酬",
   "Rewards Locked": "報酬がロック中",
-  "rewardsLockedDescription": "{{missing}}件のアクションが未完了です。報酬プール全体（{{amount}}）がロックされています — すべてのユーザーが完全にサービスされるまで、リレイヤーへの支払いは行われません。",
+  "rewardsLockedDescription": "{{missing}} 件のアクションが完了しなかったため、このラウンドの {{amount}} の報酬プールは没収されます。これは不具合ではなく仕様です。リレイヤーは、担当するすべてのユーザーの投票が行われ報酬が請求された場合にのみ支払われます。影響を受けるのはラウンド {{roundId}} のみで、他のラウンドには影響しません。",
   "Round #": "ラウンド #",
   "Round ended": "ラウンド終了",
   "Round History": "ラウンド履歴",

@@ -228,7 +228,7 @@
   "Rewards": "奖励",
   "Rewards claimed": "已领取奖励",
   "Rewards Locked": "奖励已锁定",
-  "rewardsLockedDescription": "{{missing}} 项操作未完成。整个奖励池（{{amount}}）已锁定 — 在所有用户完全服务之前，没有中继者会获得报酬。",
+  "rewardsLockedDescription": "{{missing}} 项操作从未完成，因此本轮的 {{amount}} 奖励池已被没收。这是设计使然，并非故障：只有当中继者服务的每位用户都完成投票并领取奖励后，中继者才能获得报酬。这仅影响第 {{roundId}} 轮，其他轮次均不受影响。",
   "ROI": "投资回报率",
   "Round #": "轮次 #",
   "Round ended": "轮次已结束",

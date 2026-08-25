@@ -145,7 +145,7 @@
   "Rewards": "Belöningar",
   "Rewards claimed": "Hämtade belöningar",
   "Rewards Locked": "Belöningar låsta",
-  "rewardsLockedDescription": "{{missing}} åtgärder slutfördes inte. Hela belöningspoolen ({{amount}}) är låst — ingen relayer får betalt förrän varje användare är fullständigt betjänad.",
+  "rewardsLockedDescription": "{{missing}} åtgärder slutfördes aldrig, så den här rondens belöningspool på {{amount}} går förlorad. Det är avsiktligt, inte ett fel: relayers får bara betalt när varje användare de betjänar har fått sin röst lagd och sina belöningar hämtade. Det gäller enbart rond {{roundId}} — alla andra ronder påverkas inte.",
   "Round #": "Omgång #",
   "Round ended": "Omgång avslutad",
   "Round History": "Omgångshistorik",

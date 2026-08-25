@@ -146,7 +146,7 @@
   "Rewards": "Recompensas",
   "Rewards claimed": "Recompensas reclamadas",
   "Rewards Locked": "Recompensas bloqueadas",
-  "rewardsLockedDescription": "{{missing}} ações não foram concluídas. Todo o pool de recompensas ({{amount}}) está bloqueado — nenhum relayer é pago até que todos os usuários sejam totalmente atendidos.",
+  "rewardsLockedDescription": "{{missing}} ações nunca foram concluídas, portanto o pool de recompensas de {{amount}} desta rodada foi perdido. Isso é intencional, não é uma falha: os relayers só são pagos quando cada usuário que atendem tem o voto registrado e as recompensas reivindicadas. Aplica-se somente à rodada {{roundId}} — todas as outras rodadas não são afetadas.",
   "Round #": "Ronda #",
   "Round ended": "Ronda terminada",
   "Round History": "Histórico de rondas",

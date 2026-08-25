@@ -220,7 +220,7 @@
   "Rewards": "Belohnungen",
   "Rewards claimed": "Abgeholte Belohnungen",
   "Rewards Locked": "Belohnungen gesperrt",
-  "rewardsLockedDescription": "{{missing}} Aktionen wurden nicht abgeschlossen. Der gesamte Belohnungspool ({{amount}}) ist gesperrt — kein Relayer wird bezahlt, bis jeder Nutzer vollständig bedient ist.",
+  "rewardsLockedDescription": "{{missing}} Aktionen wurden nie abgeschlossen, daher verfällt der Belohnungspool dieser Runde von {{amount}}. Das ist so vorgesehen und kein Fehler: Relayer werden nur bezahlt, wenn für jeden von ihnen bedienten Nutzer eine Stimme abgegeben und Belohnungen beansprucht wurden. Es betrifft ausschließlich Runde {{roundId}} — alle anderen Runden bleiben unberührt.",
   "Round #": "Runde #",
   "Round ended": "Runde beendet",
   "Round History": "Rundenverlauf",

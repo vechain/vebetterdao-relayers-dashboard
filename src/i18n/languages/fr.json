@@ -161,7 +161,7 @@
   "Rewards": "Récompenses",
   "Rewards claimed": "Récompenses réclamées",
   "Rewards Locked": "Récompenses verrouillées",
-  "rewardsLockedDescription": "{{missing}} actions n'ont pas été complétées. La totalité du pool de récompenses ({{amount}}) est verrouillée — aucun relayer n'est payé tant que chaque utilisateur n'est pas entièrement servi.",
+  "rewardsLockedDescription": "{{missing}} actions n'ont jamais été effectuées, la cagnotte de {{amount}} de ce tour est donc perdue. C'est voulu, ce n'est pas un dysfonctionnement : les relayers ne sont payés que lorsque chaque utilisateur qu'ils servent a vu son vote émis et ses récompenses réclamées. Cela ne concerne que le tour {{roundId}} — tous les autres tours sont intacts.",
   "Round ended": "Round terminée",
   "Round History": "Historique des rounds",
   "Round status legend intro": "Chaque round de vote a un statut selon que tous les utilisateurs éligibles ont été votés par les Relayers.",

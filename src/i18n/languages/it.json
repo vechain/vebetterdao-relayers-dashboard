@@ -144,7 +144,7 @@
   "Rewards": "Ricompense",
   "Rewards claimed": "Ricompense reclamate",
   "Rewards Locked": "Ricompense bloccate",
-  "rewardsLockedDescription": "{{missing}} azioni non sono state completate. L'intero pool di ricompense ({{amount}}) è bloccato — nessun relayer viene pagato finché ogni utente non è completamente servito.",
+  "rewardsLockedDescription": "{{missing}} azioni non sono mai state completate, quindi il montepremi di {{amount}} di questo round è perduto. È voluto, non è un guasto: i relayer vengono pagati solo quando ogni utente che servono ottiene il voto espresso e i premi riscossi. Riguarda solo il round {{roundId}} — tutti gli altri round non sono toccati.",
   "Round ended": "Round terminata",
   "Round History": "Cronologia round",
   "Round status legend intro": "Ogni round di voto ha uno stato in base al fatto che tutti gli utenti idonei siano stati votati dai Relayers.",

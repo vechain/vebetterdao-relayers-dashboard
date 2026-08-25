@@ -228,7 +228,7 @@
   "Rewards": "Phần thưởng",
   "Rewards claimed": "Phần thưởng đã nhận",
   "Rewards Locked": "Phần thưởng bị khóa",
-  "rewardsLockedDescription": "{{missing}} hành động chưa được hoàn thành. Toàn bộ quỹ thưởng ({{amount}}) bị khóa — không có relayer nào được trả cho đến khi mọi người dùng được phục vụ đầy đủ.",
+  "rewardsLockedDescription": "{{missing}} hành động chưa bao giờ được hoàn tất, nên quỹ thưởng {{amount}} của vòng này bị mất. Đây là thiết kế có chủ đích, không phải lỗi: relayer chỉ được trả khi mọi người dùng họ phục vụ đều được bỏ phiếu và nhận thưởng. Điều này chỉ áp dụng cho vòng {{roundId}} — tất cả các vòng khác không bị ảnh hưởng.",
   "ROI": "Tỷ suất sinh lời",
   "Round #": "Vòng #",
   "Round ended": "Vòng kết thúc",
