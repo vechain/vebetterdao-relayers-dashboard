@@ -2058,21 +2058,28 @@ async function main(): Promise<void> {
   const lockedEndedRoundIds = completedFromCheckpoint
     .filter((r) => !r.allActionsOk)
     .map((r) => r.roundId);
-  const minLockedEnded =
-    lockedEndedRoundIds.length > 0 ? Math.min(...lockedEndedRoundIds) : Infinity;
+
+  // Locked rounds are re-analyzed INDIVIDUALLY, not by dragging the contiguous range back
+  // to the oldest of them. Previously effectiveStartRoundId took Math.min(..., minLockedEnded),
+  // so a single permanently-locked round pinned the start forever: round 86 can never
+  // unlock, which turned every run into a re-analysis of 86 -> current. That grew by one
+  // round a week (0.29h -> 2.86h median, 4.82h max) and was heading for GitHub's 6h job
+  // limit, at which point every run would be killed before the commit step and the report
+  // would silently stop updating for ALL rounds. A locked round must cost its own
+  // re-analysis, not everyone else's.
   const effectiveStartRoundId =
     checkpoint && currentRoundId > FIRST_AUTO_VOTING_ROUND
-      ? Math.min(startRoundId, currentRoundId - 1, minLockedEnded)
+      ? Math.min(startRoundId, currentRoundId - 1)
       : startRoundId;
   if (effectiveStartRoundId < startRoundId) {
     console.log(
-      `  Re-analyzing from round ${effectiveStartRoundId} to capture new claim activity and admin reduces.`,
+      `  Re-analyzing from round ${effectiveStartRoundId} to capture new claim activity.`,
     );
-    if (lockedEndedRoundIds.length > 0) {
-      console.log(
-        `    Locked ended rounds being re-analyzed: ${lockedEndedRoundIds.sort((a, b) => a - b).join(", ")}`,
-      );
-    }
+  }
+  if (lockedEndedRoundIds.length > 0) {
+    console.log(
+      `    Locked ended rounds re-analyzed individually (admin may have reduced expected actions): ${lockedEndedRoundIds.sort((a, b) => a - b).join(", ")}`,
+    );
   }
 
   if (startRoundId > currentRoundId && checkpoint) {
@@ -2093,8 +2100,16 @@ async function main(): Promise<void> {
     return;
   }
 
-  const newRounds: RoundAnalytics[] = [];
+  // The contiguous tail, plus each locked round on its own.
+  const roundIdsToAnalyze = new Set<number>(lockedEndedRoundIds);
   for (let roundId = effectiveStartRoundId; roundId <= currentRoundId; roundId++) {
+    roundIdsToAnalyze.add(roundId);
+  }
+  const orderedRoundIds = Array.from(roundIdsToAnalyze).sort((a, b) => a - b);
+  console.log(`  Analyzing ${orderedRoundIds.length} round(s): ${orderedRoundIds.join(", ")}`);
+
+  const newRounds: RoundAnalytics[] = [];
+  for (const roundId of orderedRoundIds) {
     try {
       const roundAnalytics = await analyzeRound(thor, roundId);
       newRounds.push(roundAnalytics);
