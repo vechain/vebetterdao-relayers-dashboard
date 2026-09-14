@@ -9,6 +9,7 @@ import { encodeFunctionData } from "viem"
 
 import { getConfig } from "@/config"
 import { useIsAutoVotingEnabled } from "@/hooks/useIsAutoVotingEnabled"
+import { useIsDelegatedToNavigator } from "@/hooks/useIsDelegatedToNavigator"
 import { relayerPoolAbi, relayerPoolAddress } from "@/hooks/contracts"
 
 import { BaseModal } from "../Base/BaseModal"
@@ -24,6 +25,7 @@ export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerNam
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: isAutoVotingEnabled, isLoading } = useIsAutoVotingEnabled(account?.address)
+  const { data: isDelegatedToNavigator, isLoading: isDelegationLoading } = useIsDelegatedToNavigator(account?.address)
   const { governanceUrl } = getConfig()
   const allocationsUrl = `${governanceUrl}/allocations`
   const queryClient = useQueryClient()
@@ -54,7 +56,7 @@ export function ChooseRelayerModal({ isOpen, onClose, relayerAddress, relayerNam
     ])
   }
 
-  if (!isLoading && !isAutoVotingEnabled) {
+  if (!isLoading && !isDelegationLoading && !isAutoVotingEnabled && !isDelegatedToNavigator) {
     return (
       <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton isCloseable>
         <VStack gap={5} align="stretch">
