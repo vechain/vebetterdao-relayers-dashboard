@@ -9,11 +9,11 @@ export function useIsDelegatedToNavigator(address: string | undefined) {
   return useCallClause({
     abi: navigatorRegistryAbi,
     address: navigatorRegistryAddress,
-    method: "getDelegatedAmount",
+    method: "isDelegated",
     args: [address as `0x${string}`],
     queryOptions: {
       enabled: !!address,
-      select: (data: readonly unknown[]) => (data[0] as bigint) > 0n,
+      select: (data: readonly unknown[]) => data[0] as boolean,
     },
   })
 }
