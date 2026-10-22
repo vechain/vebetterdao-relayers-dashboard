@@ -4512,10 +4512,10 @@
     typechain "^8.1.0"
     typescript ">=4.5.0"
 
-"@vechain/vebetterdao-relayer-node@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-1.2.1.tgz#76c200da72440ef5e09e542e761a5e2d713c66be"
-  integrity sha512-DKjbuZ/rXuYOWFbwv3F6OfClW1ufnfg5PaM7lHuYo7fF36r6Zk5/rErfnmYGSJIfCTe8AlmqUrhfAIh/YlyjHA==
+"@vechain/vebetterdao-relayer-node@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-relayer-node/-/vebetterdao-relayer-node-1.2.2.tgz#932a995940c23102cbfc4fb5bc5529ffb4e3c7b9"
+  integrity sha512-KDe8m7fPnE/052u+k0b5SHN6+i0cmJR4WIvKiCRagx35OHsTnAgWhnTSBasSQFAmEzzZCRLLNV9BOqLhWDbF5w==
   dependencies:
     "@vechain/sdk-core" "2.0.7"
     "@vechain/sdk-network" "2.0.7"
