@@ -1,6 +1,6 @@
 import type { RelayerSummary, CycleResult } from "@vechain/vebetterdao-relayer-node/dist/types"
 
-const RELAYER_NODE_VERSION = "1.2.0"
+const RELAYER_NODE_VERSION = "1.2.2"
 
 // ANSI color helpers for xterm
 const c = {
